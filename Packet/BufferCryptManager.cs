@@ -4,9 +4,9 @@
     {
         public static readonly int
             ENCRYPT_NONE = 0,
-            ENCRYPT_XOR = 1,
-            ENCRYPT_TABLE = 2,
-            ENCRYPT_REARRANGE = 3
+            ENCRYPT_REARRANGE = 1,
+            ENCRYPT_XOR = 2,
+            ENCRYPT_TABLE = 3
         ;
 
         private readonly Crypter[] aEncrypt;
