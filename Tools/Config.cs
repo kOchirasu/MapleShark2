@@ -10,8 +10,9 @@ namespace MapleShark
     public sealed class Config
     {
         public string Interface = "";
-        public ushort LowPort = 8484;
-        public ushort HighPort = 8989;
+        public ushort LowPort = 30000;//MS2 Gateway
+        public ushort HighPort = 33001;//MS2 Channel Ranges
+        public bool Maple2 = true;
 
         [XmlIgnore]
         public bool LoadedFromFile = false;
@@ -50,14 +51,14 @@ namespace MapleShark
             }
         }
 
-        internal Definition GetDefinition(ushort pBuild, byte pLocale, bool pOutbound, ushort pOpcode)
+        internal Definition GetDefinition(uint pBuild, byte pLocale, bool pOutbound, ushort pOpcode)
         {
             return DefinitionsContainer.Instance.GetDefinition(pLocale, pBuild, pOpcode, pOutbound);
             // return Definitions.Find(d => d.Locale == pLocale && d.Build == pBuild && d.Outbound == pOutbound && d.Opcode == pOpcode);
         }
 
 
-        internal static string GetPropertiesFile(bool pOutbound, byte pLocale, ushort pVersion)
+        internal static string GetPropertiesFile(bool pOutbound, byte pLocale, uint pVersion)
         {
             return System.Environment.CurrentDirectory + Path.DirectorySeparatorChar + "Scripts" + Path.DirectorySeparatorChar + pLocale.ToString() + Path.DirectorySeparatorChar + pVersion.ToString() + Path.DirectorySeparatorChar + (pOutbound ? "send" : "recv") + ".properties";
         }

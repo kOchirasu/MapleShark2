@@ -1,4 +1,5 @@
 ﻿using System;
+using MapleShark.Packet;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,13 +28,28 @@ namespace MapleShark
         private byte[] mBuffer = new byte[DEFAULT_SIZE];
         private int mCursor = 0;
         private int _expectedDataSize = 4;
+        private ushort mRawSeq;
+        private BufferCryptManager mCrypt;
 
         private TransformMethod _transformMethod;
         private bool _usesByteHeader = false;
         private bool _usesOldHeader = false;
 
-        public ushort Build { get; private set; }
+        public uint Build { get; private set; }
         public byte Locale { get; private set; }
+        public uint IV { get; private set; }
+        public uint BlockIV { get; private set; }
+
+        public MapleStream(bool pOutbound, ushort pRawSeq, uint pBuild, uint pIV, uint pBlockIV)
+        {
+            mOutbound = pOutbound;
+            Build = pBuild;
+            IV = pIV;
+            BlockIV = pBlockIV;
+            mRawSeq = pRawSeq;
+
+            mCrypt = new BufferCryptManager(pBuild);
+        }
 
         public MapleStream(bool pOutbound, ushort pBuild, byte pLocale, byte[] pIV, byte pSubVersion)
         {
@@ -42,7 +58,7 @@ namespace MapleShark
             Locale = pLocale;
 
             if (mOutbound)
-                mAES = new MapleAES(Build, Locale, pIV, pSubVersion);
+                mAES = new MapleAES(pBuild, Locale, pIV, pSubVersion);
             else
                 mAES = new MapleAES((ushort)(0xFFFF - Build), Locale, pIV, pSubVersion);
 
@@ -102,20 +118,35 @@ namespace MapleShark
 
         public MaplePacket Read(DateTime pTransmitted)
         {
+            return Read(pTransmitted, Config.Instance.Maple2);
+        }
+
+        public MaplePacket Read(DateTime pTransmitted, bool bMaple2)
+        {
             if (mCursor < _expectedDataSize) return null;
-            if (!mAES.ConfirmHeader(mBuffer, 0))
+            if (bMaple2)
             {
-                throw new Exception("Failed to confirm packet header");
+                if (DecodeSeqBase(IV) != Build)
+                {
+                    //throw new Exception("Failed to confirm packet header");
+                    Console.WriteLine("ERROR: Failed to confirm packet header!");
+                }
+            } else
+            {
+                if (!mAES.ConfirmHeader(mBuffer, 0))
+                {
+                    throw new Exception("Failed to confirm packet header");
+                }
             }
 
-            int headerLength = MapleAES.GetHeaderLength(mBuffer, mCursor, _usesOldHeader);
+            int headerLength = bMaple2 ? 6 : MapleAES.GetHeaderLength(mBuffer, mCursor, _usesOldHeader);
             _expectedDataSize = headerLength;
             if (mCursor < headerLength)
             {
                 return null;
             }
 
-            int packetSize = MapleAES.GetPacketLength(mBuffer, mCursor, _usesOldHeader);
+            int packetSize = MapleAES.GetPacketLength(mBuffer, mCursor, _usesOldHeader, bMaple2);
             _expectedDataSize = packetSize + headerLength;
             if (mCursor < (packetSize + headerLength))
             {
@@ -125,11 +156,21 @@ namespace MapleShark
             byte[] packetBuffer = new byte[packetSize];
             Buffer.BlockCopy(mBuffer, headerLength, packetBuffer, 0, packetSize);
 
-            var preDecodeIV = BitConverter.ToUInt32(mAES.mIV, 0);
+            uint preDecodeIV;
 
-            Decrypt(packetBuffer, _transformMethod);
+            if (bMaple2)
+            {
+                preDecodeIV = IV;
 
-            var postDecodeIV = BitConverter.ToUInt32(mAES.mIV, 0);
+                mCrypt.Decrypt(packetBuffer, packetSize, BlockIV, IV);
+                ShiftIV();
+            } else
+            {
+                preDecodeIV = BitConverter.ToUInt32(mAES.mIV, 0);
+                Decrypt(packetBuffer, _transformMethod);
+            }
+
+            var postDecodeIV = bMaple2 ? IV : BitConverter.ToUInt32(mAES.mIV, 0);
 
             mCursor -= _expectedDataSize;
             if (mCursor > 0) Buffer.BlockCopy(mBuffer, _expectedDataSize, mBuffer, 0, mCursor);
@@ -148,7 +189,7 @@ namespace MapleShark
                 Array.Resize(ref packetBuffer, packetSize - 2);
             }
 
-            _expectedDataSize = 4;
+            _expectedDataSize = bMaple2 ? 6 : 4;
 
             Definition definition = Config.Instance.GetDefinition(Build, Locale, mOutbound, opcode);
             return new MaplePacket(pTransmitted, mOutbound, Build, Locale, opcode, definition == null ? "" : definition.Name, packetBuffer, preDecodeIV, postDecodeIV);
@@ -218,6 +259,16 @@ namespace MapleShark
         {
             uint overflow = (((uint)pThis) << 8) >> (pCount % 8);
             return (byte)((overflow & 0xFF) | (overflow >> 8));
+        }
+
+        public void ShiftIV()
+        {
+            IV = 214013 * IV + 2531011;
+        }
+
+        public uint DecodeSeqBase(uint seqKey)
+        {
+            return ((seqKey >> 16) ^ mRawSeq);
         }
     }
 }

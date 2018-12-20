@@ -2,8 +2,8 @@
 {
     public sealed class Definition
     {
-        public ushort Build = 0;
-        public byte Locale = 0;
+        public uint Build = 0;
+        public byte Locale = 0;//Region
         public bool Outbound = false;
         public ushort Opcode = 0;
         public string Name = "";

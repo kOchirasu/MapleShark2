@@ -82,10 +82,11 @@ namespace MapleShark
             else return 4;
         }
 
-        public static int GetPacketLength(byte[] pBuffer, int pBytesAvailable, bool pOldHeader)
+        public static int GetPacketLength(byte[] pBuffer, int pBytesAvailable, bool pOldHeader, bool pNewHeader)
         {
             if (pBytesAvailable < 4) return pBytesAvailable - 4;
 
+            if (pNewHeader) return BitConverter.ToInt32(pBuffer, 2);
             if (pOldHeader) return BitConverter.ToUInt16(pBuffer, 2);
 
             ushort ivBytes = (ushort)(pBuffer[0] | pBuffer[1] << 8);

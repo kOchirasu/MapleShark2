@@ -1964,7 +1964,7 @@ namespace System.Windows.Forms
 			DataObject da = new DataObject();
 
 			// set string buffer clipbard data
-			string sBuffer = System.Text.Encoding.ASCII.GetString(buffer, 0, buffer.Length);
+			string sBuffer = System.Text.Encoding.UTF8.GetString(buffer, 0, buffer.Length);
 			da.SetData(typeof(string), sBuffer);
 
 			//set memorystream (BinaryData) clipboard data
@@ -2043,7 +2043,7 @@ namespace System.Windows.Forms
 			else if(da.GetDataPresent(typeof(string)))
 			{
 				string sBuffer = (string)da.GetData(typeof(string));
-				buffer = System.Text.Encoding.ASCII.GetBytes(sBuffer);
+				buffer = System.Text.Encoding.UTF8.GetBytes(sBuffer);
 			}
 			else
 			{

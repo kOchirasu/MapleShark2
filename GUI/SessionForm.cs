@@ -36,7 +36,7 @@ namespace MapleShark
         private ushort mProxyPort = 0;
         private uint mOutboundSequence = 0;
         private uint mInboundSequence = 0;
-        private ushort mBuild = 0;
+        private uint mBuild = 0;
         private byte mLocale = 0;
         private string mPatchLocation = "";
         private Dictionary<uint, byte[]> mOutboundBuffer = new Dictionary<uint, byte[]>();
@@ -63,7 +63,7 @@ namespace MapleShark
 
         public MainForm MainForm { get { return ParentForm as MainForm; } }
         public ListView ListView { get { return mPacketList; } }
-        public ushort Build { get { return mBuild; } }
+        public uint Build { get { return mBuild; } }
         public byte Locale { get { return mLocale; } }
         public List<Opcode> Opcodes { get { return mOpcodes; } }
 
@@ -110,6 +110,11 @@ namespace MapleShark
 
         internal Results BufferTCPPacket(TcpPacket pTCPPacket, DateTime pArrivalTime)
         {
+            if (Config.Instance.Maple2)
+            {
+                return BufferTCPPacket_MS2(pTCPPacket, pArrivalTime);
+            }
+
             if (pTCPPacket.Fin || pTCPPacket.Rst)
             {
                 mTerminated = true;
@@ -244,8 +249,8 @@ namespace MapleShark
                 mLocale = serverLocale;
                 mPatchLocation = patchLocation;
 
-                mOutboundStream = new MapleStream(true, mBuild, mLocale, localIV, subVersion);
-                mInboundStream = new MapleStream(false, mBuild, mLocale, remoteIV, subVersion);
+                mOutboundStream = new MapleStream(true, version, mLocale, localIV, subVersion);
+                mInboundStream = new MapleStream(false, version, mLocale, remoteIV, subVersion);
 
                 // Generate HandShake packet
                 Definition definition = Config.Instance.GetDefinition(mBuild, mLocale, false, 0xFFFF);
@@ -293,7 +298,131 @@ using (ScriptAPI) {
                 AddPacket(packet);
 
                 Console.WriteLine("[CONNECTION] MapleStory V{2}.{3} Locale {4}", mLocalEndpoint, mRemoteEndpoint, mBuild, subVersion, serverLocale);
-                
+
+                ProcessTCPPacket(pTCPPacket, ref mInboundSequence, mInboundBuffer, mInboundStream, pArrivalTime);
+                return Results.Show;
+            }
+            if (pTCPPacket.SourcePort == mLocalPort) ProcessTCPPacket(pTCPPacket, ref mOutboundSequence, mOutboundBuffer, mOutboundStream, pArrivalTime);
+            else ProcessTCPPacket(pTCPPacket, ref mInboundSequence, mInboundBuffer, mInboundStream, pArrivalTime);
+            return Results.Continue;
+        }
+
+        internal Results BufferTCPPacket_MS2(TcpPacket pTCPPacket, DateTime pArrivalTime)
+        {
+            if (pTCPPacket.Fin || pTCPPacket.Rst)
+            {
+                mTerminated = true;
+                Text += " (Terminated)";
+
+                return mPackets.Count == 0 ? Results.CloseMe : Results.Terminated;
+            }
+            if (pTCPPacket.Syn && !pTCPPacket.Ack)
+            {
+                mLocalPort = (ushort)pTCPPacket.SourcePort;
+                mRemotePort = (ushort)pTCPPacket.DestinationPort;
+                mOutboundSequence = (uint)(pTCPPacket.SequenceNumber + 1);
+                Text = "Port " + mLocalPort + " - " + mRemotePort;
+                startTime = DateTime.Now;
+
+                try
+                {
+                    mRemoteEndpoint = ((PacketDotNet.IPv4Packet)pTCPPacket.ParentPacket).SourceAddress.ToString() + ":" + pTCPPacket.SourcePort.ToString();
+                    mLocalEndpoint = ((PacketDotNet.IPv4Packet)pTCPPacket.ParentPacket).DestinationAddress.ToString() + ":" + pTCPPacket.DestinationPort.ToString();
+                    Console.WriteLine("[CONNECTION] From {0} to {1}", mRemoteEndpoint, mLocalEndpoint);
+
+                    return Results.Continue;
+                }
+                catch
+                {
+                    return Results.CloseMe;
+                }
+            }
+            if (pTCPPacket.Syn && pTCPPacket.Ack) { mInboundSequence = (uint)(pTCPPacket.SequenceNumber + 1); return Results.Continue; }
+            if (pTCPPacket.PayloadData.Length == 0) return Results.Continue;
+            if (mBuild == 0)
+            {
+                byte[] tcpData = pTCPPacket.PayloadData;
+
+                if (pTCPPacket.SourcePort == mLocalPort) mOutboundSequence += (uint)tcpData.Length;
+                else mInboundSequence += (uint)tcpData.Length;
+
+                byte[] headerData = new byte[tcpData.Length];
+                Buffer.BlockCopy(tcpData, 0, headerData, 0, tcpData.Length);
+
+                PacketReader pr = new PacketReader(headerData);
+
+                ushort rawSeq = pr.ReadUShort();
+                uint length = pr.ReadUInt();
+                if (length != (headerData.Length - 6))
+                {
+                    Console.WriteLine("Connection on port {0} did not have a MapleStory2 Handshake", mLocalEndpoint);
+                    return Results.CloseMe;
+                }
+
+                ushort header = pr.ReadUShort();
+                if (header != 1)//RequestVersion
+                {
+                    Console.WriteLine("Connection on port {0} did not have a valid MapleStory2 Connection Header", mLocalEndpoint);
+                    return Results.CloseMe;
+                }
+                uint version = pr.ReadUInt();
+                uint localIV = pr.ReadUInt();
+                uint remoteIV = pr.ReadUInt();
+                uint blockIV = pr.ReadUInt();
+
+                mBuild = version;
+                mLocale = 0;//TODO: Handle regions somehow since handshake doesn't contain it
+                mPatchLocation = "MST";
+
+                mOutboundStream = new MapleStream(true, rawSeq, mBuild, localIV, blockIV);
+                mInboundStream = new MapleStream(false, rawSeq, mBuild, remoteIV, blockIV);
+
+                // Generate HandShake packet
+                Definition definition = Config.Instance.GetDefinition(mBuild, mLocale, false, header);
+                if (definition == null)
+                {
+                    definition = new Definition();
+                    definition.Outbound = false;
+                    definition.Locale = mLocale;
+                    definition.Opcode = header;
+                    definition.Name = "RequestVersion";
+                    definition.Build = mBuild;
+                    SaveDefinition(definition);
+                }
+
+                {
+                    var filename = Helpers.GetScriptPath(mLocale, mBuild, false, header);
+                    Helpers.MakeSureFileDirectoryExists(filename);
+
+                    // Create main script
+                    if (!File.Exists(filename))
+                    {
+                        string contents = @"
+using (ScriptAPI) {
+    AddShort(""Raw Sequence"");
+    AddField(""Packet Length"", 4);
+    AddShort(""Opcode"");
+    AddField(""MapleStory2 Version"", 4);
+    AddField(""Local Initializing Vector (IV)"", 4);
+    AddField(""Remote Initializing Vector (IV)"", 4);
+    AddField(""Block Initializing Vector (IV)"", 4);
+}
+";
+                        File.WriteAllText(filename, contents);
+                    }
+                }
+
+                MaplePacket packet = new MaplePacket(pArrivalTime, false, mBuild, mLocale, header, definition == null ? "" : definition.Name, tcpData, (uint)0, remoteIV);
+                if (!mOpcodes.Exists(op => op.Outbound == packet.Outbound && op.Header == packet.Opcode)) // Should be false, but w/e
+                {
+                    mOpcodes.Add(new Opcode(packet.Outbound, packet.Opcode));
+                }
+
+                mPacketList.Items.Add(packet);
+                AddPacket(packet);
+
+                Console.WriteLine("[CONNECTION] MapleStory2 V{2}", mLocalEndpoint, mRemoteEndpoint, mBuild);
+
                 ProcessTCPPacket(pTCPPacket, ref mInboundSequence, mInboundBuffer, mInboundStream, pArrivalTime);
                 return Results.Show;
             }
@@ -581,7 +710,10 @@ using (ScriptAPI) {
                 writer.Write(mRemotePort);
                 writer.Write(mLocale);
                 writer.Write(mBuild);
-                writer.Write(mPatchLocation);
+                if (!Config.Instance.Maple2)
+                {
+                    writer.Write(mPatchLocation);
+                }
 
                 mPackets.ForEach(p =>
                 {
@@ -614,7 +746,7 @@ using (ScriptAPI) {
             bool includeNames = MessageBox.Show("Export opcode names? (slow + generates big files!!!)", "-", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes;
 
             string tmp = "";
-            tmp += string.Format("=== MapleStory Version: {0}; Locale: {1} ===\r\n", mBuild, mLocale);
+            tmp += string.Format("=== MapleStory2 Version: {0}; Region: {1} ===\r\n", mBuild, mLocale);
             tmp += string.Format("Endpoint From: {0}\r\n", mLocalEndpoint);
             tmp += string.Format("Endpoint To: {0}\r\n", mRemoteEndpoint);
             tmp += string.Format("- Packets: {0}\r\n", mPackets.Count);

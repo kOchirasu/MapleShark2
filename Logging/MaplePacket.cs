@@ -8,7 +8,7 @@ namespace MapleShark
     {
         public DateTime Timestamp { get; private set; }
         public bool Outbound { get; private set; }
-        public ushort Build { get; private set; }
+        public uint Build { get; private set; }
         public byte Locale { get; private set; }
         public ushort Opcode { get; private set; }
         public new string Name { set { SubItems[4].Text = value; } }
@@ -20,7 +20,7 @@ namespace MapleShark
         public uint PreDecodeIV { get; private set; }
         public uint PostDecodeIV { get; private set; }
 
-        internal MaplePacket(DateTime pTimestamp, bool pOutbound, ushort pBuild, byte pLocale, ushort pOpcode, string pName, byte[] pBuffer, uint pPreDecodeIV, uint pPostDecodeIV)
+        internal MaplePacket(DateTime pTimestamp, bool pOutbound, uint pBuild, byte pLocale, ushort pOpcode, string pName, byte[] pBuffer, uint pPreDecodeIV, uint pPostDecodeIV)
             : base(new string[] {
                 pTimestamp.ToString("yyyy-MM-dd HH:mm:ss.fff"),
                 pOutbound ? "Outbound" : "Inbound",
@@ -165,7 +165,7 @@ namespace MapleShark
             if (Cursor + pLength > Length) return false;
             int length = 0;
             while (length < pLength && Buffer[Cursor + length] != 0x00) ++length;
-            if (length > 0) pValue = Encoding.ASCII.GetString(Buffer, Cursor, length);
+            if (length > 0) pValue = Encoding.UTF8.GetString(Buffer, Cursor, length);
             Cursor += pLength;
             return true;
         }
