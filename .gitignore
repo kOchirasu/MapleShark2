@@ -1,6 +1,9 @@
+# Build directories
+obj/
+bin/
+.vs/
 
-/obj
-/bin
+# Build files
 *.suo
 *.user
-/*.suo
+*.suo
