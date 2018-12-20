@@ -75,11 +75,13 @@ namespace MapleShark
             var filepath = Assembly.GetExecutingAssembly().Location;
             Environment.CurrentDirectory = filepath.Remove(filepath.LastIndexOf(System.IO.Path.DirectorySeparatorChar));
 
-            initialisator.ReportProgress(0, "Checking for updates");
-            CraftNetTools.AppUpdates.Check();
+            // Ignore updates for now.
+            //initialisator.ReportProgress(0, "Checking for updates");
+            //CraftNetTools.AppUpdates.Check();
 
-            initialisator.ReportProgress(0, "Initializing MapleStory AES Keys");
-            MapleKeys.Initialize();
+            // MapleStory 2 doesn't use any AES keys for packet crypto.
+            //initialisator.ReportProgress(0, "Initializing MapleStory AES Keys");
+            //MapleKeys.Initialize();
 
             initialisator.ReportProgress(0, "Loading Script.NET context");
             RuntimeHost.Initialize();
@@ -90,8 +92,9 @@ namespace MapleShark
             initialisator.ReportProgress(0, "Loading + saving config file");
             Config.Instance.Save();
 
-            initialisator.ReportProgress(0, "Registering .msb extension");
-            RegisterFileAssociation(".msb", "MapleShark", "MapleShark Binary File", filepath, string.Empty, 0);
+            // Disable this for now.
+            //initialisator.ReportProgress(0, "Registering .msb extension");
+            //RegisterFileAssociation(".msb", "MapleShark", "MapleShark Binary File", filepath, string.Empty, 0);
         }
 
 

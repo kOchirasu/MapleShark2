@@ -32,7 +32,7 @@ namespace MapleShark
         public MainForm(string[] startupArguments)
         {
             InitializeComponent();
-            Text = "MapleShark " + Program.AssemblyVersion;
+            Text = "MapleShark2 (Build: " + Program.AssemblyVersion + ")";
 
             _startupArguments = startupArguments;
         }
@@ -201,7 +201,7 @@ namespace MapleShark
                     if (!started)
                         continue;
 
-                    TcpPacket tcpPacket = (TcpPacket)Packet.ParsePacket(packet.LinkLayerType, packet.Data).Extract(typeof(TcpPacket));
+                    TcpPacket tcpPacket = (TcpPacket)PacketDotNet.Packet.ParsePacket(packet.LinkLayerType, packet.Data).Extract(typeof(TcpPacket));
                     if (tcpPacket == null)
                         continue;
 
@@ -327,7 +327,7 @@ namespace MapleShark
                     if (!started)
                         continue;
 
-                    TcpPacket tcpPacket = (TcpPacket)Packet.ParsePacket(packet.LinkLayerType, packet.Data).Extract(typeof(TcpPacket));
+                    TcpPacket tcpPacket = (TcpPacket)PacketDotNet.Packet.ParsePacket(packet.LinkLayerType, packet.Data).Extract(typeof(TcpPacket));
                     SessionForm session = null;
                     try
                     {

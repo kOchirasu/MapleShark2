@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("MapleShark")]
+[assembly: AssemblyTitle("MapleShark2")]
 [assembly: AssemblyDescription("This is a program to sniff packets from MapleStory connections.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("MapleShark")]
+[assembly: AssemblyProduct("MapleShark2")]
 [assembly: AssemblyCopyright("Copyright © Astaelan, Diamondo25 '11 - '17")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.0.2.8")]
-[assembly: AssemblyFileVersion("2.0.2.8")]
+[assembly: AssemblyVersion("2.0.3.0")]
+[assembly: AssemblyFileVersion("2.0.3.0")]
