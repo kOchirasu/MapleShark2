@@ -3,10 +3,10 @@
     public class BufferCryptManager
     {
         public static readonly int
-            ENCRYPT_NONE = 0,
-            ENCRYPT_REARRANGE = 1,
-            ENCRYPT_XOR = 2,
-            ENCRYPT_TABLE = 3
+            ENCRYPT_NONE        = 0,
+            ENCRYPT_REARRANGE   = 1,
+            ENCRYPT_XOR         = 2,
+            ENCRYPT_TABLE       = 3
         ;
 
         private readonly Crypter[] aEncrypt;
@@ -16,9 +16,9 @@
             this.aEncrypt = new Crypter[4];
 
             this.aEncrypt[ENCRYPT_NONE] = null;
-            this.aEncrypt[ENCRYPT_TABLE] = new TableCrypter();
-            this.aEncrypt[ENCRYPT_REARRANGE] = new RearrangeCrypter();
-            this.aEncrypt[ENCRYPT_XOR] = new XORCrypter();
+            this.aEncrypt[(version + ENCRYPT_REARRANGE) % 3 + 1] = new RearrangeCrypter();
+            this.aEncrypt[(version + ENCRYPT_XOR) % 3 + 1]       = new XORCrypter();
+            this.aEncrypt[(version + ENCRYPT_TABLE) % 3 + 1]     = new TableCrypter();
 
             for (int i = 3; i > 0; i--)
             {
