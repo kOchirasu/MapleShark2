@@ -126,12 +126,13 @@ namespace MapleShark
             if (mCursor < _expectedDataSize) return null;
             if (bMaple2)
             {
-                if (DecodeSeqBase(IV) != Build)
+                mRawSeq = BitConverter.ToUInt16(mBuffer, 0);
+                if (mOutbound && DecodeSeqBase(IV) != Build || !mOutbound && DecodeSeqBase(Rand32.CrtRand(IV)) != Build)
                 {
-                    //throw new Exception("Failed to confirm packet header");
-                    Console.WriteLine("ERROR: Failed to confirm packet header!");
+                    throw new Exception("Failed to confirm packet header");
                 }
-            } else
+            }
+            else
             {
                 if (!mAES.ConfirmHeader(mBuffer, 0))
                 {
@@ -164,7 +165,8 @@ namespace MapleShark
 
                 mCrypt.Decrypt(packetBuffer, packetSize, BlockIV, IV);
                 ShiftIV();
-            } else
+            }
+            else
             {
                 preDecodeIV = BitConverter.ToUInt32(mAES.mIV, 0);
                 Decrypt(packetBuffer, _transformMethod);
