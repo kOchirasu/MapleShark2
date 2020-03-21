@@ -353,7 +353,7 @@ using (ScriptAPI) {
 
                 ushort rawSeq = pr.ReadUShort();
                 uint length = pr.ReadUInt();
-                if (length != (headerData.Length - 6))
+                if (length != 19 && length != 32)
                 {
                     Console.WriteLine("Connection on port {0} did not have a MapleStory2 Handshake", mLocalEndpoint);
                     return Results.CloseMe;
