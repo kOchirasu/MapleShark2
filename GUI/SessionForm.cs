@@ -1,4 +1,4 @@
-﻿using ScriptNET;
+using ScriptNET;
 using PacketDotNet;
 using PacketDotNet.Utils;
 using PacketDotNet.LLDP;
@@ -557,9 +557,9 @@ using (ScriptAPI) {
                         mRemotePort = reader.ReadUInt16();
 
                         mLocale = reader.ReadByte();
-                        mBuild = reader.ReadUInt16();
+                        mBuild = reader.ReadUInt32();
 
-                        if (MapleSharkVersion >= 0x2021)
+                        if (MapleSharkVersion >= 0x2021 && !Config.Instance.Maple2)
                         {
                             mPatchLocation = reader.ReadString();
                         }
