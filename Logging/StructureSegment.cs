@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Drawing;
 using System.Text;
 
 namespace MapleShark
 {
     public sealed class StructureSegment
     {
+        private static readonly DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
         private byte[] mBuffer;
         private Encoding encoding = Encoding.UTF8;
 
@@ -95,6 +98,19 @@ namespace MapleShark
             }
         }
 
+        public DateTime? EpochDate
+        {
+            get
+            {
+                try {
+                    if (mBuffer.Length >= 8)
+                        return epoch.AddSeconds(BitConverter.ToInt64(mBuffer, 0));
+                }
+                catch { }
+                return null;
+            }
+        }
+
         public DateTime? FlippedDate
         {
             get
@@ -128,6 +144,19 @@ namespace MapleShark
             }
         }
 
+        public string UnicodeString
+        {
+            get {
+                if (mBuffer.Length < 2) return null;
+                if (mBuffer[0] == 0x00 && mBuffer[1] == 0x00) return "";
+                for (int index = 0; index < mBuffer.Length - 1; index+=2) {
+                    if (mBuffer[index] == 0x00 && mBuffer[index + 1] == 0x00)
+                        return encoding.GetString(mBuffer, 0, index);
+                }
+                return Encoding.Unicode.GetString(mBuffer, 0, mBuffer.Length);
+            }
+        }
+
         public string StringIgnore
         {
             get
@@ -139,6 +168,8 @@ namespace MapleShark
                 return encoding.GetString(sBuffer, 0, sBuffer.Length);
             }
         }
+
+        public Color Color => mBuffer.Length < 4 ? default : Color.FromArgb(mBuffer[3], mBuffer[2], mBuffer[1], mBuffer[0]);
 
         public string Length
         {
