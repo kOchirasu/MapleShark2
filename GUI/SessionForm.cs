@@ -1,15 +1,9 @@
-using ScriptNET;
 using PacketDotNet;
-using PacketDotNet.Utils;
-using PacketDotNet.LLDP;
-using SharpPcap;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
-using System.Text;
 using System.Linq;
 using System.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
@@ -350,10 +344,9 @@ using (ScriptAPI) {
                 Buffer.BlockCopy(tcpData, 0, headerData, 0, tcpData.Length);
 
                 PacketReader pr = new PacketReader(headerData);
-
                 ushort rawSeq = pr.ReadUShort();
-                uint length = pr.ReadUInt();
-                if (length != 19 && length != 32)
+                int length = pr.ReadInt();
+                if (headerData.Length - 6 < length)
                 {
                     Console.WriteLine("Connection on port {0} did not have a MapleStory2 Handshake", mLocalEndpoint);
                     return Results.CloseMe;
@@ -369,6 +362,7 @@ using (ScriptAPI) {
                 uint localIV = pr.ReadUInt();
                 uint remoteIV = pr.ReadUInt();
                 uint blockIV = pr.ReadUInt();
+                byte ignored = pr.ReadByte();
 
                 mBuild = version;
                 mLocale = 0;//TODO: Handle regions somehow since handshake doesn't contain it
@@ -376,6 +370,12 @@ using (ScriptAPI) {
 
                 mOutboundStream = new MapleStream(true, rawSeq, mBuild, localIV, blockIV);
                 mInboundStream = new MapleStream(false, rawSeq, mBuild, remoteIV, blockIV);
+
+                // Another packet was sent with handshake...
+                if (pr.Remaining > 0) {
+                    // Buffer it since it is encrypted
+                    mInboundStream.Append(pr.ReadBytes(pr.Remaining));
+                }
 
                 // Generate HandShake packet
                 Definition definition = Config.Instance.GetDefinition(mBuild, mLocale, false, header);
@@ -412,7 +412,11 @@ using (ScriptAPI) {
                     }
                 }
 
-                MaplePacket packet = new MaplePacket(pArrivalTime, false, mBuild, mLocale, header, definition == null ? "" : definition.Name, tcpData, (uint)0, remoteIV);
+                // Initial TCP packet may not be split up properly, copy only handshake portion
+                byte[] handshakePacketData = new byte[6 + length];
+                Buffer.BlockCopy(tcpData, 0, handshakePacketData, 0, length + 6);
+
+                MaplePacket packet = new MaplePacket(pArrivalTime, false, mBuild, mLocale, header, definition == null ? "" : definition.Name, handshakePacketData, (uint)0, remoteIV);
                 if (!mOpcodes.Exists(op => op.Outbound == packet.Outbound && op.Header == packet.Opcode)) // Should be false, but w/e
                 {
                     mOpcodes.Add(new Opcode(packet.Outbound, packet.Opcode));
@@ -828,10 +832,10 @@ using (ScriptAPI) {
         {
             if (mPacketList.SelectedIndices.Count == 0) return;
             MaplePacket packet = mPacketList.SelectedItems[0] as MaplePacket;
-            
+
             var scriptPath = Helpers.GetScriptPath(mLocale, mBuild, packet.Outbound, packet.Opcode);
             Helpers.MakeSureFileDirectoryExists(scriptPath);
-            
+
             ScriptForm script = new ScriptForm(scriptPath, packet);
             script.FormClosed += Script_FormClosed;
             script.Show(DockPanel, new Rectangle(MainForm.Location, new Size(600, 300)));

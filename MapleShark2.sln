@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2035
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MapleShark", "MapleShark.csproj", "{01F7E3B6-B831-4D44-8B44-095768212822}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MapleShark2", "MapleShark2.csproj", "{01F7E3B6-B831-4D44-8B44-095768212822}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
