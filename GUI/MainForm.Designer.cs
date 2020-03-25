@@ -212,8 +212,8 @@
             // 
             // mTimer
             // 
-            this.mTimer.Interval = 300;
-            this.mTimer.Tick += new System.EventHandler(this.mTimer_Tick);
+            //this.mTimer.Interval = 300;
+            //this.mTimer.Tick += new System.EventHandler(this.mTimer_Tick);
             // 
             // mImportDialog
             // 

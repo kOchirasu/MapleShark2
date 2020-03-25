@@ -29,6 +29,11 @@ namespace MapleShark
 
         private string[] _startupArguments = null;
 
+        private bool Terminate;
+        private Thread PacketThread = null;
+        private object QueueLock = new object();
+        private List<RawCapture> PacketQueue = new List<RawCapture>();
+
         public MainForm(string[] startupArguments)
         {
             InitializeComponent();
@@ -82,6 +87,7 @@ namespace MapleShark
         {
             if (mDevice != null)
             {
+                mDevice.StopCapture();
                 mDevice.Close();
             }
 
@@ -109,14 +115,136 @@ namespace MapleShark
 
             try
             {
-                mDevice.Open(DeviceMode.Promiscuous, 1);
+                mDevice.OnPacketArrival += new PacketArrivalEventHandler(mDevice_OnPacketArrival);
+                mDevice.Open(DeviceMode.Promiscuous, 10);
+                mDevice.Filter = string.Format("tcp portrange {0}-{1}", Config.Instance.LowPort, Config.Instance.HighPort);
+                mDevice.StartCapture();
             }
             catch
             {
                 MessageBox.Show("Failed to set the device in Promiscuous mode! But that doesn't really matter lol.");
                 mDevice.Open();
             }
-            mDevice.Filter = string.Format("tcp portrange {0}-{1}", Config.Instance.LowPort, Config.Instance.HighPort);
+
+            if (PacketThread == null)
+            {
+                Terminate = false;
+                PacketThread = new Thread(ProcessPacketQueue);
+                PacketThread.Start();
+            }
+        }
+
+        private void mDevice_OnPacketArrival(object sender, CaptureEventArgs e)
+        {
+            DateTime now = DateTime.Now;
+            foreach (SessionForm ses in MdiChildren)
+            {
+                if (ses.CloseMe(now))
+                    closes.Add(ses);
+            }
+            closes.ForEach((a) => { a.Close(); });
+            closes.Clear();
+
+            if (!started) return;
+
+            lock (QueueLock)
+            {
+                PacketQueue.Add(e.Packet);
+            }
+        }
+
+        private void ProcessPacketQueue()
+        {
+            while (!Terminate)
+            {
+                bool bSleep = true;
+
+                lock (QueueLock)
+                {
+                    if (PacketQueue.Count != 0)
+                    {
+                        bSleep = false;
+                    }
+                }
+
+                if (bSleep)
+                {
+                    Thread.Sleep(250);
+                } else
+                {
+                    List<RawCapture> CurQueue;
+                    lock (QueueLock)
+                    {
+                        CurQueue = PacketQueue;
+                        PacketQueue = new List<RawCapture>();
+                    }
+
+                    foreach (var pPacket in CurQueue)
+                    {
+                        this.Invoke((MethodInvoker)delegate
+                        {
+                            var packet = PacketDotNet.Packet.ParsePacket(pPacket.LinkLayerType, pPacket.Data);
+                            TcpPacket tcpPacket = (TcpPacket)packet.Extract(typeof(TcpPacket));
+                            SessionForm session = null;
+                            if (tcpPacket != null)
+                            {
+                                try
+                                {
+                                    if ((tcpPacket.SourcePort < Config.Instance.LowPort || tcpPacket.SourcePort > Config.Instance.HighPort)
+                                        && (tcpPacket.DestinationPort < Config.Instance.LowPort || tcpPacket.DestinationPort > Config.Instance.HighPort))
+                                        return;
+
+                                    if (tcpPacket.Syn && !tcpPacket.Ack && tcpPacket.DestinationPort >= Config.Instance.LowPort && tcpPacket.DestinationPort <= Config.Instance.HighPort)
+                                    {
+                                        session = NewSession();
+                                        var res = session.BufferTCPPacket(tcpPacket, pPacket.Timeval.Date);
+                                        if (res == SessionForm.Results.Continue)
+                                        {
+                                            int hash = tcpPacket.SourcePort << 16 | tcpPacket.DestinationPort;
+                                            waiting[hash] = session;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        int hash = tcpPacket.DestinationPort << 16 | tcpPacket.SourcePort;
+                                        session = Array.Find(MdiChildren, f => (f as SessionForm).MatchTCPPacket(tcpPacket)) as SessionForm;
+                                        if (session != null)
+                                        {
+                                            var res = session.BufferTCPPacket(tcpPacket, pPacket.Timeval.Date);
+
+                                            if (res == SessionForm.Results.CloseMe)
+                                            {
+                                                waiting.Remove(hash);
+                                                session.Close();
+                                            }
+                                            return;
+                                        }
+
+                                        if (waiting.TryGetValue(hash, out session))
+                                        {
+                                            var res = session.BufferTCPPacket(tcpPacket, pPacket.Timeval.Date);
+
+                                            switch (res)
+                                            {
+                                                case SessionForm.Results.Show:
+                                                    session.Show(mDockPanel, DockState.Document);
+                                                    break;
+                                                case SessionForm.Results.Continue:
+                                                    return;
+                                            }
+                                            waiting.Remove(hash);
+                                        }
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.WriteLine(ex.Message);
+                                }
+                            }
+                        });
+                    }
+                }
+            }
         }
 
         private void MainForm_Load(object pSender, EventArgs pArgs)
@@ -152,10 +280,22 @@ namespace MapleShark
             }
         }
 
-        private void MainForm_FormClosed(object pSender, FormClosedEventArgs pArgs)
+        private void Shutdown()
         {
             mTimer.Enabled = false;
-            if (mDevice != null) mDevice.Close();
+            if (mDevice != null)
+            {
+                mDevice.StopCapture();
+                mDevice.Close();
+            }
+
+            Terminate = true;
+            PacketThread.Join();
+        }
+
+        private void MainForm_FormClosed(object pSender, FormClosedEventArgs pArgs)
+        {
+            Shutdown();
             mClosed = true;
         }
 
