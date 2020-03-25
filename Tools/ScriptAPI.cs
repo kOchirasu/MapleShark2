@@ -24,6 +24,7 @@ namespace MapleShark
         public double AddDouble(string pName) { return mStructure.APIAddDouble(pName); }
         public bool AddBool(string pName) { return mStructure.APIAddBool(pName); }
         public string AddString(string pName) { return mStructure.APIAddString(pName); }
+        public string AddUnicodeString(string pName) { return mStructure.APIAddUnicodeString(pName); }
         public string AddPaddedString(string pName, int pLength) { return mStructure.APIAddPaddedString(pName, pLength); }
         public void AddField(string pName, int pLength) { mStructure.APIAddField(pName, pLength); }
         public void AddComment(string pComment) { mStructure.APIAddComment(pComment); }

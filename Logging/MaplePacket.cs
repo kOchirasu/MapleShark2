@@ -169,5 +169,19 @@ namespace MapleShark
             Cursor += pLength;
             return true;
         }
+
+        public bool ReadUnicodeString(out string pValue, int pLength)
+        {
+            int bLength = pLength * 2;
+            pValue = "";
+            if (Cursor + bLength > Length) return false;
+            int length = 0;
+            while (length < bLength && !(Buffer[Cursor + length] != 0x00 && Buffer[Cursor + length + 1] != 0x00)) {
+                length += 2;
+            }
+            if (length > 0) pValue = Encoding.Unicode.GetString(Buffer, Cursor, length);
+            Cursor += bLength;
+            return true;
+        }
     }
 }

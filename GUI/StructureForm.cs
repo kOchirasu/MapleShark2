@@ -149,6 +149,16 @@ namespace MapleShark
             APIEndNode(false);
             return value;
         }
+        internal string APIAddUnicodeString(string pName)
+        {
+            APIStartNode(pName);
+            short size = APIAddShort("Size");
+            if (!mParsing.ReadUnicodeString(out string value, size)) throw new Exception("Insufficient packet data");
+            int length = size * 2;
+            CurrentNodes.Add(new StructureNode(pName, mParsing.Buffer, mParsing.Cursor - length, length));
+            APIEndNode(false);
+            return value;
+        }
         internal string APIAddPaddedString(string pName, int pLength)
         {
             string value;
