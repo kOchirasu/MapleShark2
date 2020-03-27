@@ -104,13 +104,13 @@ namespace MapleShark
         }
 
         internal Results BufferTcpPacket(TcpPacket pTcpPacket, DateTime pArrivalTime) {
-            if (pTcpPacket.Fin || pTcpPacket.Rst) {
+            if (pTcpPacket.Finished || pTcpPacket.Reset) {
                 Terminate();
 
                 return mPackets.Count == 0 ? Results.CloseMe : Results.Terminated;
             }
 
-            if (pTcpPacket.Syn && !pTcpPacket.Ack)
+            if (pTcpPacket.Synchronize && !pTcpPacket.Acknowledgment)
             {
                 mLocalPort = (ushort)pTcpPacket.SourcePort;
                 mRemotePort = (ushort)pTcpPacket.DestinationPort;
@@ -131,7 +131,11 @@ namespace MapleShark
                     return Results.CloseMe;
                 }
             }
-            if (pTcpPacket.Syn && pTcpPacket.Ack) { mInboundSequence = (uint)(pTcpPacket.SequenceNumber + 1); return Results.Continue; }
+
+            if (pTcpPacket.Synchronize && pTcpPacket.Acknowledgment) {
+                mInboundSequence = (uint)(pTcpPacket.SequenceNumber + 1);
+                return Results.Continue;
+            }
             if (pTcpPacket.PayloadData.Length == 0) return Results.Continue;
 
             bool isOutbound = pTcpPacket.SourcePort == mLocalPort;

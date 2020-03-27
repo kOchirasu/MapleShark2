@@ -1,20 +1,15 @@
-﻿using SharpPcap;
-using SharpPcap.LibPcap;
-using PacketDotNet;
-using PacketDotNet.Utils;
-using PacketDotNet.LLDP;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Reflection;
-using System.Text;
-using System.Threading;
-using System.Windows.Forms;
-using WeifenLuo.WinFormsUI.Docking;
-
+using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Windows.Forms;
+using PacketDotNet;
+using SharpPcap;
+using SharpPcap.LibPcap;
+using WeifenLuo.WinFormsUI.Docking;
+using Resources = MapleShark.Properties.Resources;
 
 namespace MapleShark
 {
@@ -184,7 +179,7 @@ namespace MapleShark
                         this.Invoke((MethodInvoker)delegate
                         {
                             var packet = PacketDotNet.Packet.ParsePacket(pPacket.LinkLayerType, pPacket.Data);
-                            TcpPacket tcpPacket = (TcpPacket)packet.Extract(typeof(TcpPacket));
+                            TcpPacket tcpPacket = packet.Extract<TcpPacket>();
                             SessionForm session = null;
                             if (tcpPacket != null)
                             {
@@ -194,7 +189,7 @@ namespace MapleShark
                                         && (tcpPacket.DestinationPort < Config.Instance.LowPort || tcpPacket.DestinationPort > Config.Instance.HighPort))
                                         return;
 
-                                    if (tcpPacket.Syn && !tcpPacket.Ack && tcpPacket.DestinationPort >= Config.Instance.LowPort && tcpPacket.DestinationPort <= Config.Instance.HighPort)
+                                    if (tcpPacket.Synchronize && !tcpPacket.Acknowledgment && tcpPacket.DestinationPort >= Config.Instance.LowPort && tcpPacket.DestinationPort <= Config.Instance.HighPort)
                                     {
                                         session = NewSession();
                                         var res = session.BufferTcpPacket(tcpPacket, pPacket.Timeval.Date);
@@ -341,7 +336,7 @@ namespace MapleShark
                     if (!started)
                         continue;
 
-                    TcpPacket tcpPacket = (TcpPacket)PacketDotNet.Packet.ParsePacket(packet.LinkLayerType, packet.Data).Extract(typeof(TcpPacket));
+                    TcpPacket tcpPacket = PacketDotNet.Packet.ParsePacket(packet.LinkLayerType, packet.Data).Extract<TcpPacket>();
                     if (tcpPacket == null)
                         continue;
 
@@ -350,7 +345,7 @@ namespace MapleShark
                         continue;
                     try
                     {
-                        if (tcpPacket.Syn && !tcpPacket.Ack)
+                        if (tcpPacket.Synchronize && !tcpPacket.Acknowledgment)
                         {
                             if (session != null)
                                 session.Show(mDockPanel, DockState.Document);
@@ -467,11 +462,11 @@ namespace MapleShark
                     if (!started)
                         continue;
 
-                    TcpPacket tcpPacket = (TcpPacket)PacketDotNet.Packet.ParsePacket(packet.LinkLayerType, packet.Data).Extract(typeof(TcpPacket));
+                    TcpPacket tcpPacket = (TcpPacket)PacketDotNet.Packet.ParsePacket(packet.LinkLayerType, packet.Data).Extract<TcpPacket>();
                     SessionForm session = null;
                     try
                     {
-                        if (tcpPacket.Syn && !tcpPacket.Ack && tcpPacket.DestinationPort >= Config.Instance.LowPort && tcpPacket.DestinationPort <= Config.Instance.HighPort)
+                        if (tcpPacket.Synchronize && !tcpPacket.Acknowledgment && tcpPacket.DestinationPort >= Config.Instance.LowPort && tcpPacket.DestinationPort <= Config.Instance.HighPort)
                         {
                             session = NewSession();
                             var res = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
@@ -535,22 +530,22 @@ namespace MapleShark
             if (started)
             {
                 started = false;
-                mStopStartButton.Image = Properties.Resources.Button_Blank_Green_icon;
+                mStopStartButton.Image = Resources.Button_Blank_Green_icon;
                 mStopStartButton.Text = "Start sniffing";
             }
             else
             {
                 started = true;
-                mStopStartButton.Image = Properties.Resources.Button_Blank_Red_icon;
+                mStopStartButton.Image = Resources.Button_Blank_Red_icon;
                 mStopStartButton.Text = "Stop sniffing";
             }
         }
 
         private void helpToolStripButton_Click(object sender, EventArgs e)
         {
-            if (System.IO.File.Exists("Readme.txt"))
+            if (File.Exists("Readme.txt"))
             {
-                System.Diagnostics.Process.Start(Environment.CurrentDirectory + @"\Readme.txt");
+                Process.Start(Environment.CurrentDirectory + @"\Readme.txt");
             }
         }
 
@@ -576,7 +571,7 @@ namespace MapleShark
                 bool okay = false;
                 foreach (var file in files)
                 {
-                    switch (System.IO.Path.GetExtension(file))
+                    switch (Path.GetExtension(file))
                     {
                         case ".msb":
                         case ".pcap":
@@ -599,9 +594,9 @@ namespace MapleShark
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             foreach (var file in files)
             {
-                if (!System.IO.File.Exists(file)) continue;
+                if (!File.Exists(file)) continue;
 
-                switch (System.IO.Path.GetExtension(file))
+                switch (Path.GetExtension(file))
                 {
                     case ".msb":
                         {
@@ -640,7 +635,7 @@ namespace MapleShark
             bool doSaveQuestioning = true;
             if (sessions > 5)
             {
-                doSaveQuestioning = MessageBox.Show("You've got " + sessions + " sessions open. Say 'Yes' if you want to get a question for each session, 'No' if you want to quit MapleShark.", "MapleShark", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes;
+                doSaveQuestioning = MessageBox.Show("You've got " + sessions + " sessions open. Say 'Yes' if you want to get a question for each session, 'No' if you want to quit MapleShark.", "MapleShark", MessageBoxButtons.YesNo) == DialogResult.Yes;
             }
 
             while (doSaveQuestioning && sessionForms.Count > 0)
@@ -671,7 +666,7 @@ namespace MapleShark
 
         private void setupToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (ShowSetupForm() == System.Windows.Forms.DialogResult.OK)
+            if (ShowSetupForm() == DialogResult.OK)
             {
                 // Restart sniffing
                 var lastTimerState = mTimer.Enabled;
@@ -688,7 +683,7 @@ namespace MapleShark
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Title = "Select MSniffer logfile";
             ofd.Filter = "All files|*.*";
-            if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            if (ofd.ShowDialog() == DialogResult.OK)
                 ReadMSnifferFile(ofd.FileName);
         }
 
