@@ -309,9 +309,9 @@ namespace MapleShark
                     if (packet.Outbound && !mViewOutboundMenu.Checked) continue;
                     if (!packet.Outbound && !mViewInboundMenu.Checked) continue;
 
-                    var item = mPacketList.Items.Add(packet);
+                    mPacketList.Items.Add(packet);
                     if (packet.Outbound) {
-                        item.BackColor = Color.AliceBlue;
+                        packet.BackColor = Color.AliceBlue;
                     }
                     if (mPacketList.SelectedItems.Count == 0) packet.EnsureVisible();
                 }
@@ -432,6 +432,9 @@ namespace MapleShark
                     if (!mOpcodes.Exists(op => op.Outbound == packet.Outbound && op.Header == packet.Opcode)) mOpcodes.Add(new Opcode(packet.Outbound, packet.Opcode));
                     if (definition != null && definition.Ignore) continue;
                     mPacketList.Items.Add(packet);
+                    if (packet.Outbound) {
+                        packet.BackColor = Color.AliceBlue;
+                    }
                 }
                 mPacketList.EndUpdate();
                 if (mPacketList.Items.Count > 0) mPacketList.EnsureVisible(0);
@@ -466,6 +469,9 @@ namespace MapleShark
                 if (!mOpcodes.Exists(op => op.Outbound == packet.Outbound && op.Header == packet.Opcode)) mOpcodes.Add(new Opcode(packet.Outbound, packet.Opcode));
                 if (definition != null && !mViewIgnoredMenu.Checked && definition.Ignore) continue;
                 mPacketList.Items.Add(packet);
+                if (packet.Outbound) {
+                    packet.BackColor = Color.AliceBlue;
+                }
 
                 if (packet == previous) packet.Selected = true;
             }
@@ -511,6 +517,9 @@ namespace MapleShark
             if (!mOpcodes.Exists(op => op.Outbound == packet.Outbound && op.Header == packet.Opcode)) mOpcodes.Add(new Opcode(packet.Outbound, packet.Opcode));
             if (definition != null && definition.Ignore) return;
             mPacketList.Items.Add(packet);
+            if (packet.Outbound) {
+                packet.BackColor = Color.AliceBlue;
+            }
         }
 
         public void RunSaveCMD()
