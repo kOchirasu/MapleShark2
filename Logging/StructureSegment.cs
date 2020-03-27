@@ -52,24 +52,9 @@ namespace MapleShark
         public short? Short { get { if (mBuffer.Length >= 2) return BitConverter.ToInt16(mBuffer, 0); return null; } }
         public uint? UInt { get { if (mBuffer.Length >= 4) return BitConverter.ToUInt32(mBuffer, 0); return null; } }
         public int? Int { get { if (mBuffer.Length >= 4) return BitConverter.ToInt32(mBuffer, 0); return null; } }
+        public float? Float { get { if (mBuffer.Length >= 4) return BitConverter.ToSingle(mBuffer, 0); return null; } }
         public ulong? ULong { get { if (mBuffer.Length >= 8) return BitConverter.ToUInt64(mBuffer, 0); return null; } }
         public long? Long { get { if (mBuffer.Length >= 8) return BitConverter.ToInt64(mBuffer, 0); return null; } }
-        public long? FlippedLong
-        {
-            get
-            {
-                if (mBuffer.Length >= 8)
-                {
-                    long time = BitConverter.ToInt64(mBuffer, 0);
-                    time = (long)(
-                        ((time << 32) & 0xFFFFFFFF) |
-                        (time & 0xFFFFFFFF)
-                        );
-                    return time;
-                }
-                return null;
-            }
-        }
         public string IpAddress
         {
             get
@@ -105,28 +90,6 @@ namespace MapleShark
                 try {
                     if (mBuffer.Length >= 8)
                         return epoch.AddSeconds(BitConverter.ToInt64(mBuffer, 0));
-                }
-                catch { }
-                return null;
-            }
-        }
-
-        public DateTime? FlippedDate
-        {
-            get
-            {
-                try
-                {
-                    if (mBuffer.Length >= 8)
-                    {
-                        long time = BitConverter.ToInt64(mBuffer, 0);
-                        time = (long)(
-                            ((time << 32) & 0xFFFFFFFF) |
-                            (time & 0xFFFFFFFF)
-                            );
-
-                        return DateTime.FromFileTimeUtc(time);
-                    }
                 }
                 catch { }
                 return null;
