@@ -119,7 +119,7 @@ namespace Alsing.Windows.Forms
         public event EventHandler CaretChange = null;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public event EventHandler SelectionChange = null;
 
@@ -377,13 +377,13 @@ namespace Alsing.Windows.Forms
         /// &lt;BR&gt; : Line break.<br/>
         /// &lt;B&gt;&lt;/B&gt; : Activate/Deactivate Bold style.<br/>
         /// &lt;I&gt;&lt;/I&gt; : Activate/Deactivate Italic style.<br/>
-        /// &lt;U&gt;&lt;/U&gt; : Activate/Deactivate Underline style.	<br/>			
-        /// </remarks>	
+        /// &lt;U&gt;&lt;/U&gt; : Activate/Deactivate Underline style.	<br/>
+        /// </remarks>
         /// <example >
         /// <code>
-        /// MySyntaxBox.InfoTipText="public void MyMethod ( &lt;b&gt; string text &lt;/b&gt; );"; 		
+        /// MySyntaxBox.InfoTipText="public void MyMethod ( &lt;b&gt; string text &lt;/b&gt; );";
         /// </code>
-        /// </example>	
+        /// </example>
         [Category("Appearance - InfoTip"), Description("The infotip text")
         ]
         [DefaultValue("")]
@@ -512,7 +512,7 @@ namespace Alsing.Windows.Forms
         /// <remarks>
         /// Image Index 0 is used to display the Breakpoint icon.
         /// Image Index 1 is used to display the Bookmark icon.
-        /// </remarks>		
+        /// </remarks>
         [Category("Appearance - Gutter Margin"), Description(
             "Gets or Sets the imagelist to use in the gutter margin.")]
         public
@@ -1403,7 +1403,7 @@ namespace Alsing.Windows.Forms
         /// Disables painting while loading data into the Autolist
         /// </summary>
         /// <remarks>
-        /// 
+        ///
         /// </remarks>
         /// <example>
         /// <code>
@@ -1422,8 +1422,8 @@ namespace Alsing.Windows.Forms
         }
 
         /// <summary>
-        /// Resumes painting and autosizes the Autolist.			
-        /// </summary>		
+        /// Resumes painting and autosizes the Autolist.
+        /// </summary>
         public void AutoListEndLoad()
         {
             ((EditViewControl) _ActiveView).AutoListEndLoad();
@@ -1554,7 +1554,7 @@ namespace Alsing.Windows.Forms
 
         /// <summary>
         /// Takes a pixel position and returns true if that position is inside the selected text.
-        /// 
+        ///
         /// </summary>
         /// <param name="x">Pixel x position.</param>
         /// <param name="y">Pixel y position</param>
@@ -1749,7 +1749,7 @@ namespace Alsing.Windows.Forms
         public void Save(string filename)
         {
             string text = Document.Text;
-            var swr = new StreamWriter(Application.StartupPath + "\\" + filename);
+            var swr = new StreamWriter(Path.Combine(Application.StartupPath, filename));
 
             swr.Write(text);
 
@@ -1933,7 +1933,7 @@ namespace Alsing.Windows.Forms
             }
         }
 
-        #endregion //END Constructor		
+        #endregion //END Constructor
 
         #region EventHandlers
 
@@ -1986,7 +1986,7 @@ namespace Alsing.Windows.Forms
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="e"></param>
         protected override void OnEnter(EventArgs e)
@@ -2208,18 +2208,18 @@ namespace Alsing.Windows.Forms
             _GutterIcons = new ImageList(components);
             _AutoListIcons = new ImageList(components);
             ParseTimer = new Timer (components);
-            // 
+            //
             // _GutterIcons
-            // 
+            //
             _GutterIcons.ColorDepth = ColorDepth.Depth32Bit;
             _GutterIcons.ImageSize = new Size(17, 17);
             _GutterIcons.ImageStream = ((ImageListStreamer)
                                         (resources.GetObject(
                                             "_GutterIcons.ImageStream")));
             _GutterIcons.TransparentColor = Color.Transparent;
-            // 
+            //
             // _AutoListIcons
-            // 
+            //
             _AutoListIcons.ColorDepth =
                 ColorDepth.Depth8Bit;
             _AutoListIcons.ImageSize = new Size(16, 16);
@@ -2227,9 +2227,9 @@ namespace Alsing.Windows.Forms
                                              (ImageListStreamer) (resources.GetObject(
                                                                      "_AutoListIcons.ImageStream")));
             _AutoListIcons.TransparentColor = Color.Transparent;
-            // 
+            //
             // ParseTimer
-            // 
+            //
             ParseTimer.Enabled = true;
             ParseTimer.Interval = 1;
             ParseTimer.Tick += ParseTimer_Tick;
