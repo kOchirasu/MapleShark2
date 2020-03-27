@@ -197,7 +197,7 @@ namespace MapleShark
                                     if (tcpPacket.Syn && !tcpPacket.Ack && tcpPacket.DestinationPort >= Config.Instance.LowPort && tcpPacket.DestinationPort <= Config.Instance.HighPort)
                                     {
                                         session = NewSession();
-                                        var res = session.BufferTCPPacket(tcpPacket, pPacket.Timeval.Date);
+                                        var res = session.BufferTcpPacket(tcpPacket, pPacket.Timeval.Date);
                                         if (res == SessionForm.Results.Continue)
                                         {
                                             int hash = tcpPacket.SourcePort << 16 | tcpPacket.DestinationPort;
@@ -210,7 +210,7 @@ namespace MapleShark
                                         session = Array.Find(MdiChildren, f => (f as SessionForm).MatchTCPPacket(tcpPacket)) as SessionForm;
                                         if (session != null)
                                         {
-                                            var res = session.BufferTCPPacket(tcpPacket, pPacket.Timeval.Date);
+                                            var res = session.BufferTcpPacket(tcpPacket, pPacket.Timeval.Date);
 
                                             if (res == SessionForm.Results.CloseMe)
                                             {
@@ -222,7 +222,7 @@ namespace MapleShark
 
                                         if (waiting.TryGetValue(hash, out session))
                                         {
-                                            var res = session.BufferTCPPacket(tcpPacket, pPacket.Timeval.Date);
+                                            var res = session.BufferTcpPacket(tcpPacket, pPacket.Timeval.Date);
 
                                             switch (res)
                                             {
@@ -356,7 +356,7 @@ namespace MapleShark
                                 session.Show(mDockPanel, DockState.Document);
 
                             session = NewSession();
-                            var res = session.BufferTCPPacket(tcpPacket, packet.Timeval.Date);
+                            var res = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
                             if (res == SessionForm.Results.Continue)
                             {
                                 //    mDockPanel.Contents.Add(session);
@@ -365,7 +365,7 @@ namespace MapleShark
                         }
                         else if (session != null && session.MatchTCPPacket(tcpPacket))
                         {
-                            var res = session.BufferTCPPacket(tcpPacket, packet.Timeval.Date);
+                            var res = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
                             if (res == SessionForm.Results.CloseMe)
                             {
                                 session.Close();
@@ -444,7 +444,7 @@ namespace MapleShark
             else mPropertyForm.Hide();
         }
 
-        Dictionary<int, SessionForm> waiting = new Dictionary<int, SessionForm>(); 
+        Dictionary<int, SessionForm> waiting = new Dictionary<int, SessionForm>();
         List<SessionForm> closes = new List<SessionForm>();
         private void mTimer_Tick(object sender, EventArgs e)
         {
@@ -474,7 +474,7 @@ namespace MapleShark
                         if (tcpPacket.Syn && !tcpPacket.Ack && tcpPacket.DestinationPort >= Config.Instance.LowPort && tcpPacket.DestinationPort <= Config.Instance.HighPort)
                         {
                             session = NewSession();
-                            var res = session.BufferTCPPacket(tcpPacket, packet.Timeval.Date);
+                            var res = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
                             if (res == SessionForm.Results.Continue)
                             {
                                 int hash = tcpPacket.SourcePort << 16 | tcpPacket.DestinationPort;
@@ -487,7 +487,7 @@ namespace MapleShark
                             session = Array.Find(MdiChildren, f => (f as SessionForm).MatchTCPPacket(tcpPacket)) as SessionForm;
                             if (session != null)
                             {
-                                var res = session.BufferTCPPacket(tcpPacket, packet.Timeval.Date);
+                                var res = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
 
                                 if (res == SessionForm.Results.CloseMe)
                                 {
@@ -499,7 +499,7 @@ namespace MapleShark
 
                             if (waiting.TryGetValue(hash, out session))
                             {
-                                var res = session.BufferTCPPacket(tcpPacket, packet.Timeval.Date);
+                                var res = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
 
                                 switch (res)
                                 {
