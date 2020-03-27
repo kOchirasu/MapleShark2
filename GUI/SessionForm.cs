@@ -53,11 +53,11 @@ namespace MapleShark
             Saved = false;
         }
 
-        public MainForm MainForm { get { return ParentForm as MainForm; } }
-        public ListView ListView { get { return mPacketList; } }
-        public uint Build { get { return mBuild; } }
-        public byte Locale { get { return mLocale; } }
-        public List<Opcode> Opcodes { get { return mOpcodes; } }
+        public MainForm MainForm => ParentForm as MainForm;
+        public ListView ListView => mPacketList;
+        public uint Build => mBuild;
+        public byte Locale => mLocale;
+        public List<Opcode> Opcodes => mOpcodes;
 
         public bool Saved { get; private set; }
 
@@ -105,10 +105,8 @@ namespace MapleShark
             if (!Config.Instance.Maple2) {
                 throw new ArgumentException("Only Config.Maple2 is supported.");
             }
-            if (pTcpPacket.Fin || pTcpPacket.Rst)
-            {
-                mTerminated = true;
-                Text += " (Terminated)";
+            if (pTcpPacket.Fin || pTcpPacket.Rst) {
+                Terminate();
 
                 return mPackets.Count == 0 ? Results.CloseMe : Results.Terminated;
             }
@@ -122,8 +120,8 @@ namespace MapleShark
 
                 try
                 {
-                    mRemoteEndpoint = ((PacketDotNet.IPv4Packet)pTcpPacket.ParentPacket).SourceAddress.ToString() + ":" + pTcpPacket.SourcePort.ToString();
-                    mLocalEndpoint = ((PacketDotNet.IPv4Packet)pTcpPacket.ParentPacket).DestinationAddress.ToString() + ":" + pTcpPacket.DestinationPort.ToString();
+                    mRemoteEndpoint = ((IPv4Packet)pTcpPacket.ParentPacket).SourceAddress + ":" + pTcpPacket.SourcePort;
+                    mLocalEndpoint = ((IPv4Packet)pTcpPacket.ParentPacket).DestinationAddress + ":" + pTcpPacket.DestinationPort;
                     Console.WriteLine("[CONNECTION] From {0} to {1}", mRemoteEndpoint, mLocalEndpoint);
 
                     return Results.Continue;
@@ -174,7 +172,8 @@ namespace MapleShark
                 mInboundStream = new MapleStream(false, mBuild, remoteIV, blockIV);
 
                 if (mInboundStream.DecodeSeqBase(rawSeq) != version) {
-                    Console.WriteLine("Connection on port {0} had invalid header sequence number", mLocalEndpoint);
+                    Console.WriteLine("Connection on port {0} has invalid header sequence number", mLocalEndpoint);
+                    return Results.CloseMe;
                 }
 
                 // Another packet was sent with handshake...
@@ -245,8 +244,9 @@ namespace MapleShark
             return Results.Continue;
         }
 
-        private static void BufferTcpPacket(TcpPacket pTcpPacket, ref uint pSequence, MapleStream pStream) {
+        private void BufferTcpPacket(TcpPacket pTcpPacket, ref uint pSequence, MapleStream pStream) {
             if (pTcpPacket.SequenceNumber != pSequence) {
+                Terminate();
                 throw new ArgumentException($"TCP Sequence:{pTcpPacket.SequenceNumber} does not match Expected:{pSequence}");
             }
             byte[] data = pTcpPacket.PayloadData;
@@ -274,7 +274,10 @@ namespace MapleShark
                     if (packet.Outbound && !mViewOutboundMenu.Checked) continue;
                     if (!packet.Outbound && !mViewInboundMenu.Checked) continue;
 
-                    mPacketList.Items.Add(packet);
+                    var item = mPacketList.Items.Add(packet);
+                    if (packet.Outbound) {
+                        item.BackColor = Color.AliceBlue;
+                    }
                     if (mPacketList.SelectedItems.Count == 0) packet.EnsureVisible();
                 }
 
@@ -283,9 +286,7 @@ namespace MapleShark
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
-                mTerminated = true;
-                Text += " (Terminated)";
-                //MainForm.CloseSession(this);
+                Terminate();
                 return;
             }
 
@@ -866,5 +867,9 @@ namespace MapleShark
             mPackets.Add(packet);
         }
 
+        private void Terminate() {
+            mTerminated = true;
+            Text += " (Terminated)";
+        }
     }
 }
