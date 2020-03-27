@@ -1,15 +1,16 @@
-using PacketDotNet;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Windows.Forms;
-using WeifenLuo.WinFormsUI.Docking;
-
-using MapleLib.PacketLib;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
+using MapleLib.PacketLib;
+using PacketDotNet;
+using WeifenLuo.WinFormsUI.Docking;
 
 namespace MapleShark
 {
@@ -33,6 +34,8 @@ namespace MapleShark
         private uint mBuild = 0;
         private byte mLocale = 0;
         private string mPatchLocation = "";
+        private SortedSet<TcpPacket> outboundTcpBuffer = new SortedSet<TcpPacket>(new TcpSequenceComparer());
+        private SortedSet<TcpPacket> inboundTcpBuffer = new SortedSet<TcpPacket>(new TcpSequenceComparer());
         private MapleStream mOutboundStream = null;
         private MapleStream mInboundStream = null;
         private List<MaplePacket> mPackets = new List<MaplePacket>();
@@ -100,16 +103,13 @@ namespace MapleShark
             mLocalPort = 10000;
         }
 
-        internal Results BufferTcpPacket(TcpPacket pTcpPacket, DateTime pArrivalTime)
-        {
-            if (!Config.Instance.Maple2) {
-                throw new ArgumentException("Only Config.Maple2 is supported.");
-            }
+        internal Results BufferTcpPacket(TcpPacket pTcpPacket, DateTime pArrivalTime) {
             if (pTcpPacket.Fin || pTcpPacket.Rst) {
                 Terminate();
 
                 return mPackets.Count == 0 ? Results.CloseMe : Results.Terminated;
             }
+
             if (pTcpPacket.Syn && !pTcpPacket.Ack)
             {
                 mLocalPort = (ushort)pTcpPacket.SourcePort;
@@ -133,12 +133,53 @@ namespace MapleShark
             }
             if (pTcpPacket.Syn && pTcpPacket.Ack) { mInboundSequence = (uint)(pTcpPacket.SequenceNumber + 1); return Results.Continue; }
             if (pTcpPacket.PayloadData.Length == 0) return Results.Continue;
+
+            bool isOutbound = pTcpPacket.SourcePort == mLocalPort;
+            uint expectedSequence = isOutbound ? mOutboundSequence : mInboundSequence;
+            // Optimization to avoid buffering packets when not necessary
+            if (pTcpPacket.SequenceNumber == expectedSequence) {
+                if (isOutbound) mOutboundSequence += (uint) pTcpPacket.PayloadData.Length;
+                else mInboundSequence += (uint) pTcpPacket.PayloadData.Length;
+
+                return ProcessTcpPacket(pTcpPacket, pArrivalTime);
+            }
+
+            // Buffer packet to guarantee ordering
+            var tcpBuffer = isOutbound ? outboundTcpBuffer : inboundTcpBuffer;
+            lock (tcpBuffer) {
+                tcpBuffer.Add(pTcpPacket);
+
+                TcpPacket bufferedPacket;
+                // Remove any retransmitted packets that were already processed.
+                while (tcpBuffer.Count > 0 && (bufferedPacket = tcpBuffer.Min()).SequenceNumber < expectedSequence) {
+                    tcpBuffer.Remove(bufferedPacket);
+                }
+                // Process all buffered packets.
+                while (tcpBuffer.Count > 0 && (bufferedPacket = tcpBuffer.Min()).SequenceNumber == expectedSequence) {
+                    tcpBuffer.Remove(bufferedPacket);
+                    if (isOutbound) mOutboundSequence += (uint) bufferedPacket.PayloadData.Length;
+                    else mInboundSequence += (uint) bufferedPacket.PayloadData.Length;
+                    expectedSequence += (uint) bufferedPacket.PayloadData.Length;
+
+                    Results result = ProcessTcpPacket(bufferedPacket, pArrivalTime);
+                    if (result != Results.Continue) {
+                        return result;
+                    }
+                }
+            }
+            return Results.Continue;
+        }
+
+        // TcpPacket ordering is guaranteed at this point
+        private Results ProcessTcpPacket(TcpPacket pTcpPacket, DateTime pArrivalTime)
+        {
+            if (!Config.Instance.Maple2) {
+                throw new ArgumentException("Only Config.Maple2 is supported.");
+            }
+
             if (mBuild == 0)
             {
                 byte[] tcpData = pTcpPacket.PayloadData;
-
-                if (pTcpPacket.SourcePort == mLocalPort) mOutboundSequence += (uint)tcpData.Length;
-                else mInboundSequence += (uint)tcpData.Length;
 
                 byte[] headerData = new byte[tcpData.Length];
                 Buffer.BlockCopy(tcpData, 0, headerData, 0, tcpData.Length);
@@ -235,23 +276,13 @@ namespace MapleShark
             }
 
             if (pTcpPacket.SourcePort == mLocalPort) {
-                BufferTcpPacket(pTcpPacket, ref mOutboundSequence, mOutboundStream);
+                mOutboundStream.Append(pTcpPacket.PayloadData);
                 ProcessPacketBuffer(mOutboundStream, pArrivalTime);
             } else {
-                BufferTcpPacket(pTcpPacket, ref mInboundSequence, mInboundStream);
+                mInboundStream.Append(pTcpPacket.PayloadData);
                 ProcessPacketBuffer(mInboundStream, pArrivalTime);
             }
             return Results.Continue;
-        }
-
-        private void BufferTcpPacket(TcpPacket pTcpPacket, ref uint pSequence, MapleStream pStream) {
-            if (pTcpPacket.SequenceNumber != pSequence) {
-                Terminate();
-                throw new ArgumentException($"TCP Sequence:{pTcpPacket.SequenceNumber} does not match Expected:{pSequence}");
-            }
-            byte[] data = pTcpPacket.PayloadData;
-            pStream.Append(data);
-            pSequence += (uint)data.Length;
         }
 
         private void ProcessPacketBuffer(MapleStream pStream, DateTime pArrivalDate) {
@@ -313,7 +344,7 @@ namespace MapleShark
                     // Old version
                     frmLocale loc = new frmLocale();
                     var res = loc.ShowDialog();
-                    if (res == System.Windows.Forms.DialogResult.OK)
+                    if (res == DialogResult.OK)
                     {
                         mLocale = loc.ChosenLocale;
                     }
@@ -463,11 +494,11 @@ namespace MapleShark
             bool outbound = match.Groups[5].Value == "Send";
             string[] bytesText = match.Groups[6].Value.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-            ushort opcode = (ushort)(byte.Parse(bytesText[0], System.Globalization.NumberStyles.HexNumber) | byte.Parse(bytesText[1], System.Globalization.NumberStyles.HexNumber) << 8);
+            ushort opcode = (ushort)(byte.Parse(bytesText[0], NumberStyles.HexNumber) | byte.Parse(bytesText[1], NumberStyles.HexNumber) << 8);
 
             for (var i = 2; i < packetLength; i++)
             {
-                buffer[i - 2] = byte.Parse(bytesText[i], System.Globalization.NumberStyles.HexNumber);
+                buffer[i - 2] = byte.Parse(bytesText[i], NumberStyles.HexNumber);
             }
 
             Definition definition = Config.Instance.GetDefinition(mBuild, mLocale, outbound, opcode);
@@ -536,7 +567,7 @@ namespace MapleShark
             mExportDialog.FileName = string.Format("Port {0}", mLocalPort);
             if (mExportDialog.ShowDialog(this) != DialogResult.OK) return;
 
-            bool includeNames = MessageBox.Show("Export opcode names? (slow + generates big files!!!)", "-", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes;
+            bool includeNames = MessageBox.Show("Export opcode names? (slow + generates big files!!!)", "-", MessageBoxButtons.YesNo) == DialogResult.Yes;
 
             string tmp = "";
             tmp += string.Format("=== MapleStory2 Version: {0}; Region: {1} ===\r\n", mBuild, mLocale);
@@ -770,19 +801,19 @@ namespace MapleShark
         {
             DefinitionsContainer.Instance.SaveProperties();
             string tmp = Config.GetPropertiesFile(true, (byte)mLocale, mBuild);
-            System.Diagnostics.Process.Start(tmp);
+            Process.Start(tmp);
         }
 
         private void recvpropertiesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             DefinitionsContainer.Instance.SaveProperties();
             string tmp = Config.GetPropertiesFile(false, (byte)mLocale, mBuild);
-            System.Diagnostics.Process.Start(tmp);
+            Process.Start(tmp);
         }
 
         private void removeLoggedPacketsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("Are you sure you want to delete all logged packets?", "!!", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.No) return;
+            if (MessageBox.Show("Are you sure you want to delete all logged packets?", "!!", MessageBoxButtons.YesNo) == DialogResult.No) return;
 
             ClearedPackets = true;
 
@@ -870,6 +901,22 @@ namespace MapleShark
         private void Terminate() {
             mTerminated = true;
             Text += " (Terminated)";
+        }
+    }
+
+    internal class TcpSequenceComparer : IComparer<TcpPacket>
+    {
+        public int Compare(TcpPacket x, TcpPacket y) {
+            if (x == y) {
+                return 0;
+            }
+            if (x == null) {
+                return -1;
+            }
+            if (y == null) {
+                return 1;
+            }
+            return x.SequenceNumber.CompareTo(y.SequenceNumber);
         }
     }
 }
