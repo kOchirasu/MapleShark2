@@ -21,21 +21,21 @@
         }
 
         #region Windows Form Designer generated code
-
         /// <summary>
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent()
-        {
+        private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ScriptForm));
+            System.ComponentModel.ComponentResourceManager resources =
+                new System.ComponentModel.ComponentResourceManager(typeof(ScriptForm));
             this.mSaveButton = new System.Windows.Forms.Button();
             this.mScriptEditor = new Alsing.Windows.Forms.SyntaxBoxControl();
             this.mScriptSyntax = new Alsing.SourceCode.SyntaxDocument(this.components);
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.mImportButton = new System.Windows.Forms.Button();
             this.FileImporter = new System.Windows.Forms.OpenFileDialog();
+            ((System.ComponentModel.ISupportInitialize) (this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
@@ -81,7 +81,8 @@
             this.mScriptEditor.SmoothScroll = false;
             this.mScriptEditor.SplitviewH = -4;
             this.mScriptEditor.SplitviewV = -4;
-            this.mScriptEditor.TabGuideColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(219)))), ((int)(((byte)(214)))));
+            this.mScriptEditor.TabGuideColor = System.Drawing.Color.FromArgb(((int) (((byte) (222)))),
+                ((int) (((byte) (219)))), ((int) (((byte) (214)))));
             this.mScriptEditor.TabIndex = 0;
             this.mScriptEditor.TabsToSpaces = true;
             this.mScriptEditor.WhitespaceColor = System.Drawing.SystemColors.ControlDark;
@@ -89,8 +90,7 @@
             // 
             // mScriptSyntax
             // 
-            this.mScriptSyntax.Lines = new string[] {
-        ""};
+            this.mScriptSyntax.Lines = new string[] {""};
             this.mScriptSyntax.MaxUndoBufferSize = 1000;
             this.mScriptSyntax.Modified = false;
             this.mScriptSyntax.UndoStep = 0;
@@ -135,12 +135,15 @@
             this.ClientSize = new System.Drawing.Size(598, 395);
             this.Controls.Add(this.mScriptEditor);
             this.Controls.Add(this.splitContainer1);
-            this.DockAreas = ((WeifenLuo.WinFormsUI.Docking.DockAreas)(((((WeifenLuo.WinFormsUI.Docking.DockAreas.Float | WeifenLuo.WinFormsUI.Docking.DockAreas.DockLeft) 
-            | WeifenLuo.WinFormsUI.Docking.DockAreas.DockRight) 
-            | WeifenLuo.WinFormsUI.Docking.DockAreas.DockTop) 
-            | WeifenLuo.WinFormsUI.Docking.DockAreas.DockBottom)));
-            this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.DockAreas =
+                ((WeifenLuo.WinFormsUI.Docking.DockAreas) ((
+                    (((WeifenLuo.WinFormsUI.Docking.DockAreas.Float | WeifenLuo.WinFormsUI.Docking.DockAreas.DockLeft) |
+                      WeifenLuo.WinFormsUI.Docking.DockAreas.DockRight) |
+                     WeifenLuo.WinFormsUI.Docking.DockAreas.DockTop) |
+                    WeifenLuo.WinFormsUI.Docking.DockAreas.DockBottom)));
+            this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular,
+                System.Drawing.GraphicsUnit.Point, ((byte) (0)));
+            this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "ScriptForm";
@@ -150,11 +153,10 @@
             this.Load += new System.EventHandler(this.ScriptForm_Load);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize) (this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.ResumeLayout(false);
-
         }
-
         #endregion
 
         private Alsing.Windows.Forms.SyntaxBoxControl mScriptEditor;
