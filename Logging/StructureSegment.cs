@@ -9,40 +9,10 @@ namespace MapleShark
         private static readonly DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         private byte[] mBuffer;
-        private Encoding encoding = Encoding.UTF8;
 
         public StructureSegment(byte[] pBuffer, int pStart, int pLength, byte locale)
         {
             mBuffer = new byte[pLength];
-            try
-            {
-                switch (locale)
-                {
-                    case MapleLocale.KOREA:
-                    case MapleLocale.KOREA_TEST:
-                        encoding = Encoding.GetEncoding(51949); // EUC_KR
-                        break;
-                    case MapleLocale.JAPAN:
-                        encoding = Encoding.GetEncoding(50222); // Shift_JIS
-                        break;
-                    case MapleLocale.CHINA:
-                        encoding = Encoding.GetEncoding(54936); // GB18030
-                        break;
-                    case MapleLocale.TESPIA:
-                        encoding = Encoding.Default;
-                        break;
-                    case MapleLocale.TAIWAN:
-                        encoding = Encoding.GetEncoding("BIG5-HKSCS");
-                        break;
-                    default:
-                        encoding = Encoding.UTF8;
-                        break;
-                }
-            }
-            catch
-            {
-                encoding = Encoding.UTF8;
-            }
             Buffer.BlockCopy(pBuffer, pStart, mBuffer, 0, pLength);
         }
 
@@ -102,8 +72,11 @@ namespace MapleShark
             {
                 if (mBuffer.Length == 0) return null;
                 if (mBuffer[0] == 0x00) return "";
-                for (int index = 0; index < mBuffer.Length; ++index) if (mBuffer[index] == 0x00) return encoding.GetString(mBuffer, 0, index);
-                return encoding.GetString(mBuffer, 0, mBuffer.Length);
+                for (int index = 0; index < mBuffer.Length; ++index) {
+                    if (mBuffer[index] == 0x00)
+                        return Encoding.UTF8.GetString(mBuffer, 0, index);
+                }
+                return Encoding.UTF8.GetString(mBuffer, 0, mBuffer.Length);
             }
         }
 
@@ -114,7 +87,7 @@ namespace MapleShark
                 if (mBuffer[0] == 0x00 && mBuffer[1] == 0x00) return "";
                 for (int index = 0; index < mBuffer.Length - 1; index+=2) {
                     if (mBuffer[index] == 0x00 && mBuffer[index + 1] == 0x00)
-                        return encoding.GetString(mBuffer, 0, index);
+                        return Encoding.Unicode.GetString(mBuffer, 0, index);
                 }
                 return Encoding.Unicode.GetString(mBuffer, 0, mBuffer.Length);
             }
@@ -127,19 +100,16 @@ namespace MapleShark
                 byte[] sBuffer = new byte[mBuffer.Length];
                 Buffer.BlockCopy(mBuffer, 0, sBuffer, 0, mBuffer.Length);
                 if (sBuffer.Length == 0) return null;
-                for (int index = 0; index < sBuffer.Length; ++index) if (sBuffer[index] >= 0x00 && sBuffer[index] < 0x20) sBuffer[index] = 0x2E;
-                return encoding.GetString(sBuffer, 0, sBuffer.Length);
+                for (int index = 0; index < sBuffer.Length; ++index) {
+                    if (sBuffer[index] < 0x20)
+                        sBuffer[index] = 0x2E;
+                }
+                return Encoding.UTF8.GetString(sBuffer, 0, sBuffer.Length);
             }
         }
 
         public Color Color => mBuffer.Length < 4 ? default : Color.FromArgb(mBuffer[3], mBuffer[2], mBuffer[1], mBuffer[0]);
 
-        public string Length
-        {
-            get
-            {
-                return mBuffer.Length + (mBuffer.Length != 1 ? " bytes" : " byte");
-            }
-        }
+        public string Length => mBuffer.Length + (mBuffer.Length != 1 ? " bytes" : " byte");
     }
 }
