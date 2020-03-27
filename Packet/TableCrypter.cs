@@ -1,85 +1,52 @@
 ﻿using System;
 
-namespace MapleShark.Packet
-{
-    public class TableCrypter : Crypter
-    {
+namespace MapleShark.Packet {
+    public class TableCrypter : ICrypter {
+        private const int INDEX = 3;
+
+        private const int TABLE_SIZE = 256;
+
         private readonly byte[] decrypted;
         private readonly byte[] encrypted;
 
-        public TableCrypter()
-        {
-            this.decrypted = new byte[256];
-            this.encrypted = new byte[256];
-        }
+        public TableCrypter(uint version) {
+            this.decrypted = new byte[TABLE_SIZE];
+            this.encrypted = new byte[TABLE_SIZE];
 
-        public void Init(uint version)
-        {
-            int[] shuffle = new int[256];
-            for (int i = 0; i < shuffle.Length; i++)
-            {
-                shuffle[i] = i;
+            // Init
+            for (int i = 0; i < TABLE_SIZE; i++) {
+                encrypted[i] = (byte)i;
             }
-
-            Rand32 rand32 = new Rand32((uint) Math.Pow(version, 2));
-            Shuffle(shuffle, rand32);
-
-            // Shuffle the table of bytes
-            for (int i = 0; i < shuffle.Length; i++)
-            {
-                encrypted[i] = (byte)(shuffle[i] & 0xFF);
-                decrypted[encrypted[i] & 0xFF] = (byte)(i & 0xFF);
+            Shuffle(encrypted, version);
+            for (int i = 0; i < TABLE_SIZE; i++) {
+                decrypted[encrypted[i]] = (byte)i;
             }
         }
 
-        public int Encrypt(byte[] src, int offset, uint seqKey)
-        {
-            int dest = 0;
-            if (offset != 0)
-            {
-                while (dest < offset)
-                {
-                    src[dest] = encrypted[src[dest] & 0xFF];
-
-                    dest++;
-                }
-            }
-            return dest;
+        public static uint GetIndex(uint version) {
+            return (version + INDEX) % 3 + 1;
         }
 
-        public int Decrypt(byte[] src, int offset, uint seqKey)
-        {
-            if (offset != 0)
-            {
-                for (int i = 0; i < offset; i++)
-                {
-                    src[i] = decrypted[src[i] & 0xFF];
-                }
+        public void Encrypt(byte[] src) {
+            for (int i = 0; i < src.Length; i++) {
+                src[i] = encrypted[src[i]];
             }
-            return 1;
         }
 
-        private void Shuffle(int[] data, Rand32 rand32)
-        {
-            int len = data.Length - 1;
+        public void Decrypt(byte[] src) {
+            for (int i = 0; i < src.Length; i++) {
+                src[i] = decrypted[src[i]];
+            }
+        }
 
-            while (len >= 1)
-            {
-                uint rand = (uint)(rand32.Random() % (len + 1));
+        private static void Shuffle(byte[] data, uint version) {
+            var rand32 = new Rand32((uint)Math.Pow(version, 2));
+            for (int i = TABLE_SIZE - 1; i >= 1; i--) {
+                byte rand = (byte)(rand32.Random() % (i + 1));
 
-                if (len != rand)
-                {
-                    if (rand >= data.Length || len >= data.Length)
-                    {
-                        return;
-                    }
-                    int val = data[len];
-
-                    data[len] = data[rand];
-                    data[rand] = val;
-                }
-
-                --len;
+                byte swap = data[i];
+                data[i] = data[rand];
+                data[rand] = swap;
             }
         }
     }

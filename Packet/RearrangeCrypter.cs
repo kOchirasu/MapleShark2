@@ -1,51 +1,28 @@
-﻿namespace MapleShark.Packet
-{
-    public class RearrangeCrypter : Crypter
-    {
-        public RearrangeCrypter()
-        {
+﻿namespace MapleShark.Packet {
+    // Reverses the source data
+    public class RearrangeCrypter : ICrypter {
+        private const int INDEX = 1;
 
+        public static uint GetIndex(uint version) {
+            return (version + INDEX) % 3 + 1;
         }
 
-        public void Init(uint version)
-        {
-
-        }
-
-        public int Encrypt(byte[] src, int offset, uint seqKey)
-        {
-            int len = offset >> 1;
-
-            if (len != 0)
-            {
-                for (int i = 0; i < len; i++)
-                {
-                    byte data = src[i];
-
-                    src[i] = src[i + len];
-                    src[i + len] = data;
-                }
+        public void Encrypt(byte[] src) {
+            int len = src.Length >> 1;
+            for (int i = 0; i < len; i++) {
+                byte swap = src[i];
+                src[i] = src[i + len];
+                src[i + len] = swap;
             }
-
-            return 0;
         }
 
-        public int Decrypt(byte[] src, int offset, uint seqKey)
-        {
-            int len = offset >> 1;
-
-            if (len != 0)
-            {
-                for (int i = 0; i < len; i++)
-                {
-                    byte data = src[i];
-
-                    src[i] = src[i + len];
-                    src[i + len] = data;
-                }
+        public void Decrypt(byte[] src) {
+            int len = src.Length >> 1;
+            for (int i = 0; i < len; i++) {
+                byte swap = src[i];
+                src[i] = src[i + len];
+                src[i + len] = swap;
             }
-
-            return 1;
         }
     }
 }

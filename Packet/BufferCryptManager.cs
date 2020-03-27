@@ -1,88 +1,46 @@
-﻿namespace MapleShark.Packet
-{
-    public class BufferCryptManager
-    {
-        public static readonly int
-            ENCRYPT_NONE        = 0,
-            ENCRYPT_REARRANGE   = 1,
-            ENCRYPT_XOR         = 2,
-            ENCRYPT_TABLE       = 3
-        ;
+﻿using System.Collections.Generic;
 
-        private readonly Crypter[] aEncrypt;
+namespace MapleShark.Packet {
+    public class BufferCryptManager {
+        private readonly ICrypter[] encryptSeq;
+        private readonly ICrypter[] decryptSeq;
 
-        public BufferCryptManager(uint version)
-        {
-            this.aEncrypt = new Crypter[4];
+        public BufferCryptManager(uint version, uint blockIV) {
+            // Initialize Crypter Sequence
+            List<ICrypter> cryptSeq = InitCryptSeq(version, blockIV);
+            encryptSeq = cryptSeq.ToArray();
+            cryptSeq.Reverse();
+            decryptSeq = cryptSeq.ToArray();
+        }
 
-            this.aEncrypt[ENCRYPT_NONE] = null;
-            this.aEncrypt[(version + ENCRYPT_REARRANGE) % 3 + 1] = new RearrangeCrypter();
-            this.aEncrypt[(version + ENCRYPT_XOR) % 3 + 1]       = new XORCrypter();
-            this.aEncrypt[(version + ENCRYPT_TABLE) % 3 + 1]     = new TableCrypter();
+        private static List<ICrypter> InitCryptSeq(uint version, uint blockIV) {
+            ICrypter[] crypt = new ICrypter[4];
+            crypt[RearrangeCrypter.GetIndex(version)] = new RearrangeCrypter();
+            crypt[XORCrypter.GetIndex(version)] = new XORCrypter(version);
+            crypt[TableCrypter.GetIndex(version)] = new TableCrypter(version);
 
-            for (int i = 3; i > 0; i--)
-            {
-                this.aEncrypt[i].Init(version);
+            List<ICrypter> cryptSeq = new List<ICrypter>();
+            while (blockIV > 0) {
+                var crypter = crypt[blockIV % 10];
+                if (crypter != null) {
+                    cryptSeq.Add(crypter);
+                }
+                blockIV /= 10;
+            }
+
+            return cryptSeq;
+        }
+
+        public void Decrypt(byte[] packet) {
+            foreach (ICrypter crypter in decryptSeq) {
+                crypter.Decrypt(packet);
             }
         }
 
-        public bool Decrypt(byte[] src, int offset, uint seqBlock, uint seqRcv)
-        {
-            if (seqBlock != 0)
-            {
-                uint block = 0;
-
-                while (seqBlock > 0)
-                {
-                    block = seqBlock + 10 * (block - seqBlock / 10);
-
-                    seqBlock /= 10;
-                }
-
-                if (block != 0)
-                {
-                    uint dest;
-                    while (block > 0)
-                    {
-                        dest = block / 10;
-
-                        Crypter crypt = aEncrypt[block % 10];
-                        if (crypt != null)
-                        {
-                            if (crypt.Decrypt(src, offset, seqRcv) == 0)
-                                return false;
-                        }
-
-                        block = dest;
-                    }
-                    return true;
-                }
+        public void Encrypt(byte[] packet) {
+            foreach (ICrypter crypter in encryptSeq) {
+                crypter.Encrypt(packet);
             }
-            return true;
-        }
-
-        public uint Encrypt(byte[] src, int offset, uint seqBlock, uint seqSnd)
-        {
-            uint dest = 0;
-            if (seqBlock != 0)
-            {
-                uint block = seqBlock / 10;
-
-                while (block != 0)
-                {
-                    block = seqBlock / 10;
-                    dest = 10 * block;
-
-                    Crypter crypt = aEncrypt[seqBlock % 10];
-                    if (crypt != null)
-                    {
-                        crypt.Encrypt(src, offset, seqSnd);
-                    }
-
-                    seqBlock = block;
-                }
-            }
-            return dest;
         }
     }
 }

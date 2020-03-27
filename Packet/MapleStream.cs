@@ -4,273 +4,86 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace MapleShark
-{
-    [Flags]
-    public enum TransformMethod : int
-    {
-        AES = 1 << 1,
-        MAPLE_CRYPTO = 1 << 2,
-        OLD_KMS_CRYPTO = 1 << 3,
-        KMS_CRYPTO = 1 << 4,
-
-        SHIFT_IV = 1 << 5,
-        SHIFT_IV_OLD = 1 << 6,
-        NONE = 0
-    }
-
-    public sealed class MapleStream
-    {
+namespace MapleShark {
+    public sealed class MapleStream {
         private const int DEFAULT_SIZE = 4096;
+        private const int HEADER_SIZE = 6;
+        private const int OPCODE_SIZE = 2;
 
-        private bool mOutbound = false;
-        private MapleAES mAES = null;
-        private byte[] mBuffer = new byte[DEFAULT_SIZE];
-        private int mCursor = 0;
-        private int _expectedDataSize = 4;
-        private ushort mRawSeq;
-        private BufferCryptManager mCrypt;
+        private readonly bool isOutbound;
+        private readonly uint version;
+        private readonly BufferCryptManager crypter;
 
-        private TransformMethod _transformMethod;
-        private bool _usesByteHeader = false;
-        private bool _usesOldHeader = false;
+        private byte[] buffer = new byte[DEFAULT_SIZE];
+        private uint iv;
+        private int cursor;
 
-        public uint Build { get; private set; }
-        public byte Locale { get; private set; }
-        public uint IV { get; private set; }
-        public uint BlockIV { get; private set; }
-
-        public MapleStream(bool pOutbound, ushort pRawSeq, uint pBuild, uint pIV, uint pBlockIV)
-        {
-            mOutbound = pOutbound;
-            Build = pBuild;
-            IV = pIV;
-            BlockIV = pBlockIV;
-            mRawSeq = pRawSeq;
-
-            mCrypt = new BufferCryptManager(pBuild);
+        public MapleStream(bool isOutbound, uint version, uint iv, uint blockIV) {
+            this.isOutbound = isOutbound;
+            this.version = version;
+            this.iv = iv;
+            this.crypter = new BufferCryptManager(version, blockIV);
         }
 
-        public MapleStream(bool pOutbound, ushort pBuild, byte pLocale, byte[] pIV, byte pSubVersion)
-        {
-            mOutbound = pOutbound;
-            Build = pBuild;
-            Locale = pLocale;
-
-            if (mOutbound)
-                mAES = new MapleAES(pBuild, Locale, pIV, pSubVersion);
-            else
-                mAES = new MapleAES((ushort)(0xFFFF - Build), Locale, pIV, pSubVersion);
-
-            if ((Locale == MapleLocale.TESPIA && Build == 40) ||
-                (Locale == MapleLocale.SOUTH_EAST_ASIA && Build == 15))
-            {
-                // WvsBeta
-                _transformMethod = TransformMethod.MAPLE_CRYPTO | TransformMethod.SHIFT_IV;
-                _usesByteHeader = true;
-            }
-            else if (Locale == MapleLocale.KOREA_TEST && Build == 255)
-            {
-                // KMSB (Modified client)
-                _transformMethod = TransformMethod.OLD_KMS_CRYPTO | TransformMethod.SHIFT_IV_OLD;
-                _usesByteHeader = true;
-                _usesOldHeader = true;
-            }
-            else if (
-                Locale == MapleLocale.TAIWAN ||
-                Locale == MapleLocale.CHINA ||
-                Locale == MapleLocale.TESPIA ||
-                Locale == MapleLocale.JAPAN ||
-                (Locale == MapleLocale.GLOBAL && (short)Build >= 149) ||
-                (Locale == MapleLocale.KOREA && Build >= 221) ||
-                (Locale == MapleLocale.SOUTH_EAST_ASIA && Build >= 144) ||
-                (Locale == MapleLocale.EUROPE && Build >= 115))
-            {
-                // TWMS / CMS / CMST / JMS / GMS (>= 149)
-                _transformMethod = TransformMethod.AES | TransformMethod.SHIFT_IV;
-            }
-            else if (Locale == MapleLocale.KOREA || Locale == MapleLocale.KOREA_TEST)
-            {
-                // KMS / KMST
-                _transformMethod = TransformMethod.KMS_CRYPTO;
-            }
-            else
-            {
-                // All others lol
-                _transformMethod = TransformMethod.AES | TransformMethod.MAPLE_CRYPTO | TransformMethod.SHIFT_IV;
-            }
-
-            Console.WriteLine("Using transform methods: {0}", _transformMethod);
+        public void Append(byte[] packet) {
+            Append(packet, 0, packet.Length);
         }
 
-        public void Append(byte[] pBuffer) { Append(pBuffer, 0, pBuffer.Length); }
-        public void Append(byte[] pBuffer, int pStart, int pLength)
-        {
-            if (mBuffer.Length - mCursor < pLength)
-            {
-                int newSize = mBuffer.Length * 2;
-                while (newSize < mCursor + pLength) newSize *= 2;
-                Array.Resize<byte>(ref mBuffer, newSize);
-            }
-            Buffer.BlockCopy(pBuffer, pStart, mBuffer, mCursor, pLength);
-            mCursor += pLength;
-        }
-
-        public MaplePacket Read(DateTime pTransmitted)
-        {
-            return Read(pTransmitted, Config.Instance.Maple2);
-        }
-
-        public MaplePacket Read(DateTime pTransmitted, bool bMaple2)
-        {
-            if (mCursor < _expectedDataSize) return null;
-            if (bMaple2)
-            {
-                mRawSeq = BitConverter.ToUInt16(mBuffer, 0);
-                if (mOutbound && DecodeSeqBase(IV) != Build || !mOutbound && DecodeSeqBase(Rand32.CrtRand(IV)) != Build)
-                {
-                    throw new Exception("Failed to confirm packet header");
+        public void Append(byte[] packet, int offset, int length) {
+            if (buffer.Length - cursor < length) {
+                int newSize = buffer.Length * 2;
+                while (newSize < cursor + length) {
+                    newSize *= 2;
                 }
+                byte[] newBuffer = new byte[newSize];
+                Buffer.BlockCopy(buffer, 0, newBuffer, 0, cursor);
+                buffer = newBuffer;
             }
-            else
-            {
-                if (!mAES.ConfirmHeader(mBuffer, 0))
-                {
-                    throw new Exception("Failed to confirm packet header");
-                }
-            }
+            Buffer.BlockCopy(packet, offset, buffer, cursor, length);
+            cursor += length;
+        }
 
-            int headerLength = bMaple2 ? 6 : MapleAES.GetHeaderLength(mBuffer, mCursor, _usesOldHeader);
-            _expectedDataSize = headerLength;
-            if (mCursor < headerLength)
-            {
+        public MaplePacket Read(DateTime pTransmitted) {
+            if (cursor < HEADER_SIZE) {
                 return null;
             }
 
-            int packetSize = MapleAES.GetPacketLength(mBuffer, mCursor, _usesOldHeader, bMaple2);
-            _expectedDataSize = packetSize + headerLength;
-            if (mCursor < (packetSize + headerLength))
-            {
+            int packetSize = BitConverter.ToInt32(buffer, 2);
+            int bufferSize = HEADER_SIZE + packetSize;
+            if (cursor < bufferSize) {
                 return null;
+            }
+
+            uint preDecodeIV = iv;
+            ushort encSeq = BitConverter.ToUInt16(buffer, 0);
+            if (DecodeSeqBase(encSeq) != version) {
+                throw new ArgumentException("Packet has invalid sequence header.");
             }
 
             byte[] packetBuffer = new byte[packetSize];
-            Buffer.BlockCopy(mBuffer, headerLength, packetBuffer, 0, packetSize);
+            Buffer.BlockCopy(buffer, HEADER_SIZE, packetBuffer, 0, packetSize);
 
-            uint preDecodeIV;
+            // Remove packet from buffer
+            cursor -= bufferSize;
+            Buffer.BlockCopy(buffer, bufferSize, buffer, 0, cursor);
+            crypter.Decrypt(packetBuffer);
 
-            if (bMaple2)
-            {
-                preDecodeIV = IV;
+            ushort opcode = BitConverter.ToUInt16(packetBuffer, 0);
+            Buffer.BlockCopy(packetBuffer, OPCODE_SIZE, packetBuffer, 0, packetSize - OPCODE_SIZE);
+            Array.Resize(ref packetBuffer, packetSize - OPCODE_SIZE);
 
-                mCrypt.Decrypt(packetBuffer, packetSize, BlockIV, IV);
-                ShiftIV();
-            }
-            else
-            {
-                preDecodeIV = BitConverter.ToUInt32(mAES.mIV, 0);
-                Decrypt(packetBuffer, _transformMethod);
-            }
-
-            var postDecodeIV = bMaple2 ? IV : BitConverter.ToUInt32(mAES.mIV, 0);
-
-            mCursor -= _expectedDataSize;
-            if (mCursor > 0) Buffer.BlockCopy(mBuffer, _expectedDataSize, mBuffer, 0, mCursor);
-            ushort opcode;
-
-            if (_usesByteHeader)
-            {
-                opcode = (ushort)(packetBuffer[0]);
-                Buffer.BlockCopy(packetBuffer, 1, packetBuffer, 0, packetSize - 1);
-                Array.Resize(ref packetBuffer, packetSize - 1);
-            }
-            else
-            {
-                opcode = (ushort)(packetBuffer[0] | (packetBuffer[1] << 8));
-                Buffer.BlockCopy(packetBuffer, 2, packetBuffer, 0, packetSize - 2);
-                Array.Resize(ref packetBuffer, packetSize - 2);
-            }
-
-            _expectedDataSize = bMaple2 ? 6 : 4;
-
-            Definition definition = Config.Instance.GetDefinition(Build, Locale, mOutbound, opcode);
-            return new MaplePacket(pTransmitted, mOutbound, Build, Locale, opcode, definition == null ? "" : definition.Name, packetBuffer, preDecodeIV, postDecodeIV);
+            Definition definition = Config.Instance.GetDefinition(version, 0, isOutbound, opcode);
+            return new MaplePacket(pTransmitted, isOutbound, version, 0, opcode, definition?.Name ?? "", packetBuffer, preDecodeIV, iv);;
         }
 
-        private void Decrypt(byte[] pBuffer, TransformMethod pTransformLocale)
-        {
-            if ((pTransformLocale & TransformMethod.AES) != 0) mAES.TransformAES(pBuffer);
-
-            if ((pTransformLocale & TransformMethod.MAPLE_CRYPTO) != 0)
-            {
-                for (int index1 = 1; index1 <= 6; ++index1)
-                {
-                    byte firstFeedback = 0;
-                    byte secondFeedback = 0;
-                    byte length = (byte)(pBuffer.Length & 0xFF);
-                    if ((index1 % 2) == 0)
-                    {
-                        for (int index2 = 0; index2 < pBuffer.Length; ++index2)
-                        {
-                            byte temp = pBuffer[index2];
-                            temp -= 0x48;
-                            temp = (byte)(~temp);
-                            temp = RollLeft(temp, length & 0xFF);
-                            secondFeedback = temp;
-                            temp ^= firstFeedback;
-                            firstFeedback = secondFeedback;
-                            temp -= length;
-                            temp = RollRight(temp, 3);
-                            pBuffer[index2] = temp;
-                            --length;
-                        }
-                    }
-                    else
-                    {
-                        for (int index2 = pBuffer.Length - 1; index2 >= 0; --index2)
-                        {
-                            byte temp = pBuffer[index2];
-                            temp = RollLeft(temp, 3);
-                            temp ^= 0x13;
-                            secondFeedback = temp;
-                            temp ^= firstFeedback;
-                            firstFeedback = secondFeedback;
-                            temp -= length;
-                            temp = RollRight(temp, 4);
-                            pBuffer[index2] = temp;
-                            --length;
-                        }
-                    }
-                }
-            }
-
-            if ((pTransformLocale & TransformMethod.KMS_CRYPTO) != 0) mAES.TransformKMS(pBuffer);
-            if ((pTransformLocale & TransformMethod.OLD_KMS_CRYPTO) != 0) mAES.TransformOldKMS(pBuffer);
-
-            if ((pTransformLocale & TransformMethod.SHIFT_IV) != 0) mAES.ShiftIV();
-            if ((pTransformLocale & TransformMethod.SHIFT_IV_OLD) != 0) mAES.ShiftIVOld();
+        private void AdvanceIV() {
+            iv = Rand32.CrtRand(iv);
         }
 
-        public static byte RollLeft(byte pThis, int pCount)
-        {
-            uint overflow = ((uint)pThis) << (pCount % 8);
-            return (byte)((overflow & 0xFF) | (overflow >> 8));
-        }
-
-        public static byte RollRight(byte pThis, int pCount)
-        {
-            uint overflow = (((uint)pThis) << 8) >> (pCount % 8);
-            return (byte)((overflow & 0xFF) | (overflow >> 8));
-        }
-
-        public void ShiftIV()
-        {
-            IV = 214013 * IV + 2531011;
-        }
-
-        public uint DecodeSeqBase(uint seqKey)
-        {
-            return ((seqKey >> 16) ^ mRawSeq);
+        public ushort DecodeSeqBase(ushort encSeq) {
+            ushort decSeq =  (ushort)((iv >> 16) ^ encSeq);
+            AdvanceIV();
+            return decSeq;
         }
     }
 }

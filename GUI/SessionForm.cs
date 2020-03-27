@@ -170,8 +170,12 @@ namespace MapleShark
                 mLocale = 0;//TODO: Handle regions somehow since handshake doesn't contain it
                 mPatchLocation = "MST";
 
-                mOutboundStream = new MapleStream(true, rawSeq, mBuild, localIV, blockIV);
-                mInboundStream = new MapleStream(false, rawSeq, mBuild, remoteIV, blockIV);
+                mOutboundStream = new MapleStream(true, mBuild, localIV, blockIV);
+                mInboundStream = new MapleStream(false, mBuild, remoteIV, blockIV);
+
+                if (mInboundStream.DecodeSeqBase(rawSeq) != version) {
+                    Console.WriteLine("Connection on port {0} had invalid header sequence number", mLocalEndpoint);
+                }
 
                 // Another packet was sent with handshake...
                 if (pr.Remaining > 0) {

@@ -123,7 +123,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Packet\BufferCryptManager.cs" />
-    <Compile Include="Packet\Crypter.cs" />
+    <Compile Include="Packet\ICrypter.cs" />
     <Compile Include="Packet\Rand32.cs" />
     <Compile Include="Packet\RearrangeCrypter.cs" />
     <Compile Include="Packet\TableCrypter.cs" />
@@ -255,7 +255,6 @@
       <DependentUpon>frmSplash.cs</DependentUpon>
     </Compile>
     <Compile Include="Logging\Opcode.cs" />
-    <Compile Include="Packet\MapleKeys.cs" />
     <Compile Include="HexBox\ByteCollection.cs" />
     <Compile Include="HexBox\DataBlock.cs" />
     <Compile Include="HexBox\DataMap.cs" />
@@ -276,7 +275,6 @@
     <Compile Include="GUI\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Packet\MapleAES.cs" />
     <Compile Include="Packet\MapleLocales.cs" />
     <Compile Include="Logging\MaplePacket.cs" />
     <Compile Include="Packet\MapleStream.cs" />
