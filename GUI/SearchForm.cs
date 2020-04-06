@@ -54,14 +54,14 @@ namespace MapleShark
                 return;
             Opcode search = (DockPanel.ActiveDocument as SessionForm).Opcodes[mOpcodeCombo.SelectedIndex];
             int initialIndex = session.ListView.SelectedIndices.Count == 0 ? 0 : session.ListView.SelectedIndices[0] + 1;
-            for (int index = initialIndex; index < session.ListView.Items.Count; ++index)
+            for (int index = initialIndex; index < session.ListView.VirtualListSize; ++index)
             {
-                MaplePacket packet = session.ListView.Items[index] as MaplePacket;
-                if (packet.Outbound == search.Outbound && packet.Opcode == search.Header)
+                MaplePacket packetItem = session.FilteredPackets[index];
+                if (packetItem.Outbound == search.Outbound && packetItem.Opcode == search.Header)
                 {
                     session.ListView.SelectedIndices.Clear();
                     session.ListView.SelectedIndices.Add(index);
-                    packet.EnsureVisible();
+                    session.ListView.Items[index].EnsureVisible();
                     session.ListView.Focus();
                     return;
                 }
@@ -91,20 +91,19 @@ namespace MapleShark
 
         private void NextSequence()
         {
-            SessionForm session = DockPanel.ActiveDocument as SessionForm;
-            if (session == null) return;
+            if (!(DockPanel.ActiveDocument is SessionForm session)) return;
             int initialIndex = session.ListView.SelectedIndices.Count == 0 ? 0 : session.ListView.SelectedIndices[0];
-            byte[] pattern = (mSequenceHex.ByteProvider as DynamicByteProvider).Bytes.ToArray();
+            byte[] pattern = (mSequenceHex.ByteProvider as DynamicByteProvider)?.Bytes.ToArray();
             long startIndex = MainForm.DataForm.HexBox.SelectionLength > 0 ? MainForm.DataForm.HexBox.SelectionStart : -1;
-            for (int index = initialIndex; index < session.ListView.Items.Count; ++index)
+            for (int index = initialIndex; index < session.ListView.VirtualListSize; ++index)
             {
-                MaplePacket packet = session.ListView.Items[index] as MaplePacket;
+                MaplePacket packetItem = session.FilteredPackets[index];
                 long searchIndex = startIndex + 1;
                 bool found = false;
-                while (searchIndex <= packet.Buffer.Length - pattern.Length)
+                while (pattern != null && searchIndex <= packetItem.Buffer.Length - pattern.Length)
                 {
                     found = true;
-                    for (int patternIndex = 0; found && patternIndex < pattern.Length; ++patternIndex) found = packet.Buffer[searchIndex + patternIndex] == pattern[patternIndex];
+                    for (int patternIndex = 0; found && patternIndex < pattern.Length; ++patternIndex) found = packetItem.Buffer[searchIndex + patternIndex] == pattern[patternIndex];
                     if (found) break;
                     ++searchIndex;
                 }
@@ -112,7 +111,7 @@ namespace MapleShark
                 {
                     session.ListView.SelectedIndices.Clear();
                     session.ListView.SelectedIndices.Add(index);
-                    packet.EnsureVisible();
+                    //packetItem.EnsureVisible();
                     MainForm.DataForm.HexBox.SelectionStart = searchIndex;
                     MainForm.DataForm.HexBox.SelectionLength = pattern.Length;
                     MainForm.DataForm.HexBox.ScrollByteIntoView();
@@ -134,12 +133,12 @@ namespace MapleShark
             int initialIndex = session.ListView.SelectedIndices.Count == 0 ? 0 : session.ListView.SelectedIndices[0];
             for (int index = initialIndex - 1; index > 0; --index)
             {
-                MaplePacket packet = session.ListView.Items[index] as MaplePacket;
-                if (packet.Outbound == search.Outbound && packet.Opcode == search.Header)
+                MaplePacket packetItem = session.FilteredPackets[index];
+                if (packetItem.Outbound == search.Outbound && packetItem.Opcode == search.Header)
                 {
                     session.ListView.SelectedIndices.Clear();
                     session.ListView.SelectedIndices.Add(index);
-                    packet.EnsureVisible();
+                    //packetItem.EnsureVisible();
                     session.ListView.Focus();
                     return;
                 }

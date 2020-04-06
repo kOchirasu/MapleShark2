@@ -72,8 +72,7 @@ namespace MapleShark {
             Buffer.BlockCopy(packetBuffer, OPCODE_SIZE, packetBuffer, 0, packetSize - OPCODE_SIZE);
             Array.Resize(ref packetBuffer, packetSize - OPCODE_SIZE);
 
-            Definition definition = Config.Instance.GetDefinition(version, 0, isOutbound, opcode);
-            return new MaplePacket(pTransmitted, isOutbound, version, 0, opcode, definition?.Name ?? "", packetBuffer, preDecodeIV, iv);;
+            return new MaplePacket(pTransmitted, isOutbound, version, opcode, packetBuffer, preDecodeIV, iv);;
         }
 
         private void AdvanceIV() {

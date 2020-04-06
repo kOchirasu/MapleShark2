@@ -74,9 +74,9 @@
             this.mPacketContextMenu.SuspendLayout();
             this.mMenu.SuspendLayout();
             this.SuspendLayout();
-            // 
+            //
             // mPacketList
-            // 
+            //
             this.mPacketList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.mTimestampColumn,
             this.mDirectionColumn,
@@ -98,33 +98,37 @@
             this.mPacketList.View = System.Windows.Forms.View.Details;
             this.mPacketList.ItemActivate += new System.EventHandler(this.mPacketList_ItemActivate);
             this.mPacketList.SelectedIndexChanged += new System.EventHandler(this.mPacketList_SelectedIndexChanged);
-            // 
+            this.mPacketList.VirtualMode = true;
+            this.mPacketList.VirtualListSize = 20;
+            this.mPacketList.RetrieveVirtualItem += this.mPacketList_RetrieveVirtualItem;
+            this.mPacketList.SearchForVirtualItem += this.mPacketList_SearchForVirtualItem;
+            //
             // mTimestampColumn
-            // 
+            //
             this.mTimestampColumn.Text = "Timestamp";
             this.mTimestampColumn.Width = 175;
-            // 
+            //
             // mDirectionColumn
-            // 
+            //
             this.mDirectionColumn.Text = "Direction";
             this.mDirectionColumn.Width = 75;
-            // 
+            //
             // mLengthColumn
-            // 
+            //
             this.mLengthColumn.Text = "Length";
             this.mLengthColumn.Width = 64;
-            // 
+            //
             // mOpcodeColumn
-            // 
+            //
             this.mOpcodeColumn.Text = "Opcode";
-            // 
+            //
             // mNameColumn
-            // 
+            //
             this.mNameColumn.Text = "Name";
             this.mNameColumn.Width = 147;
-            // 
+            //
             // mPacketContextMenu
-            // 
+            //
             this.mPacketContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mPacketContextNameLabel,
             this.mPacketContextNameBox,
@@ -135,36 +139,36 @@
             this.mPacketContextMenu.Size = new System.Drawing.Size(226, 101);
             this.mPacketContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.mPacketContextMenu_Opening);
             this.mPacketContextMenu.Opened += new System.EventHandler(this.mPacketContextMenu_Opened);
-            // 
+            //
             // mPacketContextNameLabel
-            // 
+            //
             this.mPacketContextNameLabel.Enabled = false;
             this.mPacketContextNameLabel.Name = "mPacketContextNameLabel";
             this.mPacketContextNameLabel.Size = new System.Drawing.Size(225, 22);
             this.mPacketContextNameLabel.Text = "Name:";
-            // 
+            //
             // mPacketContextNameBox
-            // 
+            //
             this.mPacketContextNameBox.AcceptsReturn = true;
             this.mPacketContextNameBox.Name = "mPacketContextNameBox";
             this.mPacketContextNameBox.Size = new System.Drawing.Size(150, 23);
             this.mPacketContextNameBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.mPacketContextNameBox_KeyDown);
-            // 
+            //
             // mPacketContextSeparator
-            // 
+            //
             this.mPacketContextSeparator.Name = "mPacketContextSeparator";
             this.mPacketContextSeparator.Size = new System.Drawing.Size(222, 6);
-            // 
+            //
             // mPacketContextIgnoreMenu
-            // 
+            //
             this.mPacketContextIgnoreMenu.CheckOnClick = true;
             this.mPacketContextIgnoreMenu.Name = "mPacketContextIgnoreMenu";
             this.mPacketContextIgnoreMenu.Size = new System.Drawing.Size(225, 22);
             this.mPacketContextIgnoreMenu.Text = "Ignore";
             this.mPacketContextIgnoreMenu.CheckedChanged += new System.EventHandler(this.mPacketContextIgnoreMenu_CheckedChanged);
-            // 
+            //
             // removePacketFromSessionToolStripMenuItem
-            // 
+            //
             this.removePacketFromSessionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.thisPacketOnlyToolStripMenuItem,
             this.toolStripSeparator2,
@@ -173,21 +177,21 @@
             this.removePacketFromSessionToolStripMenuItem.Name = "removePacketFromSessionToolStripMenuItem";
             this.removePacketFromSessionToolStripMenuItem.Size = new System.Drawing.Size(225, 22);
             this.removePacketFromSessionToolStripMenuItem.Text = "Remove packet from session";
-            // 
+            //
             // thisPacketOnlyToolStripMenuItem
-            // 
+            //
             this.thisPacketOnlyToolStripMenuItem.Name = "thisPacketOnlyToolStripMenuItem";
             this.thisPacketOnlyToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
             this.thisPacketOnlyToolStripMenuItem.Text = "This packet only";
             this.thisPacketOnlyToolStripMenuItem.Click += new System.EventHandler(this.thisPacketOnlyToolStripMenuItem_Click);
-            // 
+            //
             // toolStripSeparator2
-            // 
+            //
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(219, 6);
-            // 
+            //
             // allBeforeThisOneToolStripMenuItem
-            // 
+            //
             this.allBeforeThisOneToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.onlyVisibleToolStripMenuItem,
             this.allToolStripMenuItem});
@@ -195,46 +199,46 @@
             this.allBeforeThisOneToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
             this.allBeforeThisOneToolStripMenuItem.Text = "Every packet before this one";
             this.allBeforeThisOneToolStripMenuItem.Click += new System.EventHandler(this.allBeforeThisOneToolStripMenuItem_Click);
-            // 
+            //
             // onlyVisibleToolStripMenuItem
-            // 
+            //
             this.onlyVisibleToolStripMenuItem.Name = "onlyVisibleToolStripMenuItem";
             this.onlyVisibleToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
             this.onlyVisibleToolStripMenuItem.Text = "Only visible";
             this.onlyVisibleToolStripMenuItem.Click += new System.EventHandler(this.onlyVisibleToolStripMenuItem_Click);
-            // 
+            //
             // allToolStripMenuItem
-            // 
+            //
             this.allToolStripMenuItem.Name = "allToolStripMenuItem";
             this.allToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
             this.allToolStripMenuItem.Text = "All";
             this.allToolStripMenuItem.Click += new System.EventHandler(this.allToolStripMenuItem_Click);
-            // 
+            //
             // allAfterThisOneToolStripMenuItem
-            // 
+            //
             this.allAfterThisOneToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.onlyVisibleToolStripMenuItem1,
             this.allToolStripMenuItem1});
             this.allAfterThisOneToolStripMenuItem.Name = "allAfterThisOneToolStripMenuItem";
             this.allAfterThisOneToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
             this.allAfterThisOneToolStripMenuItem.Text = "Every packet after this one";
-            // 
+            //
             // onlyVisibleToolStripMenuItem1
-            // 
+            //
             this.onlyVisibleToolStripMenuItem1.Name = "onlyVisibleToolStripMenuItem1";
             this.onlyVisibleToolStripMenuItem1.Size = new System.Drawing.Size(135, 22);
             this.onlyVisibleToolStripMenuItem1.Text = "Only visible";
             this.onlyVisibleToolStripMenuItem1.Click += new System.EventHandler(this.onlyVisibleToolStripMenuItem1_Click);
-            // 
+            //
             // allToolStripMenuItem1
-            // 
+            //
             this.allToolStripMenuItem1.Name = "allToolStripMenuItem1";
             this.allToolStripMenuItem1.Size = new System.Drawing.Size(135, 22);
             this.allToolStripMenuItem1.Text = "All";
             this.allToolStripMenuItem1.Click += new System.EventHandler(this.allToolStripMenuItem1_Click);
-            // 
+            //
             // mMenu
-            // 
+            //
             this.mMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mMainFileMenu,
             this.mViewMenu,
@@ -245,9 +249,9 @@
             this.mMenu.TabIndex = 6;
             this.mMenu.Visible = false;
             this.mMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.mMenu_ItemClicked);
-            // 
+            //
             // mMainFileMenu
-            // 
+            //
             this.mMainFileMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mFileSeparatorMenu,
             this.mFileSaveMenu,
@@ -256,17 +260,17 @@
             this.mMainFileMenu.Name = "mMainFileMenu";
             this.mMainFileMenu.Size = new System.Drawing.Size(37, 20);
             this.mMainFileMenu.Text = "&File";
-            // 
+            //
             // mFileSeparatorMenu
-            // 
+            //
             this.mFileSeparatorMenu.MergeAction = System.Windows.Forms.MergeAction.Insert;
             this.mFileSeparatorMenu.MergeIndex = 2;
             this.mFileSeparatorMenu.Name = "mFileSeparatorMenu";
             this.mFileSeparatorMenu.Size = new System.Drawing.Size(144, 6);
             this.mFileSeparatorMenu.Click += new System.EventHandler(this.mFileSeparatorMenu_Click);
-            // 
+            //
             // mFileSaveMenu
-            // 
+            //
             this.mFileSaveMenu.MergeAction = System.Windows.Forms.MergeAction.Insert;
             this.mFileSaveMenu.MergeIndex = 3;
             this.mFileSaveMenu.Name = "mFileSaveMenu";
@@ -274,9 +278,9 @@
             this.mFileSaveMenu.Size = new System.Drawing.Size(147, 22);
             this.mFileSaveMenu.Text = "&Save";
             this.mFileSaveMenu.Click += new System.EventHandler(this.mFileSaveMenu_Click);
-            // 
+            //
             // mFileExportMenu
-            // 
+            //
             this.mFileExportMenu.MergeAction = System.Windows.Forms.MergeAction.Insert;
             this.mFileExportMenu.MergeIndex = 4;
             this.mFileExportMenu.Name = "mFileExportMenu";
@@ -284,9 +288,9 @@
             this.mFileExportMenu.Size = new System.Drawing.Size(147, 22);
             this.mFileExportMenu.Text = "&Export";
             this.mFileExportMenu.Click += new System.EventHandler(this.mFileExportMenu_Click);
-            // 
+            //
             // mViewMenu
-            // 
+            //
             this.mViewMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mViewCommonScriptMenu,
             this.mViewSeparator1Menu,
@@ -304,9 +308,9 @@
             this.mViewMenu.Name = "mViewMenu";
             this.mViewMenu.Size = new System.Drawing.Size(44, 20);
             this.mViewMenu.Text = "&View";
-            // 
+            //
             // mViewCommonScriptMenu
-            // 
+            //
             this.mViewCommonScriptMenu.MergeAction = System.Windows.Forms.MergeAction.Insert;
             this.mViewCommonScriptMenu.MergeIndex = 0;
             this.mViewCommonScriptMenu.Name = "mViewCommonScriptMenu";
@@ -314,16 +318,16 @@
             this.mViewCommonScriptMenu.Size = new System.Drawing.Size(223, 22);
             this.mViewCommonScriptMenu.Text = "Common Script";
             this.mViewCommonScriptMenu.Click += new System.EventHandler(this.mViewCommonScriptMenu_Click);
-            // 
+            //
             // mViewSeparator1Menu
-            // 
+            //
             this.mViewSeparator1Menu.MergeAction = System.Windows.Forms.MergeAction.Insert;
             this.mViewSeparator1Menu.MergeIndex = 1;
             this.mViewSeparator1Menu.Name = "mViewSeparator1Menu";
             this.mViewSeparator1Menu.Size = new System.Drawing.Size(220, 6);
-            // 
+            //
             // mViewRefreshMenu
-            // 
+            //
             this.mViewRefreshMenu.MergeAction = System.Windows.Forms.MergeAction.Insert;
             this.mViewRefreshMenu.MergeIndex = 2;
             this.mViewRefreshMenu.Name = "mViewRefreshMenu";
@@ -331,16 +335,16 @@
             this.mViewRefreshMenu.Size = new System.Drawing.Size(223, 22);
             this.mViewRefreshMenu.Text = "&Refresh";
             this.mViewRefreshMenu.Click += new System.EventHandler(this.mViewRefreshMenu_Click);
-            // 
+            //
             // mViewSeparator2Menu
-            // 
+            //
             this.mViewSeparator2Menu.MergeAction = System.Windows.Forms.MergeAction.Insert;
             this.mViewSeparator2Menu.MergeIndex = 3;
             this.mViewSeparator2Menu.Name = "mViewSeparator2Menu";
             this.mViewSeparator2Menu.Size = new System.Drawing.Size(220, 6);
-            // 
+            //
             // mViewOutboundMenu
-            // 
+            //
             this.mViewOutboundMenu.Checked = true;
             this.mViewOutboundMenu.CheckOnClick = true;
             this.mViewOutboundMenu.CheckState = System.Windows.Forms.CheckState.Checked;
@@ -351,9 +355,9 @@
             this.mViewOutboundMenu.Size = new System.Drawing.Size(223, 22);
             this.mViewOutboundMenu.Text = "Outbound";
             this.mViewOutboundMenu.CheckedChanged += new System.EventHandler(this.mViewOutboundMenu_CheckedChanged);
-            // 
+            //
             // mViewInboundMenu
-            // 
+            //
             this.mViewInboundMenu.Checked = true;
             this.mViewInboundMenu.CheckOnClick = true;
             this.mViewInboundMenu.CheckState = System.Windows.Forms.CheckState.Checked;
@@ -364,9 +368,9 @@
             this.mViewInboundMenu.Size = new System.Drawing.Size(223, 22);
             this.mViewInboundMenu.Text = "Inbound";
             this.mViewInboundMenu.CheckedChanged += new System.EventHandler(this.mViewInboundMenu_CheckedChanged);
-            // 
+            //
             // mViewIgnoredMenu
-            // 
+            //
             this.mViewIgnoredMenu.CheckOnClick = true;
             this.mViewIgnoredMenu.MergeAction = System.Windows.Forms.MergeAction.Insert;
             this.mViewIgnoredMenu.MergeIndex = 6;
@@ -375,72 +379,72 @@
             this.mViewIgnoredMenu.Size = new System.Drawing.Size(223, 22);
             this.mViewIgnoredMenu.Text = "Ignored";
             this.mViewIgnoredMenu.CheckedChanged += new System.EventHandler(this.mViewIgnoredMenu_CheckedChanged);
-            // 
+            //
             // mViewSeparator3Menu
-            // 
+            //
             this.mViewSeparator3Menu.MergeAction = System.Windows.Forms.MergeAction.Insert;
             this.mViewSeparator3Menu.MergeIndex = 7;
             this.mViewSeparator3Menu.Name = "mViewSeparator3Menu";
             this.mViewSeparator3Menu.Size = new System.Drawing.Size(220, 6);
-            // 
+            //
             // sessionInformationToolStripMenuItem
-            // 
+            //
             this.sessionInformationToolStripMenuItem.Name = "sessionInformationToolStripMenuItem";
             this.sessionInformationToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.I)));
             this.sessionInformationToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
             this.sessionInformationToolStripMenuItem.Text = "Session Information";
             this.sessionInformationToolStripMenuItem.Click += new System.EventHandler(this.sessionInformationToolStripMenuItem_Click);
-            // 
+            //
             // toolStripSeparator1
-            // 
+            //
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(220, 6);
-            // 
+            //
             // sendpropertiesToolStripMenuItem
-            // 
+            //
             this.sendpropertiesToolStripMenuItem.Name = "sendpropertiesToolStripMenuItem";
             this.sendpropertiesToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.D1)));
             this.sendpropertiesToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
             this.sendpropertiesToolStripMenuItem.Text = "Open send.properties";
             this.sendpropertiesToolStripMenuItem.Click += new System.EventHandler(this.sendpropertiesToolStripMenuItem_Click);
-            // 
+            //
             // recvpropertiesToolStripMenuItem
-            // 
+            //
             this.recvpropertiesToolStripMenuItem.Name = "recvpropertiesToolStripMenuItem";
             this.recvpropertiesToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.D2)));
             this.recvpropertiesToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
             this.recvpropertiesToolStripMenuItem.Text = "Open recv.properties";
             this.recvpropertiesToolStripMenuItem.Click += new System.EventHandler(this.recvpropertiesToolStripMenuItem_Click);
-            // 
+            //
             // dataToolStripMenuItem
-            // 
+            //
             this.dataToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.removeLoggedPacketsToolStripMenuItem});
             this.dataToolStripMenuItem.Name = "dataToolStripMenuItem";
             this.dataToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
             this.dataToolStripMenuItem.Text = "Data";
-            // 
+            //
             // removeLoggedPacketsToolStripMenuItem
-            // 
+            //
             this.removeLoggedPacketsToolStripMenuItem.Name = "removeLoggedPacketsToolStripMenuItem";
             this.removeLoggedPacketsToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.removeLoggedPacketsToolStripMenuItem.Text = "Remove logged packets";
             this.removeLoggedPacketsToolStripMenuItem.Click += new System.EventHandler(this.removeLoggedPacketsToolStripMenuItem_Click);
-            // 
+            //
             // mSaveDialog
-            // 
+            //
             this.mSaveDialog.Filter = "MapleShark Binary Files|*.msb";
             this.mSaveDialog.RestoreDirectory = true;
             this.mSaveDialog.Title = "Save";
-            // 
+            //
             // mExportDialog
-            // 
+            //
             this.mExportDialog.Filter = "Text Files|*.txt";
             this.mExportDialog.RestoreDirectory = true;
             this.mExportDialog.Title = "Export";
-            // 
+            //
             // SessionForm
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(752, 451);

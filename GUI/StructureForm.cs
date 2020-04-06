@@ -24,18 +24,18 @@ namespace MapleShark
         public MainForm MainForm { get { return ParentForm as MainForm; } }
         public TreeView Tree { get { return mTree; } }
 
-        public void ParseMaplePacket(MaplePacket pPacket)
+        public void ParseMaplePacket(MaplePacket pPacketItem)
         {
             mTree.Nodes.Clear();
             mSubNodes.Clear();
-            pPacket.Rewind();
+            pPacketItem.Rewind();
 
-            var scriptPath = Helpers.GetScriptPath(pPacket.Locale, pPacket.Build, pPacket.Outbound, pPacket.Opcode);
-            var commonPath = Helpers.GetCommonScriptPath(pPacket.Locale, pPacket.Build);
+            var scriptPath = Helpers.GetScriptPath(pPacketItem.Locale, pPacketItem.Build, pPacketItem.Outbound, pPacketItem.Opcode);
+            var commonPath = Helpers.GetCommonScriptPath(pPacketItem.Locale, pPacketItem.Build);
 
             if (File.Exists(scriptPath))
             {
-                mParsing = pPacket;
+                mParsing = pPacketItem;
 
                 try
                 {
@@ -55,7 +55,7 @@ namespace MapleShark
 
                 mParsing = null;
             }
-            if (pPacket.Remaining > 0) mTree.Nodes.Add(new StructureNode("Undefined", pPacket.Buffer, pPacket.Cursor, pPacket.Remaining));
+            if (pPacketItem.Remaining > 0) mTree.Nodes.Add(new StructureNode("Undefined", pPacketItem.Buffer, pPacketItem.Cursor, pPacketItem.Remaining));
         }
 
         private TreeNodeCollection CurrentNodes { get { return mSubNodes.Count > 0 ? mSubNodes.Peek().Nodes : mTree.Nodes; } }

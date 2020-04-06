@@ -127,6 +127,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Logging\MaplePacket.cs" />
     <Compile Include="Packet\BufferCryptManager.cs" />
     <Compile Include="Packet\ICrypter.cs" />
     <Compile Include="Packet\Rand32.cs" />
@@ -281,7 +282,7 @@
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Packet\MapleLocales.cs" />
-    <Compile Include="Logging\MaplePacket.cs" />
+    <Compile Include="Logging\MaplePacketItem.cs" />
     <Compile Include="Packet\MapleStream.cs" />
     <Compile Include="GUI\OutputForm.cs">
       <SubType>Form</SubType>
@@ -290,6 +291,7 @@
       <DependentUpon>OutputForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Tools\Helpers.cs" />
+    <Compile Include="Tools\ListViewUtil.cs" />
     <Compile Include="Tools\PacketReader.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

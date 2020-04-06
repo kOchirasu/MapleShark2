@@ -21,13 +21,11 @@
         }
 
         #region Windows Form Designer generated code
-
         /// <summary>
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent()
-        {
+        private void InitializeComponent() {
             this.mOpcodeCombo = new System.Windows.Forms.ComboBox();
             this.mNextOpcodeButton = new System.Windows.Forms.Button();
             this.mPrevOpcodeButton = new System.Windows.Forms.Button();
@@ -38,9 +36,12 @@
             // 
             // mOpcodeCombo
             // 
-            this.mOpcodeCombo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.mOpcodeCombo.Anchor =
+                ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Left |
+                                                       System.Windows.Forms.AnchorStyles.Right)));
             this.mOpcodeCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.mOpcodeCombo.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.mOpcodeCombo.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular,
+                System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.mOpcodeCombo.FormattingEnabled = true;
             this.mOpcodeCombo.Location = new System.Drawing.Point(3, 3);
             this.mOpcodeCombo.Name = "mOpcodeCombo";
@@ -74,12 +75,16 @@
             // 
             // mSequenceHex
             // 
-            this.mSequenceHex.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.mSequenceHex.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.mSequenceHex.Anchor =
+                ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Left |
+                                                       System.Windows.Forms.AnchorStyles.Right)));
+            this.mSequenceHex.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular,
+                System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.mSequenceHex.LineInfoForeColor = System.Drawing.Color.Empty;
             this.mSequenceHex.Location = new System.Drawing.Point(3, 32);
             this.mSequenceHex.Name = "mSequenceHex";
-            this.mSequenceHex.ShadowSelectionColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(60)))), ((int)(((byte)(188)))), ((int)(((byte)(255)))));
+            this.mSequenceHex.ShadowSelectionColor = System.Drawing.Color.FromArgb(((int) (((byte) (100)))),
+                ((int) (((byte) (60)))), ((int) (((byte) (188)))), ((int) (((byte) (255)))));
             this.mSequenceHex.Size = new System.Drawing.Size(152, 25);
             this.mSequenceHex.TabIndex = 6;
             this.mSequenceHex.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.mSequenceHex_KeyPress);
@@ -118,11 +123,14 @@
             this.Controls.Add(this.mPrevOpcodeButton);
             this.Controls.Add(this.mSequenceHex);
             this.Controls.Add(this.mOpcodeCombo);
-            this.DockAreas = ((WeifenLuo.WinFormsUI.Docking.DockAreas)(((((WeifenLuo.WinFormsUI.Docking.DockAreas.Float | WeifenLuo.WinFormsUI.Docking.DockAreas.DockLeft) 
-            | WeifenLuo.WinFormsUI.Docking.DockAreas.DockRight) 
-            | WeifenLuo.WinFormsUI.Docking.DockAreas.DockTop) 
-            | WeifenLuo.WinFormsUI.Docking.DockAreas.DockBottom)));
-            this.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.DockAreas =
+                ((WeifenLuo.WinFormsUI.Docking.DockAreas) ((
+                    (((WeifenLuo.WinFormsUI.Docking.DockAreas.Float | WeifenLuo.WinFormsUI.Docking.DockAreas.DockLeft) |
+                      WeifenLuo.WinFormsUI.Docking.DockAreas.DockRight) |
+                     WeifenLuo.WinFormsUI.Docking.DockAreas.DockTop) |
+                    WeifenLuo.WinFormsUI.Docking.DockAreas.DockBottom)));
+            this.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular,
+                System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.HideOnClose = true;
             this.MinimumSize = new System.Drawing.Size(300, 60);
@@ -131,9 +139,7 @@
             this.Text = "Search";
             this.Load += new System.EventHandler(this.SearchForm_Load);
             this.ResumeLayout(false);
-
         }
-
         #endregion
 
         private System.Windows.Forms.ComboBox mOpcodeCombo;

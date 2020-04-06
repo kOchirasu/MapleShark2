@@ -1,17 +1,13 @@
-﻿using System;
+﻿﻿using System;
 using System.Text;
-using System.Windows.Forms;
 
-namespace MapleShark
-{
-    public sealed class MaplePacket : ListViewItem
-    {
+namespace MapleShark {
+    public class MaplePacket {
         public DateTime Timestamp { get; private set; }
         public bool Outbound { get; private set; }
         public uint Build { get; private set; }
         public byte Locale { get; private set; }
         public ushort Opcode { get; private set; }
-        public new string Name { set { SubItems[4].Text = value; } }
 
         public byte[] Buffer { get; private set; }
         public int Cursor { get; private set; }
@@ -20,20 +16,12 @@ namespace MapleShark
         public uint PreDecodeIV { get; private set; }
         public uint PostDecodeIV { get; private set; }
 
-        internal MaplePacket(DateTime pTimestamp, bool pOutbound, uint pBuild, byte pLocale, ushort pOpcode, string pName, byte[] pBuffer, uint pPreDecodeIV, uint pPostDecodeIV)
-            : base(new string[] {
-                pTimestamp.ToString("yyyy-MM-dd HH:mm:ss.fff"),
-                pOutbound ? "Outbound" : "Inbound",
-                pBuffer.Length.ToString(),
-                "0x" + pOpcode.ToString("X4"),
-                pName })
-        {
+        internal MaplePacket(DateTime pTimestamp, bool pOutbound, uint pBuild, ushort pOpcode, byte[] pBuffer, uint pPreDecodeIV, uint pPostDecodeIV) {
             Timestamp = pTimestamp;
             Outbound = pOutbound;
             Build = pBuild;
             Opcode = pOpcode;
             Buffer = pBuffer;
-            Locale = pLocale;
             PreDecodeIV = pPreDecodeIV;
             PostDecodeIV = pPostDecodeIV;
         }
