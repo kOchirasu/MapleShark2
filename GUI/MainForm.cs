@@ -401,6 +401,7 @@ namespace MapleShark
                     catch (Exception ex)
                     {
                         Console.WriteLine(ex.ToString());
+                        File.WriteAllText("MapleShark Error.txt", ex + "\n" + ex.StackTrace);
                         session?.Close();
                         session = null;
                     }

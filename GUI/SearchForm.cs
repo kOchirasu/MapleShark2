@@ -111,7 +111,7 @@ namespace MapleShark
                 {
                     session.ListView.SelectedIndices.Clear();
                     session.ListView.SelectedIndices.Add(index);
-                    //packetItem.EnsureVisible();
+                    session.ListView.Items[index].EnsureVisible();
                     MainForm.DataForm.HexBox.SelectionStart = searchIndex;
                     MainForm.DataForm.HexBox.SelectionLength = pattern.Length;
                     MainForm.DataForm.HexBox.ScrollByteIntoView();
@@ -138,7 +138,7 @@ namespace MapleShark
                 {
                     session.ListView.SelectedIndices.Clear();
                     session.ListView.SelectedIndices.Add(index);
-                    //packetItem.EnsureVisible();
+                    session.ListView.Items[index].EnsureVisible();
                     session.ListView.Focus();
                     return;
                 }
