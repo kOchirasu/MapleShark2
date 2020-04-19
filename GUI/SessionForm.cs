@@ -158,11 +158,12 @@ namespace MapleShark
 
                 TcpPacket bufferedPacket;
                 // Remove any retransmitted packets that were already processed.
-                while (tcpBuffer.Count > 0 && (bufferedPacket = tcpBuffer.Min()).SequenceNumber < expectedSequence) {
+                while (tcpBuffer.Count > 0 && (bufferedPacket = tcpBuffer.First()).SequenceNumber < expectedSequence) {
                     tcpBuffer.Remove(bufferedPacket);
                 }
+
                 // Process all buffered packets.
-                while (tcpBuffer.Count > 0 && (bufferedPacket = tcpBuffer.Min()).SequenceNumber == expectedSequence) {
+                while (tcpBuffer.Count > 0 && (bufferedPacket = tcpBuffer.First()).SequenceNumber == expectedSequence) {
                     tcpBuffer.Remove(bufferedPacket);
                     if (isOutbound) mOutboundSequence += (uint) bufferedPacket.PayloadData.Length;
                     else mInboundSequence += (uint) bufferedPacket.PayloadData.Length;
@@ -308,7 +309,7 @@ namespace MapleShark
                 mPacketList.EndUpdate();
             } catch (Exception ex) {
                 Console.WriteLine(ex.ToString());
-                File.WriteAllText("MapleShark Error.txt", ex + "\n" + ex.StackTrace);
+                File.AppendAllText("MapleShark Error.txt", ex + "\n" + ex.StackTrace);
                 Terminate();
                 return;
             }

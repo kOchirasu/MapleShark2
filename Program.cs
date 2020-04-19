@@ -19,7 +19,7 @@ namespace MapleShark
             {
                 Exception e = (Exception)args.ExceptionObject;
 
-                System.IO.File.WriteAllText("MapleShark Error.txt", e.ToString());
+                System.IO.File.AppendAllText("MapleShark Error.txt", e.ToString());
 
                 if (MessageBox.Show("Exception occurred. Open error in notepad?", "", MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {

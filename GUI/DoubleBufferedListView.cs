@@ -11,7 +11,13 @@ namespace MapleShark
 
         public new int VirtualListSize {
             get => base.VirtualListSize;
-            set => this.SetVirtualListSizeWithoutRefresh(value);
+            set {
+                if (this.SelectedIndices.Count <= 0) {
+                    base.VirtualListSize = value;
+                } else {
+                    this.SetVirtualListSizeWithoutRefresh(value);
+                }
+            }
         }
     }
 }
