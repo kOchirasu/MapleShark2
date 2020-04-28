@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.mPacketList = new MapleShark.DoubleBufferedListView();
+            this.mPacketList = new MapleShark.PacketListView();
             this.mTimestampColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.mDirectionColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.mLengthColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -98,9 +98,6 @@
             this.mPacketList.View = System.Windows.Forms.View.Details;
             this.mPacketList.ItemActivate += new System.EventHandler(this.mPacketList_ItemActivate);
             this.mPacketList.SelectedIndexChanged += new System.EventHandler(this.mPacketList_SelectedIndexChanged);
-            this.mPacketList.VirtualMode = true;
-            this.mPacketList.RetrieveVirtualItem += this.mPacketList_RetrieveVirtualItem;
-            this.mPacketList.SearchForVirtualItem += this.mPacketList_SearchForVirtualItem;
             //
             // mTimestampColumn
             //
@@ -510,6 +507,6 @@
         private System.Windows.Forms.ToolStripMenuItem allToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem onlyVisibleToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem allToolStripMenuItem1;
-        private DoubleBufferedListView mPacketList;
+        private PacketListView mPacketList;
     }
 }

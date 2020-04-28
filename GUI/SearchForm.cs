@@ -59,9 +59,7 @@ namespace MapleShark
                 MaplePacket packetItem = session.FilteredPackets[index];
                 if (packetItem.Outbound == search.Outbound && packetItem.Opcode == search.Header)
                 {
-                    session.ListView.SelectedIndices.Clear();
-                    session.ListView.SelectedIndices.Add(index);
-                    session.ListView.Items[index]?.EnsureVisible();
+                    session.ListView.Select(index);
                     session.ListView.Focus();
                     return;
                 }
@@ -109,9 +107,7 @@ namespace MapleShark
                 }
                 if (found)
                 {
-                    session.ListView.SelectedIndices.Clear();
-                    session.ListView.SelectedIndices.Add(index);
-                    session.ListView.Items[index]?.EnsureVisible();
+                    session.ListView.Select(index);
                     MainForm.DataForm.HexBox.SelectionStart = searchIndex;
                     MainForm.DataForm.HexBox.SelectionLength = pattern.Length;
                     MainForm.DataForm.HexBox.ScrollByteIntoView();
@@ -136,9 +132,7 @@ namespace MapleShark
                 MaplePacket packetItem = session.FilteredPackets[index];
                 if (packetItem.Outbound == search.Outbound && packetItem.Opcode == search.Header)
                 {
-                    session.ListView.SelectedIndices.Clear();
-                    session.ListView.SelectedIndices.Add(index);
-                    session.ListView.Items[index]?.EnsureVisible();
+                    session.ListView.Select(index);
                     session.ListView.Focus();
                     return;
                 }

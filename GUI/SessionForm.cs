@@ -40,7 +40,7 @@ namespace MapleShark
         private MapleStream mOutboundStream = null;
         private MapleStream mInboundStream = null;
         private List<MaplePacket> mPackets = new List<MaplePacket>();
-        private readonly List<MaplePacket> mFilteredPackets = new List<MaplePacket>();
+
         private List<Opcode> mOpcodes = new List<Opcode>();
         private int socks5 = 0;
 
@@ -59,8 +59,8 @@ namespace MapleShark
         }
 
         public MainForm MainForm => ParentForm as MainForm;
-        public ListView ListView => mPacketList;
-        public IReadOnlyList<MaplePacket> FilteredPackets => mFilteredPackets;
+        public PacketListView ListView => mPacketList;
+        public IReadOnlyList<MaplePacket> FilteredPackets => mPacketList.FilteredPackets;
         public uint Build => mBuild;
         public byte Locale => mLocale;
         public List<Opcode> Opcodes => mOpcodes;
@@ -296,16 +296,15 @@ namespace MapleShark
             int opcodeCount = mOpcodes.Count;
             try {
                 mPacketList.BeginUpdate();
-
                 while (pStream.TryRead(pArrivalDate, out MaplePacket packetItem)) {
                     AddPacket(packetItem);
                 }
+                mPacketList.EndUpdate();
 
+                // This should be called after EndUpdate so VirtualListSize is set properly
                 if (mPacketList.SelectedIndices.Count == 0 && FilteredPackets.Count > 0) {
                     mPacketList.Items[FilteredPackets.Count - 1]?.EnsureVisible();
                 }
-
-                mPacketList.EndUpdate();
             } catch (Exception ex) {
                 Console.WriteLine(ex.ToString());
                 File.AppendAllText("MapleShark Error.txt", ex + "\n" + ex.StackTrace);
@@ -430,7 +429,7 @@ namespace MapleShark
                 ? FilteredPackets[mPacketList.SelectedIndices[0]]
                 : null;
             mOpcodes.Clear();
-            ClearFilteredPackets();
+            mPacketList.Clear();
 
             MainForm.DataForm.HexBox.ByteProvider = null;
             MainForm.StructureForm.Tree.Nodes.Clear();
@@ -444,22 +443,24 @@ namespace MapleShark
                 if (!mOpcodes.Exists(op => op.Outbound == packet.Outbound && op.Header == packet.Opcode)) {
                     mOpcodes.Add(new Opcode(packet.Outbound, packet.Opcode));
                 }
-                Definition definition = Config.Instance.GetDefinition(mBuild, mLocale, packet.Outbound, packet.Opcode);
+                Definition definition = Config.Instance.GetDefinition(packet);
                 if (definition != null && !mViewIgnoredMenu.Checked && definition.Ignore) continue;
 
-                int index = AddListViewPacket(packet);
+                int index = mPacketList.AddPacket(packet);
                 if (packet == previous) {
                     previousIndex = index;
                 }
             }
 
             MainForm.SearchForm.RefreshOpcodes(true);
+
+            mPacketList.EndUpdate();
+
+            // This should be called after EndUpdate so VirtualListSize is set properly
             if (previous != null && previousIndex >= 0) {
                 mPacketList.Items[previousIndex].Selected = true;
                 mPacketList.Items[previousIndex].EnsureVisible();
             }
-
-            mPacketList.EndUpdate();
         }
 
         public void ReselectPacket()
@@ -580,7 +581,7 @@ namespace MapleShark
                 if (packet.Outbound) ++outboundCount;
                 else ++inboundCount;
 
-                Definition definition = Config.Instance.GetDefinition(mBuild, mLocale, packet.Outbound, packet.Opcode);
+                Definition definition = Config.Instance.GetDefinition(packet);
 
                 tmp += string.Format("[{0}][{2}] [{3:X4}{5}] {4}\r\n",
                     packet.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff"),
@@ -612,7 +613,7 @@ namespace MapleShark
         private void CommonScript_FormClosed(object pSender, FormClosedEventArgs pArgs)
         {
             if (mPacketList.SelectedIndices.Count == 0) return;
-            MaplePacket packet = mFilteredPackets[mPacketList.SelectedIndices[0]];
+            MaplePacket packet = mPacketList.Selected;
             MainForm.StructureForm.ParseMaplePacket(packet);
             Activate();
         }
@@ -631,34 +632,14 @@ namespace MapleShark
                 MainForm.PropertyForm.Properties.SelectedObject = null;
                 return;
             }
-            MainForm.DataForm.HexBox.ByteProvider = new DynamicByteProvider(mFilteredPackets[mPacketList.SelectedIndices[0]].Buffer);
-            MainForm.StructureForm.ParseMaplePacket(mFilteredPackets[mPacketList.SelectedIndices[0]]);
-        }
-
-        private void mPacketList_RetrieveVirtualItem(object sender, RetrieveVirtualItemEventArgs e) {
-            if (mFilteredPackets.Count <= e.ItemIndex) {
-                return;
-            }
-
-            MaplePacket packet = mFilteredPackets[e.ItemIndex];
-            Definition definition = Config.Instance.GetDefinition(mBuild, mLocale, packet.Outbound, packet.Opcode);
-            string name = definition == null ? "" : definition.Name;
-
-            var packetItem = new MaplePacketItem(packet, name);
-            if (packetItem.Packet.Outbound) {
-                packetItem.BackColor = Color.AliceBlue;
-            }
-            e.Item = packetItem;
-        }
-
-        private void mPacketList_SearchForVirtualItem(object sender, SearchForVirtualItemEventArgs e) {
-            e.Index = e.StartIndex;
+            MainForm.DataForm.HexBox.ByteProvider = new DynamicByteProvider(mPacketList.Selected.Buffer);
+            MainForm.StructureForm.ParseMaplePacket(mPacketList.Selected);
         }
 
         private void mPacketList_ItemActivate(object pSender, EventArgs pArgs)
         {
             if (mPacketList.SelectedIndices.Count == 0) return;
-            MaplePacket packet = mFilteredPackets[mPacketList.SelectedIndices[0]];
+            MaplePacket packet = mPacketList.Selected;
 
             var scriptPath = Helpers.GetScriptPath(mLocale, mBuild, packet.Outbound, packet.Opcode);
             Helpers.MakeSureFileDirectoryExists(scriptPath);
@@ -685,8 +666,8 @@ namespace MapleShark
             if (mPacketList.SelectedIndices.Count == 0) pArgs.Cancel = true;
             else
             {
-                MaplePacket packet = mFilteredPackets[mPacketList.SelectedIndices[0]];
-                Definition definition = Config.Instance.GetDefinition(mBuild, mLocale, packet.Outbound, packet.Opcode);
+                MaplePacket packet = mPacketList.Selected;
+                Definition definition = Config.Instance.GetDefinition(packet);
                 if (definition != null)
                 {
                     mPacketContextNameBox.Text = definition.Name;
@@ -706,10 +687,10 @@ namespace MapleShark
 
         private void mPacketContextNameBox_KeyDown(object pSender, KeyEventArgs pArgs)
         {
-            if (pArgs.Modifiers == Keys.None && pArgs.KeyCode == Keys.Enter) {
+            if (pArgs.Modifiers == Keys.None && pArgs.KeyCode == Keys.Enter && mPacketList.SelectedIndices.Count > 0) {
                 int index = mPacketList.SelectedIndices[0];
-                MaplePacket packet = mFilteredPackets[index];
-                Definition definition = Config.Instance.GetDefinition(mBuild, mLocale, packet.Outbound, packet.Opcode);
+                MaplePacket packet = mPacketList.Selected;
+                Definition definition = Config.Instance.GetDefinition(packet);
                 if (definition == null) {
                     definition = new Definition {
                         Build = mBuild,
@@ -731,9 +712,9 @@ namespace MapleShark
 
         private void mPacketContextIgnoreMenu_CheckedChanged(object pSender, EventArgs pArgs)
         {
-            if (openingContextMenu) return;
+            if (openingContextMenu || mPacketList.SelectedIndices.Count == 0) return;
             int index = mPacketList.SelectedIndices[0];
-            MaplePacket packetItem = mFilteredPackets[index];
+            MaplePacket packetItem = mPacketList.Selected;
             Definition definition = Config.Instance.GetDefinition(mBuild, mLocale, packetItem.Outbound, packetItem.Opcode);
             if (definition == null)
             {
@@ -753,7 +734,7 @@ namespace MapleShark
             int newIndex = index - 1;
             for (var i = index - 1; i > 0; i--)
             {
-                var pack = mFilteredPackets[i];
+                var pack = mPacketList.FilteredPackets[i];
                 var def = Config.Instance.GetDefinition(mBuild, mLocale, pack.Outbound, pack.Opcode);
                 if (def == definition)
                 {
@@ -763,7 +744,7 @@ namespace MapleShark
 
             RefreshPackets();
 
-            if (newIndex != 0 && mFilteredPackets[newIndex] != null)
+            if (newIndex != 0 && mPacketList.FilteredPackets[newIndex] != null)
             {
                 ListViewItem listItem = mPacketList.Items[newIndex];
                 listItem.Selected = true;
@@ -783,15 +764,22 @@ namespace MapleShark
 
         private void sessionInformationToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SessionInformation si = new SessionInformation();
-            si.txtVersion.Text = mBuild.ToString();
-            si.txtPatchLocation.Text = mPatchLocation;
-            si.txtLocale.Text = mLocale.ToString();
-            si.txtAdditionalInfo.Text = "Connection info:\r\n" + mLocalEndpoint + " <-> " + mRemoteEndpoint + (mProxyEndpoint != "???" ? "\r\nProxy:" + mProxyEndpoint : "");
+            var info = new SessionInformation {
+                txtVersion = {Text = mBuild.ToString()},
+                txtPatchLocation = {Text = mPatchLocation},
+                txtLocale = {Text = mLocale.ToString()},
+                txtAdditionalInfo = {
+                    Text = "Connection info:\r\n"
+                           + mLocalEndpoint
+                           + " <-> "
+                           + mRemoteEndpoint
+                           + (mProxyEndpoint != "???" ? "\r\nProxy:" + mProxyEndpoint : "")
+                }
+            };
 
             if (mLocale == 1 || mLocale == 2)
             {
-                si.txtAdditionalInfo.Text += "\r\nRecording session of a MapleStory Korea" + (mLocale == 2 ? " Test" : "") + " server.\r\nAdditional KMS info:\r\n";
+                info.txtAdditionalInfo.Text += "\r\nRecording session of a MapleStory Korea" + (mLocale == 2 ? " Test" : "") + " server.\r\nAdditional KMS info:\r\n";
 
                 try
                 {
@@ -799,12 +787,12 @@ namespace MapleShark
                     ushort maplerVersion = (ushort)(test & 0x7FFF);
                     int extraOption = (test >> 15) & 1;
                     int subVersion = (test >> 16) & 0xFF;
-                    si.txtAdditionalInfo.Text += "Real Version: " + maplerVersion + "\r\nSubversion: " + subVersion + "\r\nExtra flag: " + extraOption;
+                    info.txtAdditionalInfo.Text += "Real Version: " + maplerVersion + "\r\nSubversion: " + subVersion + "\r\nExtra flag: " + extraOption;
                 }
                 catch { }
             }
 
-            si.Show();
+            info.Show();
         }
 
         private void sendpropertiesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -828,7 +816,7 @@ namespace MapleShark
             ClearedPackets = true;
 
             mPackets.Clear();
-            ClearFilteredPackets();
+            mPacketList.Clear();
             mOpcodes.Clear();
             RefreshPackets();
         }
@@ -843,7 +831,7 @@ namespace MapleShark
             if (mPacketList.SelectedIndices.Count == 0) return;
             int index = mPacketList.SelectedIndices[0];
             var packetItem = mPacketList.Items[index];
-            mPackets.Remove(mFilteredPackets[index]);
+            mPackets.Remove(mPacketList.FilteredPackets[index]);
 
             packetItem.Selected = false;
             if (index > 0)
@@ -865,16 +853,16 @@ namespace MapleShark
             int index = mPacketList.SelectedIndices[0];
 
             for (int i = 0; i < index; i++)
-                mPackets.Remove(mFilteredPackets[i]);
+                mPackets.Remove(mPacketList.FilteredPackets[i]);
             RefreshPackets();
         }
 
         private void allToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (mPacketList.SelectedIndices.Count == 0) return;
-            var packet = mFilteredPackets[mPacketList.SelectedIndices[0]];
+            var packet = mPacketList.Selected;
+            if (packet == default) return;
 
-            mPackets.RemoveRange(0, mPackets.FindIndex((p) => { return p == packet; }));
+            mPackets.RemoveRange(0, mPackets.FindIndex((p) => p == packet));
             RefreshPackets();
         }
 
@@ -884,15 +872,16 @@ namespace MapleShark
             int index = mPacketList.SelectedIndices[0];
 
             for (int i = index + 1; i < mPacketList.VirtualListSize; i++)
-                mPackets.Remove(mFilteredPackets[i] as MaplePacket);
+                mPackets.Remove(mPacketList.FilteredPackets[i]);
             RefreshPackets();
         }
 
         private void allToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            if (mPacketList.SelectedIndices.Count == 0) return;
-            var packet = mFilteredPackets[mPacketList.SelectedIndices[0]];
-            var startIndex = mPackets.FindIndex((p) => { return p == packet; }) + 1;
+            var packet = mPacketList.Selected;
+            if (packet == default) return;
+
+            var startIndex = mPackets.FindIndex((p) => p == packet) + 1;
             mPackets.RemoveRange(startIndex, mPackets.Count - startIndex);
             RefreshPackets();
         }
@@ -918,23 +907,7 @@ namespace MapleShark
                 if (!packetItem.Outbound && !mViewInboundMenu.Checked) return;
             }
 
-            AddListViewPacket(packetItem);
-        }
-
-        public int AddListViewPacket(MaplePacket packetItem) {
-            try {
-                mFilteredPackets.Add(packetItem);
-                mPacketList.VirtualListSize = mFilteredPackets.Count;
-            } catch (Exception ex) {
-                File.AppendAllText("MapleShark Error.txt", ex + "\n" + ex.StackTrace);
-            }
-
-            return mFilteredPackets.Count - 1;
-        }
-
-        public void ClearFilteredPackets() {
-            mFilteredPackets.Clear();
-            mPacketList.VirtualListSize = mFilteredPackets.Count;
+            mPacketList.AddPacket(packetItem);
         }
 
         private void Terminate() {

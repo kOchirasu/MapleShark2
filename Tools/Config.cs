@@ -51,6 +51,10 @@ namespace MapleShark
             }
         }
 
+        internal Definition GetDefinition(MaplePacket packet) {
+            return GetDefinition(packet.Build, packet.Locale, packet.Outbound, packet.Opcode);
+        }
+
         internal Definition GetDefinition(uint pBuild, byte pLocale, bool pOutbound, ushort pOpcode)
         {
             return DefinitionsContainer.Instance.GetDefinition(pLocale, pBuild, pOpcode, pOutbound);
