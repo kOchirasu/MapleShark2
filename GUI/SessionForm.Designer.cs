@@ -99,7 +99,6 @@
             this.mPacketList.ItemActivate += new System.EventHandler(this.mPacketList_ItemActivate);
             this.mPacketList.SelectedIndexChanged += new System.EventHandler(this.mPacketList_SelectedIndexChanged);
             this.mPacketList.VirtualMode = true;
-            this.mPacketList.VirtualListSize = 20;
             this.mPacketList.RetrieveVirtualItem += this.mPacketList_RetrieveVirtualItem;
             this.mPacketList.SearchForVirtualItem += this.mPacketList_SearchForVirtualItem;
             //

@@ -43,15 +43,17 @@ namespace MapleShark {
             cursor += length;
         }
 
-        public MaplePacket Read(DateTime pTransmitted) {
+        public bool TryRead(DateTime pTransmitted, out MaplePacket packet) {
             if (cursor < HEADER_SIZE) {
-                return null;
+                packet = null;
+                return false;
             }
 
             int packetSize = BitConverter.ToInt32(buffer, 2);
             int bufferSize = HEADER_SIZE + packetSize;
             if (cursor < bufferSize) {
-                return null;
+                packet = null;
+                return false;
             }
 
             uint preDecodeIV = iv;
@@ -72,7 +74,8 @@ namespace MapleShark {
             Buffer.BlockCopy(packetBuffer, OPCODE_SIZE, packetBuffer, 0, packetSize - OPCODE_SIZE);
             Array.Resize(ref packetBuffer, packetSize - OPCODE_SIZE);
 
-            return new MaplePacket(pTransmitted, isOutbound, version, opcode, packetBuffer, preDecodeIV, iv);;
+            packet = new MaplePacket(pTransmitted, isOutbound, version, opcode, packetBuffer, preDecodeIV, iv);
+            return true;
         }
 
         private void AdvanceIV() {

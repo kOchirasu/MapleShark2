@@ -158,12 +158,12 @@ namespace MapleShark
 
                 TcpPacket bufferedPacket;
                 // Remove any retransmitted packets that were already processed.
-                while (tcpBuffer.Count > 0 && (bufferedPacket = tcpBuffer.First()).SequenceNumber < expectedSequence) {
+                while (tcpBuffer.Count > 0 && (bufferedPacket = tcpBuffer.Min).SequenceNumber < expectedSequence) {
                     tcpBuffer.Remove(bufferedPacket);
                 }
 
                 // Process all buffered packets.
-                while (tcpBuffer.Count > 0 && (bufferedPacket = tcpBuffer.First()).SequenceNumber == expectedSequence) {
+                while (tcpBuffer.Count > 0 && (bufferedPacket = tcpBuffer.Min).SequenceNumber == expectedSequence) {
                     tcpBuffer.Remove(bufferedPacket);
                     if (isOutbound) mOutboundSequence += (uint) bufferedPacket.PayloadData.Length;
                     else mInboundSequence += (uint) bufferedPacket.PayloadData.Length;
@@ -297,13 +297,12 @@ namespace MapleShark
             try {
                 mPacketList.BeginUpdate();
 
-                MaplePacket packetItem;
-                while ((packetItem = pStream.Read(pArrivalDate)) != null) {
+                while (pStream.TryRead(pArrivalDate, out MaplePacket packetItem)) {
                     AddPacket(packetItem);
                 }
 
-                if (mPacketList.SelectedIndices.Count == 0) {
-                    mPacketList.Items[FilteredPackets.Count - 1].EnsureVisible();
+                if (mPacketList.SelectedIndices.Count == 0 && FilteredPackets.Count > 0) {
+                    mPacketList.Items[FilteredPackets.Count - 1]?.EnsureVisible();
                 }
 
                 mPacketList.EndUpdate();
@@ -637,6 +636,10 @@ namespace MapleShark
         }
 
         private void mPacketList_RetrieveVirtualItem(object sender, RetrieveVirtualItemEventArgs e) {
+            if (mFilteredPackets.Count <= e.ItemIndex) {
+                return;
+            }
+
             MaplePacket packet = mFilteredPackets[e.ItemIndex];
             Definition definition = Config.Instance.GetDefinition(mBuild, mLocale, packet.Outbound, packet.Opcode);
             string name = definition == null ? "" : definition.Name;
@@ -697,7 +700,7 @@ namespace MapleShark
             mPacketContextNameBox.Focus();
             mPacketContextNameBox.SelectAll();
 
-            mPacketList.Items[mPacketList.SelectedIndices[0]].EnsureVisible();
+            mPacketList.Items[mPacketList.SelectedIndices[0]]?.EnsureVisible();
             openingContextMenu = false;
         }
 
@@ -722,7 +725,7 @@ namespace MapleShark
                 mPacketContextMenu.Close();
                 RefreshPackets();
 
-                mPacketList.Items[index].EnsureVisible();
+                mPacketList.Items[index]?.EnsureVisible();
             }
         }
 
@@ -744,6 +747,9 @@ namespace MapleShark
             definition.Ignore = mPacketContextIgnoreMenu.Checked;
             SaveDefinition(definition);
 
+            // If viewing ignored packets, ignoring a new packet does not change view
+            if (mViewIgnoredMenu.Checked) return;
+
             int newIndex = index - 1;
             for (var i = index - 1; i > 0; i--)
             {
@@ -756,7 +762,6 @@ namespace MapleShark
             }
 
             RefreshPackets();
-
 
             if (newIndex != 0 && mFilteredPackets[newIndex] != null)
             {
@@ -917,8 +922,13 @@ namespace MapleShark
         }
 
         public int AddListViewPacket(MaplePacket packetItem) {
-            mFilteredPackets.Add(packetItem);
-            mPacketList.VirtualListSize = mFilteredPackets.Count;
+            try {
+                mFilteredPackets.Add(packetItem);
+                mPacketList.VirtualListSize = mFilteredPackets.Count;
+            } catch (Exception ex) {
+                File.AppendAllText("MapleShark Error.txt", ex + "\n" + ex.StackTrace);
+            }
+
             return mFilteredPackets.Count - 1;
         }
 
