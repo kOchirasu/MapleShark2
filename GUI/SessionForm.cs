@@ -109,37 +109,33 @@ namespace MapleShark
         internal Results BufferTcpPacket(TcpPacket pTcpPacket, DateTime pArrivalTime) {
             if (pTcpPacket.Finished || pTcpPacket.Reset) {
                 Terminate();
-
                 return mPackets.Count == 0 ? Results.CloseMe : Results.Terminated;
             }
 
-            if (pTcpPacket.Synchronize && !pTcpPacket.Acknowledgment)
-            {
-                mLocalPort = (ushort)pTcpPacket.SourcePort;
-                mRemotePort = (ushort)pTcpPacket.DestinationPort;
-                mOutboundSequence = (uint)(pTcpPacket.SequenceNumber + 1);
-                Text = "Port " + mLocalPort + " - " + mRemotePort;
-                startTime = DateTime.Now;
+            if (pTcpPacket.Synchronize) {
+                if (pTcpPacket.Acknowledgment) {
+                    mInboundSequence = pTcpPacket.SequenceNumber + 1;
+                } else {
+                    mLocalPort = pTcpPacket.SourcePort;
+                    mRemotePort = pTcpPacket.DestinationPort;
+                    mOutboundSequence = pTcpPacket.SequenceNumber + 1;
+                    Text = $"Port {mLocalPort} - {mRemotePort}";
+                    startTime = DateTime.Now;
 
-                try
-                {
-                    mRemoteEndpoint = ((IPv4Packet)pTcpPacket.ParentPacket).SourceAddress + ":" + pTcpPacket.SourcePort;
-                    mLocalEndpoint = ((IPv4Packet)pTcpPacket.ParentPacket).DestinationAddress + ":" + pTcpPacket.DestinationPort;
-                    Console.WriteLine("[CONNECTION] From {0} to {1}", mRemoteEndpoint, mLocalEndpoint);
-
-                    return Results.Continue;
+                    try {
+                        mRemoteEndpoint = $"{((IPv4Packet)pTcpPacket.ParentPacket).SourceAddress}:{mLocalPort}";
+                        mLocalEndpoint = $"{((IPv4Packet)pTcpPacket.ParentPacket).DestinationAddress}:{mRemotePort}";
+                        Console.WriteLine("[CONNECTION] From {0} to {1}", mRemoteEndpoint, mLocalEndpoint);
+                    } catch {
+                        return Results.CloseMe;
+                    }
                 }
-                catch
-                {
-                    return Results.CloseMe;
-                }
-            }
-
-            if (pTcpPacket.Synchronize && pTcpPacket.Acknowledgment) {
-                mInboundSequence = (uint)(pTcpPacket.SequenceNumber + 1);
                 return Results.Continue;
             }
-            if (pTcpPacket.PayloadData.Length == 0) return Results.Continue;
+
+            if (pTcpPacket.PayloadData.Length == 0) {
+                return Results.Continue;
+            }
 
             bool isOutbound = pTcpPacket.SourcePort == mLocalPort;
             uint expectedSequence = isOutbound ? mOutboundSequence : mInboundSequence;

@@ -323,7 +323,6 @@ namespace MapleShark
             else mPropertyForm.Hide();
         }
 
-        Dictionary<int, SessionForm> waiting = new Dictionary<int, SessionForm>();
         List<SessionForm> closes = new List<SessionForm>();
         private void mTimer_Tick(object sender, EventArgs e)
         {
@@ -360,41 +359,19 @@ namespace MapleShark
                         {
                             session = NewSession();
                             var res = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
-                            if (res == SessionForm.Results.Continue)
-                            {
-                                int hash = tcpPacket.SourcePort << 16 | tcpPacket.DestinationPort;
-                                waiting[hash] = session;
+                            if (res == SessionForm.Results.Continue) {
+                                session.Show(mDockPanel, DockState.Document);
                             }
                         }
                         else
                         {
-                            int hash = tcpPacket.DestinationPort << 16 | tcpPacket.SourcePort;
                             session = Array.Find(MdiChildren, f => ((SessionForm) f).MatchTCPPacket(tcpPacket)) as SessionForm;
                             if (session != null)
                             {
                                 var res = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
-
-                                if (res == SessionForm.Results.CloseMe)
-                                {
-                                    waiting.Remove(hash);
+                                if (res == SessionForm.Results.CloseMe) {
                                     session.Close();
                                 }
-                                continue;
-                            }
-
-                            if (waiting.TryGetValue(hash, out session))
-                            {
-                                var res = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
-
-                                switch (res)
-                                {
-                                    case SessionForm.Results.Show:
-                                        session.Show(mDockPanel, DockState.Document);
-                                        break;
-                                    case SessionForm.Results.Continue:
-                                        continue;
-                                }
-                                waiting.Remove(hash);
                             }
                         }
                     }
