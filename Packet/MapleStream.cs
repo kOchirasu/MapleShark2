@@ -30,51 +30,56 @@ namespace MapleShark {
         }
 
         public void Append(byte[] packet, int offset, int length) {
-            if (buffer.Length - cursor < length) {
-                int newSize = buffer.Length * 2;
-                while (newSize < cursor + length) {
-                    newSize *= 2;
+            lock (this) {
+                if (buffer.Length - cursor < length) {
+                    int newSize = buffer.Length * 2;
+                    while (newSize < cursor + length) {
+                        newSize *= 2;
+                    }
+                    byte[] newBuffer = new byte[newSize];
+                    Buffer.BlockCopy(buffer, 0, newBuffer, 0, cursor);
+                    buffer = newBuffer;
                 }
-                byte[] newBuffer = new byte[newSize];
-                Buffer.BlockCopy(buffer, 0, newBuffer, 0, cursor);
-                buffer = newBuffer;
+                Buffer.BlockCopy(packet, offset, buffer, cursor, length);
+                cursor += length;
             }
-            Buffer.BlockCopy(packet, offset, buffer, cursor, length);
-            cursor += length;
         }
 
         public bool TryRead(DateTime pTransmitted, out MaplePacket packet) {
-            if (cursor < HEADER_SIZE) {
-                packet = null;
-                return false;
+            lock (this) {
+                if (cursor < HEADER_SIZE) {
+                    packet = null;
+                    return false;
+                }
+
+                int packetSize = BitConverter.ToInt32(buffer, 2);
+                int bufferSize = HEADER_SIZE + packetSize;
+                if (cursor < bufferSize) {
+                    packet = null;
+                    return false;
+                }
+
+                uint preDecodeIV = iv;
+                ushort encSeq = BitConverter.ToUInt16(buffer, 0);
+                if (DecodeSeqBase(encSeq) != version) {
+                    throw new ArgumentException("Packet has invalid sequence header.");
+                }
+
+                byte[] packetBuffer = new byte[packetSize];
+                Buffer.BlockCopy(buffer, HEADER_SIZE, packetBuffer, 0, packetSize);
+
+                // Remove packet from buffer
+                cursor -= bufferSize;
+                Buffer.BlockCopy(buffer, bufferSize, buffer, 0, cursor);
+                crypter.Decrypt(packetBuffer);
+
+                ushort opcode = BitConverter.ToUInt16(packetBuffer, 0);
+                Buffer.BlockCopy(packetBuffer, OPCODE_SIZE, packetBuffer, 0, packetSize - OPCODE_SIZE);
+                Array.Resize(ref packetBuffer, packetSize - OPCODE_SIZE);
+
+                packet = new MaplePacket(pTransmitted, isOutbound, version, opcode, packetBuffer, preDecodeIV, iv);
             }
 
-            int packetSize = BitConverter.ToInt32(buffer, 2);
-            int bufferSize = HEADER_SIZE + packetSize;
-            if (cursor < bufferSize) {
-                packet = null;
-                return false;
-            }
-
-            uint preDecodeIV = iv;
-            ushort encSeq = BitConverter.ToUInt16(buffer, 0);
-            if (DecodeSeqBase(encSeq) != version) {
-                throw new ArgumentException("Packet has invalid sequence header.");
-            }
-
-            byte[] packetBuffer = new byte[packetSize];
-            Buffer.BlockCopy(buffer, HEADER_SIZE, packetBuffer, 0, packetSize);
-
-            // Remove packet from buffer
-            cursor -= bufferSize;
-            Buffer.BlockCopy(buffer, bufferSize, buffer, 0, cursor);
-            crypter.Decrypt(packetBuffer);
-
-            ushort opcode = BitConverter.ToUInt16(packetBuffer, 0);
-            Buffer.BlockCopy(packetBuffer, OPCODE_SIZE, packetBuffer, 0, packetSize - OPCODE_SIZE);
-            Array.Resize(ref packetBuffer, packetSize - OPCODE_SIZE);
-
-            packet = new MaplePacket(pTransmitted, isOutbound, version, opcode, packetBuffer, preDecodeIV, iv);
             return true;
         }
 
