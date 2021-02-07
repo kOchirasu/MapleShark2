@@ -1,11 +1,8 @@
-﻿using Microsoft.Win32;
-using ScriptNET.Runtime;
-using System;
-using System.Collections.Generic;
+﻿using System;
+using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
-using System.Security.Principal;
-
 using SharpPcap.LibPcap;
 
 namespace MapleShark
@@ -19,11 +16,11 @@ namespace MapleShark
             {
                 Exception e = (Exception)args.ExceptionObject;
 
-                System.IO.File.AppendAllText("MapleShark Error.txt", e.ToString());
+                File.AppendAllText("MapleShark Error.txt", e.ToString());
 
                 if (MessageBox.Show("Exception occurred. Open error in notepad?", "", MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    System.Diagnostics.Process.Start("notepad", "\"MapleShark Error.txt\"");
+                    Process.Start("notepad", "\"MapleShark Error.txt\"");
                 }
             };
 
@@ -33,9 +30,9 @@ namespace MapleShark
             }
             catch
             {
-                if (MessageBox.Show(null, "Did you install WinPcap first? If you did, then try to run MapleShark in Administrator Mode, else press 'No' to go to the install page of WinPcap.", "Interface Error", MessageBoxButtons.YesNo, MessageBoxIcon.Error) == System.Windows.Forms.DialogResult.No)
+                if (MessageBox.Show(null, "Did you install WinPcap first? If you did, then try to run MapleShark in Administrator Mode, else press 'No' to go to the install page of WinPcap.", "Interface Error", MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.No)
                 {
-                    System.Diagnostics.Process.Start("http://www.winpcap.org/install/default.htm");
+                    Process.Start("http://www.winpcap.org/install/default.htm");
                 }
                 Environment.Exit(2);
                 return;

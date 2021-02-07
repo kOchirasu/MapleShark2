@@ -1,12 +1,10 @@
-﻿using ScriptNET;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
+using Scripting.SSharp;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace MapleShark

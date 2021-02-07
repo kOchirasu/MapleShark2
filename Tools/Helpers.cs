@@ -12,9 +12,9 @@ namespace MapleShark
         public static string GetScriptFolder(byte locale, uint build)
         {
             return string.Format(
-                "{1}{0}Scripts{0}{2}{0}{3}{0}", 
-                Path.DirectorySeparatorChar, 
-                Application.StartupPath, 
+                "{1}{0}Scripts{0}{2}{0}{3}{0}",
+                Path.DirectorySeparatorChar,
+                Application.StartupPath,
                 locale,
                 build
             );
@@ -42,6 +42,6 @@ namespace MapleShark
             if (!Directory.Exists(dirname))
                 Directory.CreateDirectory(dirname);
         }
-        
+
     }
 }

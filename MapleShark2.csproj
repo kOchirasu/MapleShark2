@@ -6,7 +6,7 @@
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{01F7E3B6-B831-4D44-8B44-095768212822}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MapleShark</RootNamespace>
     <AssemblyName>MapleShark2</AssemblyName>
@@ -105,10 +105,15 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Alsing.SyntaxBox, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>packages\Alsing.SyntaxBox.2.0.0\lib\net40\Alsing.SyntaxBox.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Be.Windows.Forms.HexBox, Version=1.6.1.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>packages\Be.Windows.Forms.HexBox.1.6.1\lib\net40\Be.Windows.Forms.HexBox.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="mscorlib" />
     <Reference Include="PacketDotNet, Version=1.2.0.0, Culture=neutral, PublicKeyToken=451414c7667b2a58">
       <HintPath>packages\PacketDotNet.1.2.0\lib\net45\PacketDotNet.dll</HintPath>
@@ -116,6 +121,10 @@
     </Reference>
     <Reference Include="SharpPcap, Version=5.4.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>packages\SharpPcap.5.4.0\lib\netstandard2.0\SharpPcap.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SSharp.Net, Version=4.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>packages\SSharp.Net.1.0.1\lib\net472\SSharp.Net.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -223,13 +232,9 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="ScriptDotNet\IronyLibrary\Microsoft\MathResources.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="Properties\app.manifest" />
-    <None Include="ScriptDotNet\Runtime\Operators\Operators_Native.zip" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -242,171 +247,6 @@
       <DependentUpon>PropertyForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Tools\ScriptAPI.cs" />
-    <Compile Include="ScriptDotNet\AST\AScriptAstTemplate.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptArrayConstructor.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptArrayResolution.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptAssignExpr.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptAst.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptBinExpr.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptCompoundStatement.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptCondition.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptConstExpr.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptElements.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptExpr.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptExprList.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptFlowControlStatement.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptForEachStatement.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptForStatement.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptFuncContract.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptFuncContractInv.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptFuncContractPost.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptFuncContractPre.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptFuncParameters.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptFunctionCall.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptFunctionDefinition.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptGenericsPostfix.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptGlobalList.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptIfStatement.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptIsExpr.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptMetaExpr.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptMObject.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptMObjectPart.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptNewArrStmt.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptNewStmt.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptProg.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptQualifiedName.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptStatement.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptSwitchCaseStatement.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptSwitchDefaultStatement.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptSwitchStatement.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptTryCatchFinallyStatement.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptTypeConstructor.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptTypeConvertExpr.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptTypeExpr.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptTypeExprList.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptUnaryExpr.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptUsingStatement.cs" />
-    <Compile Include="ScriptDotNet\AST\ScriptWhileStatement.cs" />
-    <Compile Include="ScriptDotNet\CustomFunctions\AboutFunc.cs" />
-    <Compile Include="ScriptDotNet\CustomFunctions\AppendFunc.cs" />
-    <Compile Include="ScriptDotNet\CustomFunctions\ArrayFunc.cs" />
-    <Compile Include="ScriptDotNet\CustomFunctions\CharFunc.cs" />
-    <Compile Include="ScriptDotNet\CustomFunctions\EvalFunc.cs" />
-    <Compile Include="ScriptDotNet\CustomFunctions\ReplaceFunc.cs" />
-    <Compile Include="ScriptDotNet\CustomFunctions\RunConsole.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Common.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\AstProcessing\AstProcessor.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\AstProcessing\LexicalAddress.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\AstProcessing\ProcInfo.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\AstProcessing\Scope.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\AST\AstNode.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\AST\AstNodeArgs.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\AST\AstVisitor.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\CompilerContext.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\Enums.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\EventArgs.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\Grammar\BnfExpression.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\Grammar\BnfTerm.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\Grammar\Grammar.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\Grammar\GrammarData.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\Grammar\GrammarDataBuilder.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\Grammar\NonTerminal.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\Grammar\Terminal.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\LanguageCompiler.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\Parser\Parser.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\Parser\ParserStack.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\Scanner\Scanner.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\Scanner\SourceFile.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\Scanner\Token.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\SyntaxError.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\Terminals\CommentTerminal.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\Terminals\CompoundTerminalBase.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\Terminals\ConstantTerminal.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\Terminals\CustomTerminal.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\Terminals\IdentifierTerminal.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\Terminals\NumberLiteral.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\Terminals\RegExBasedTerminal.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\Terminals\StringLiteral.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\Terminals\SymbolTerminal.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\Terminals\TerminalFactory.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\TokenFilters\BraceMatchFilter.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\TokenFilters\CodeOutlineFilter.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Compiler\TokenFilters\TokenFilter.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Exceptions.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Microsoft\BigInteger.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Microsoft\Complex64.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\Microsoft\MathResources.Designer.cs" />
-    <Compile Include="ScriptDotNet\IronyLibrary\TextUtils.cs" />
-    <Compile Include="ScriptDotNet\Processing\DebugMarkerVisitor.cs" />
-    <Compile Include="ScriptDotNet\Processing\FunctionDeclarationVisitor.cs" />
-    <Compile Include="ScriptDotNet\Processing\IPostProcessing.cs" />
-    <Compile Include="ScriptDotNet\Runtime\AssemblyManager.cs" />
-    <Compile Include="ScriptDotNet\Runtime\BaseAssemblyManager.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Configuration\ConfigSchema.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Configuration\Operator.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Configuration\Reference.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Configuration\ScopeDefinition.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Configuration\ScriptConfiguration.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Configuration\SettingXml.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Configuration\TypeXml.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Exceptions.cs" />
-    <Compile Include="ScriptDotNet\Runtime\IAssemblyManager.cs" />
-    <Compile Include="ScriptDotNet\Runtime\IOperatorHandler.cs" />
-    <Compile Include="ScriptDotNet\Runtime\IScriptContext.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\Binder\BindableAttribute.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\Binder\ConstructorBind.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\Binder\EventBind.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\Binder\FieldBind.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\Binder\LateBoundMember.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\Binder\LateBoundMethod.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\Binder\MethodBind.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\Binder\ObjectBinder.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\Binder\ObjectBinderExtended.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\Binder\ObjectBinderHelpers.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\Binder\PropertyBind.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\Components\EventBroker.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\Components\Expando.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\Components\ExpandoWrapper.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\Components\ExplicitInterface.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\Components\MemberRename.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\Components\NameSpaceResolver.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\IInvokable.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\IObjectActivator.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\IObjectBind.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\IObjectBinder.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\IScriptable.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\ISupportAssign.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ObjectModel\ObjectActivator\ObjectActivator.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Operators\BinaryOperator.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Operators\Binary\BoolOperators.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Operators\Binary\DivOperator.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Operators\Binary\GqOperator.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Operators\Binary\GrOperator.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Operators\Binary\IEvaluator.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Operators\Binary\IsOperator.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Operators\Binary\LessOperator.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Operators\Binary\LqOperator.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Operators\Binary\MinusOperator.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Operators\Binary\ModOperator.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Operators\Binary\MulOperator.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Operators\Binary\PlusOperator.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Operators\Binary\PowOperator.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Operators\IOperator.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Operators\UnaryOperator.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Operators\Unary\NegateOperators.cs" />
-    <Compile Include="ScriptDotNet\Runtime\RuntimeHost.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Scopes\EventScopeActivator.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Scopes\FunctionScope.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Scopes\INotifyingScope.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Scopes\IScopeActivator.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Scopes\IScopeFactory.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Scopes\IScriptScope.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Scopes\ScopeFactory.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Scopes\ScriptScope.cs" />
-    <Compile Include="ScriptDotNet\Runtime\Scopes\ScriptUsingScope.cs" />
-    <Compile Include="ScriptDotNet\Runtime\ScriptContext.cs" />
-    <Compile Include="ScriptDotNet\Script.cs" />
-    <Compile Include="ScriptDotNet\ScriptGrammar.cs" />
     <Compile Include="GUI\ScriptForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -445,257 +285,10 @@
     </Compile>
     <Compile Include="Logging\StructureNode.cs" />
     <Compile Include="Logging\StructureSegment.cs" />
-    <Compile Include="SyntaxBox\Classes\Caret.cs" />
-    <Compile Include="SyntaxBox\Classes\KeyboadActionList.cs" />
-    <Compile Include="SyntaxBox\Classes\KeyboardAction.cs" />
-    <Compile Include="SyntaxBox\Classes\NativePainter.cs" />
-    <Compile Include="SyntaxBox\Classes\Selection.cs" />
-    <Compile Include="SyntaxBox\Classes\Structs.cs" />
-    <Compile Include="SyntaxBox\Collections\CollectionBase.cs" />
-    <Compile Include="SyntaxBox\Controls\Autolist\AutoListForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SyntaxBox\Controls\Autolist\TabListBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="SyntaxBox\Controls\BaseControls\BaseControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="SyntaxBox\Controls\BaseControls\BaseListBoxControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="SyntaxBox\Controls\BaseControls\BasePanelControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="SyntaxBox\Controls\BaseControls\BorderControl.cs" />
-    <Compile Include="SyntaxBox\Controls\EditView\EditViewControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="SyntaxBox\Controls\FormatLabel\Element.cs" />
-    <Compile Include="SyntaxBox\Controls\FormatLabel\Events.cs" />
-    <Compile Include="SyntaxBox\Controls\FormatLabel\FormatLabelControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="SyntaxBox\Controls\FormatLabel\Row.cs" />
-    <Compile Include="SyntaxBox\Controls\FormatLabel\Word.cs" />
-    <Compile Include="SyntaxBox\Controls\InfoTip\InfoTipForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SyntaxBox\Controls\IntelliMouse\Events.cs" />
-    <Compile Include="SyntaxBox\Controls\IntelliMouse\IntelliMouse.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="SyntaxBox\Controls\RegionHandler\RegionHandler.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="SyntaxBox\Controls\SplitView\SplitViewChildControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="SyntaxBox\Controls\SplitView\SplitViewControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="SyntaxBox\Controls\SplitView\SplitViewParentControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="SyntaxBox\Controls\Syntaxbox\Dialogs\FindReplace.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SyntaxBox\Controls\Syntaxbox\Dialogs\GotoLine.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SyntaxBox\Controls\Syntaxbox\Dialogs\Settings.cs" />
-    <Compile Include="SyntaxBox\Controls\Syntaxbox\Events.cs" />
-    <Compile Include="SyntaxBox\Controls\Syntaxbox\SyntaxBoxControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="SyntaxBox\Controls\Syntaxbox\SyntaxBoxDesigner.cs" />
-    <Compile Include="SyntaxBox\Controls\ThumbControl\ThumbControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="SyntaxBox\Controls\ThumbControl\ThumbControl.Designer.cs">
-      <DependentUpon>ThumbControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SyntaxBox\Design\CollectionEditorGui.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="SyntaxBox\Design\ComponaCollectionEditor.cs" />
-    <Compile Include="SyntaxBox\Design\FilteredTypeConverter.cs" />
-    <Compile Include="SyntaxBox\Design\Int32AutoConverter.cs" />
-    <Compile Include="SyntaxBox\Design\Int32DefaultConverter.cs" />
-    <Compile Include="SyntaxBox\Document\DocumentStructure\Row\Row.cs" />
-    <Compile Include="SyntaxBox\Document\DocumentStructure\Row\RowEventArgs.cs" />
-    <Compile Include="SyntaxBox\Document\DocumentStructure\Row\RowEventHandler.cs" />
-    <Compile Include="SyntaxBox\Document\DocumentStructure\Row\RowList.cs" />
-    <Compile Include="SyntaxBox\Document\DocumentStructure\Span\Span.cs" />
-    <Compile Include="SyntaxBox\Document\DocumentStructure\Span\SpanList.cs" />
-    <Compile Include="SyntaxBox\Document\DocumentStructure\Structs\BracketType.cs" />
-    <Compile Include="SyntaxBox\Document\DocumentStructure\Structs\TextPoint.cs" />
-    <Compile Include="SyntaxBox\Document\DocumentStructure\Structs\TextRange.cs" />
-    <Compile Include="SyntaxBox\Document\DocumentStructure\Undo\UndoBlock.cs" />
-    <Compile Include="SyntaxBox\Document\DocumentStructure\Undo\UndoBlockCollection.cs" />
-    <Compile Include="SyntaxBox\Document\DocumentStructure\Undo\UndoBuffer.cs" />
-    <Compile Include="SyntaxBox\Document\DocumentStructure\Word\Word.cs" />
-    <Compile Include="SyntaxBox\Document\DocumentStructure\Word\WordList.cs" />
-    <Compile Include="SyntaxBox\Document\Export\CollapsingHTMLExporter.cs" />
-    <Compile Include="SyntaxBox\Document\Export\SimpleHTMLExporter.cs" />
-    <Compile Include="SyntaxBox\Document\ImageIndexList.cs" />
-    <Compile Include="SyntaxBox\Document\Parser\DefaultParser.cs" />
-    <Compile Include="SyntaxBox\Document\Parser\IParser.cs" />
-    <Compile Include="SyntaxBox\Document\Parser\NewParser.cs" />
-    <Compile Include="SyntaxBox\Document\Parser\ParserBase.cs" />
-    <Compile Include="SyntaxBox\Document\Parser\ParserEventHandler.cs" />
-    <Compile Include="SyntaxBox\Document\Parser\ParseTools.cs" />
-    <Compile Include="SyntaxBox\Document\Parser\ScanResultSegment.cs" />
-    <Compile Include="SyntaxBox\Document\Parser\ScanResultWord.cs" />
-    <Compile Include="SyntaxBox\Document\Print\SourceCodePrintDocument.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="SyntaxBox\Document\SyntaxDefinition\Pattern\Pattern.cs" />
-    <Compile Include="SyntaxBox\Document\SyntaxDefinition\Pattern\PatternCollection.cs" />
-    <Compile Include="SyntaxBox\Document\SyntaxDefinition\Pattern\PatternExtensions.cs" />
-    <Compile Include="SyntaxBox\Document\SyntaxDefinition\Pattern\PatternList.cs" />
-    <Compile Include="SyntaxBox\Document\SyntaxDefinition\Pattern\PatternListList.cs" />
-    <Compile Include="SyntaxBox\Document\SyntaxDefinition\Pattern\PatternScanResult.cs" />
-    <Compile Include="SyntaxBox\Document\SyntaxDefinition\Scope\Scope.cs" />
-    <Compile Include="SyntaxBox\Document\SyntaxDefinition\Scope\ScopeList.cs" />
-    <Compile Include="SyntaxBox\Document\SyntaxDefinition\SpanDefinition\SpanDefinition.cs" />
-    <Compile Include="SyntaxBox\Document\SyntaxDefinition\SpanDefinition\SpanDefinitionList.cs" />
-    <Compile Include="SyntaxBox\Document\SyntaxDefinition\SyntaxDefinition.cs" />
-    <Compile Include="SyntaxBox\Document\SyntaxDefinition\SyntaxDefinitionList.cs" />
-    <Compile Include="SyntaxBox\Document\SyntaxDefinition\SyntaxDefinitionLoader.cs" />
-    <Compile Include="SyntaxBox\Document\SyntaxDefinition\TextStyle\TextStyle.cs" />
-    <Compile Include="SyntaxBox\Document\SyntaxDefinition\TextStyle\TextStyleDesignerDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SyntaxBox\Document\SyntaxDefinition\TextStyle\TextStyleUIEditor.cs" />
-    <Compile Include="SyntaxBox\Document\SyntaxDocument.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="SyntaxBox\Drawing\DesktopGraphics.cs" />
-    <Compile Include="SyntaxBox\Drawing\DrawingTools.cs" />
-    <Compile Include="SyntaxBox\Drawing\Enums.cs" />
-    <Compile Include="SyntaxBox\Drawing\GDI32\FontEnum.cs" />
-    <Compile Include="SyntaxBox\Drawing\GDI32\GDIBrushes.cs" />
-    <Compile Include="SyntaxBox\Drawing\GDI32\GDIFont.cs" />
-    <Compile Include="SyntaxBox\Drawing\GDI32\GDIObject.cs" />
-    <Compile Include="SyntaxBox\Drawing\GDI32\GDIPens.cs" />
-    <Compile Include="SyntaxBox\Drawing\GDI32\GDISurface.cs" />
-    <Compile Include="SyntaxBox\Globalization\IMEWindow.cs" />
-    <Compile Include="SyntaxBox\Interfaces\IPainter.cs" />
-    <Compile Include="SyntaxBox\Properties\Resources.Designer.cs" />
-    <Compile Include="SyntaxBox\Text\PatternMatchers\BinPatternMatcher.cs" />
-    <Compile Include="SyntaxBox\Text\PatternMatchers\DecPatternMatcher.cs" />
-    <Compile Include="SyntaxBox\Text\PatternMatchers\HexPatternMatcher.cs" />
-    <Compile Include="SyntaxBox\Text\PatternMatchers\IntPatternMatcher.cs" />
-    <Compile Include="SyntaxBox\Text\PatternMatchers\IPatternMatcher.cs" />
-    <Compile Include="SyntaxBox\Text\PatternMatchers\PatternMatcherBase.cs" />
-    <Compile Include="SyntaxBox\Text\PatternMatchers\PropertyPathPatternMatcher.cs" />
-    <Compile Include="SyntaxBox\Text\PatternMatchers\RegexPatternMatcher.cs" />
-    <Compile Include="SyntaxBox\Text\PatternMatchers\RegionPatternMatcher.cs" />
-    <Compile Include="SyntaxBox\Text\Tokenizer\CharUtils.cs" />
-    <Compile Include="SyntaxBox\Text\Tokenizer\MatchResult.cs" />
-    <Compile Include="SyntaxBox\Text\Tokenizer\PatternMatchReference.cs" />
-    <Compile Include="SyntaxBox\Text\Tokenizer\Token.cs" />
-    <Compile Include="SyntaxBox\Text\Tokenizer\Tokenizer.cs" />
-    <Compile Include="SyntaxBox\Text\Tokenizer\TokenTree-API.cs" />
-    <Compile Include="SyntaxBox\Text\Tokenizer\TokenTree-Util.cs" />
-    <Compile Include="SyntaxBox\Text\Tokenizer\TokenTree.cs" />
-    <Compile Include="SyntaxBox\Text\Tokenizer\TokenTreeNode.cs" />
-    <Compile Include="SyntaxBox\Win32\Enums.cs" />
-    <Compile Include="SyntaxBox\Win32\NativeMethods.cs" />
-    <Compile Include="SyntaxBox\Win32\NativeSubclasser.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="ScriptDotNet\RuntimeConfig.xml" />
     <EmbeddedResource Include="GUI\SessionInformation.resx">
       <DependentUpon>SessionInformation.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SyntaxBox\Controls\Autolist\AutoListForm.resx">
-      <DependentUpon>AutoListForm.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SyntaxBox\Controls\Autolist\TabListBox.resx">
-      <DependentUpon>TabListBox.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SyntaxBox\Controls\BaseControls\BaseControl.resx">
-      <DependentUpon>BaseControl.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SyntaxBox\Controls\BaseControls\BaseListBoxControl.resx">
-      <DependentUpon>BaseListBoxControl.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SyntaxBox\Controls\BaseControls\BasePanelControl.resx">
-      <DependentUpon>BasePanelControl.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SyntaxBox\Controls\EditView\EditViewControl.resx">
-      <DependentUpon>EditViewControl.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SyntaxBox\Controls\FormatLabel\FormatLabelControl.resx">
-      <DependentUpon>FormatLabelControl.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SyntaxBox\Controls\InfoTip\InfoTipForm.resx">
-      <DependentUpon>InfoTipForm.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SyntaxBox\Controls\IntelliMouse\IntelliMouse.resx">
-      <DependentUpon>IntelliMouse.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SyntaxBox\Controls\RegionHandler\RegionHandler.resx">
-      <DependentUpon>RegionHandler.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SyntaxBox\Controls\SplitView\SplitViewChildControl.resx">
-      <DependentUpon>SplitViewChildControl.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SyntaxBox\Controls\SplitView\SplitViewControl.resx">
-      <DependentUpon>SplitViewControl.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SyntaxBox\Controls\SplitView\SplitViewParentControl.resx">
-      <DependentUpon>SplitViewParentControl.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SyntaxBox\Controls\Syntaxbox\Dialogs\FindReplace.resx">
-      <DependentUpon>FindReplace.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SyntaxBox\Controls\Syntaxbox\Dialogs\GotoLine.resx">
-      <DependentUpon>GotoLine.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SyntaxBox\Controls\Syntaxbox\Dialogs\Settings.resx">
-      <DependentUpon>Settings.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SyntaxBox\Controls\Syntaxbox\SyntaxBoxControl.resx">
-      <DependentUpon>SyntaxBoxControl.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SyntaxBox\Design\CollectionEditorGui.resx">
-      <DependentUpon>CollectionEditorGui.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SyntaxBox\Document\Print\SourceCodePrintDocument.resx">
-      <DependentUpon>SourceCodePrintDocument.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SyntaxBox\Document\SyntaxDefinition\TextStyle\TextStyleDesignerDialog.resx">
-      <DependentUpon>TextStyleDesignerDialog.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SyntaxBox\Document\SyntaxDocument.resx">
-      <DependentUpon>SyntaxDocument.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SyntaxBox\Properties\Resources.resx">
-      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -744,7 +337,6 @@
     <None Include="Resources\save-icon.png" />
     <Content Include="Shark.ico" />
     <Content Include="SharkLogo.png" />
-    <Content Include="SyntaxBox\Text\ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-
-using Microsoft.Win32;
-using ScriptNET.Runtime;
+using System.IO;
 using System.Reflection;
-using System.Security.Principal;
+using System.Windows.Forms;
+using Microsoft.Win32;
+using Scripting.SSharp.Runtime;
 
 namespace MapleShark
 {
@@ -66,14 +61,14 @@ namespace MapleShark
 
         private void initialisator_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            this.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.DialogResult = DialogResult.OK;
             this.Close();
         }
 
         private void initialisator_DoWork(object sender, DoWorkEventArgs e)
         {
             var filepath = Assembly.GetExecutingAssembly().Location;
-            Environment.CurrentDirectory = filepath.Remove(filepath.LastIndexOf(System.IO.Path.DirectorySeparatorChar));
+            Environment.CurrentDirectory = filepath.Remove(filepath.LastIndexOf(Path.DirectorySeparatorChar));
 
             // Ignore updates for now.
             //initialisator.ReportProgress(0, "Checking for updates");
