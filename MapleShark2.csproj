@@ -43,6 +43,7 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <LangVersion>8</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
@@ -104,27 +105,48 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="mscorlib" />
-    <Reference Include="PacketDotNet, Version=1.0.4.0, Culture=neutral, PublicKeyToken=451414c7667b2a58">
-      <HintPath>packages\PacketDotNet.1.0.4\lib\net45\PacketDotNet.dll</HintPath>
+    <Reference Include="Be.Windows.Forms.HexBox, Version=1.6.1.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>packages\Be.Windows.Forms.HexBox.1.6.1\lib\net40\Be.Windows.Forms.HexBox.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="SharpPcap, Version=5.1.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>packages\SharpPcap.5.1.0\lib\netstandard2.0\SharpPcap.dll</HintPath>
+    <Reference Include="mscorlib" />
+    <Reference Include="PacketDotNet, Version=1.2.0.0, Culture=neutral, PublicKeyToken=451414c7667b2a58">
+      <HintPath>packages\PacketDotNet.1.2.0\lib\net45\PacketDotNet.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SharpPcap, Version=5.4.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>packages\SharpPcap.5.4.0\lib\netstandard2.0\SharpPcap.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+      <HintPath>packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Drawing.Design" />
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.6.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>packages\System.Runtime.CompilerServices.Unsafe.4.7.1\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+      <HintPath>packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <HintPath>packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <HintPath>packages\System.Runtime.CompilerServices.Unsafe.5.0.0\lib\net45\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="WeifenLuo.WinFormsUI.Docking, Version=3.0.6.0, Culture=neutral, PublicKeyToken=5cded1a1a0a7b481">
+      <HintPath>packages\DockPanelSuite.3.0.6\lib\net40\WeifenLuo.WinFormsUI.Docking.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Logging\MaplePacket.cs" />
@@ -133,6 +155,7 @@
     <Compile Include="Packet\Rand32.cs" />
     <Compile Include="Packet\RearrangeCrypter.cs" />
     <Compile Include="Packet\TableCrypter.cs" />
+    <Compile Include="Packet\TcpReassembler.cs" />
     <Compile Include="Packet\XORCrypter.cs" />
     <Compile Include="Tools\AppUpdates.cs" />
     <Compile Include="Tools\Config.cs" />
@@ -144,101 +167,6 @@
     </Compile>
     <Compile Include="Logging\Definition.cs" />
     <Compile Include="Logging\DefinitionsContainer.cs" />
-    <Compile Include="Docking\AutoHideStripBase.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Docking\DockAreasEditor.cs" />
-    <Compile Include="Docking\DockContent.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Docking\DockContentCollection.cs" />
-    <Compile Include="Docking\DockContentEventArgs.cs" />
-    <Compile Include="Docking\DockContentHandler.cs" />
-    <Compile Include="Docking\DockOutlineBase.cs" />
-    <Compile Include="Docking\DockPane.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Docking\DockPane.SplitterControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Docking\DockPaneCaptionBase.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Docking\DockPaneCollection.cs" />
-    <Compile Include="Docking\DockPanel.AutoHideWindow.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Docking\DockPanel.cs" />
-    <Compile Include="Docking\DockPanel.DockDragHandler.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Docking\DockPanel.DragHandler.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Docking\DockPanel.FocusManager.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Docking\DockPanel.MdiClientController.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Docking\DockPanel.Persistor.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Docking\DockPanel.SplitterDragHandler.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Docking\DockPanelExtender.cs" />
-    <Compile Include="Docking\DockPanelSkin.cs" />
-    <Compile Include="Docking\DockPaneStripBase.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Docking\DockWindow.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Docking\DockWindow.SplitterControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Docking\DockWindowCollection.cs" />
-    <Compile Include="Docking\DragForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Docking\DummyControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Docking\Enums.cs" />
-    <Compile Include="Docking\FloatWindow.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Docking\FloatWindowCollection.cs" />
-    <Compile Include="Docking\Helpers\DockHelper.cs" />
-    <Compile Include="Docking\Helpers\DrawHelper.cs" />
-    <Compile Include="Docking\Helpers\ResourceHelper.cs" />
-    <Compile Include="Docking\Helpers\Win32Helper.cs" />
-    <Compile Include="Docking\InertButtonBase.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Docking\Interfaces.cs" />
-    <Compile Include="Docking\Localization.cs" />
-    <Compile Include="Docking\Measures.cs" />
-    <Compile Include="Docking\NestedDockingStatus.cs" />
-    <Compile Include="Docking\NestedPaneCollection.cs" />
-    <Compile Include="Docking\Resources.Designer.cs" />
-    <Compile Include="Docking\SplitterBase.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Docking\Strings.Designer.cs" />
-    <Compile Include="Docking\VisibleNestedPaneCollection.cs" />
-    <Compile Include="Docking\VS2005AutoHideStrip.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Docking\VS2005DockPaneCaption.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Docking\VS2005DockPaneStrip.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Docking\Win32\Enums.cs" />
-    <Compile Include="Docking\Win32\NativeMethods.cs" />
     <Compile Include="GUI\PacketListView.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -261,20 +189,6 @@
       <DependentUpon>frmSplash.cs</DependentUpon>
     </Compile>
     <Compile Include="Logging\Opcode.cs" />
-    <Compile Include="HexBox\ByteCollection.cs" />
-    <Compile Include="HexBox\DataBlock.cs" />
-    <Compile Include="HexBox\DataMap.cs" />
-    <Compile Include="HexBox\DynamicByteProvider.cs" />
-    <Compile Include="HexBox\DynamicFileByteProvider.cs" />
-    <Compile Include="HexBox\FileByteProvider.cs" />
-    <Compile Include="HexBox\FileDataBlock.cs" />
-    <Compile Include="HexBox\HexBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="HexBox\HexFontEditor.cs" />
-    <Compile Include="HexBox\IByteProvider.cs" />
-    <Compile Include="HexBox\MemoryDataBlock.cs" />
-    <Compile Include="HexBox\NativeMethods.cs" />
     <Compile Include="GUI\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -304,10 +218,6 @@
     <EmbeddedResource Include="GUI\frmSplash.resx">
       <DependentUpon>frmSplash.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="HexBox\HexBox.resx">
-      <DependentUpon>HexBox.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -317,7 +227,6 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="app.config" />
-    <None Include="Docking\Resources\Thumbs.db" />
     <None Include="packages.config" />
     <None Include="Properties\app.manifest" />
     <None Include="ScriptDotNet\Runtime\Operators\Operators_Native.zip" />
@@ -794,12 +703,6 @@
       <DependentUpon>DataForm.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Docking\Resources.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Docking\Strings.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="GUI\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -833,30 +736,6 @@
       <DependentUpon>StructureForm.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <Content Include="Docking\DockPanel.bmp" />
-    <Content Include="Docking\Resources\DockIndicator_PaneDiamond.bmp" />
-    <Content Include="Docking\Resources\DockIndicator_PaneDiamond_Bottom.bmp" />
-    <Content Include="Docking\Resources\Dockindicator_PaneDiamond_Fill.bmp" />
-    <Content Include="Docking\Resources\DockIndicator_PaneDiamond_Hotspot.bmp" />
-    <Content Include="Docking\Resources\DockIndicator_PaneDiamond_HotspotIndex.bmp" />
-    <Content Include="Docking\Resources\DockIndicator_PaneDiamond_Left.bmp" />
-    <Content Include="Docking\Resources\DockIndicator_PaneDiamond_Right.bmp" />
-    <Content Include="Docking\Resources\DockIndicator_PaneDiamond_Top.bmp" />
-    <Content Include="Docking\Resources\DockIndicator_PanelBottom.bmp" />
-    <Content Include="Docking\Resources\DockIndicator_PanelBottom_Active.bmp" />
-    <Content Include="Docking\Resources\DockIndicator_PanelFill.bmp" />
-    <Content Include="Docking\Resources\DockIndicator_PanelFill_Active.bmp" />
-    <Content Include="Docking\Resources\DockIndicator_PanelLeft.bmp" />
-    <Content Include="Docking\Resources\DockIndicator_PanelLeft_Active.bmp" />
-    <Content Include="Docking\Resources\DockIndicator_PanelRight.bmp" />
-    <Content Include="Docking\Resources\DockIndicator_PanelRight_Active.bmp" />
-    <Content Include="Docking\Resources\DockIndicator_PanelTop.bmp" />
-    <Content Include="Docking\Resources\DockIndicator_PanelTop_Active.bmp" />
-    <Content Include="Docking\Resources\DockPane_AutoHide.bmp" />
-    <Content Include="Docking\Resources\DockPane_Close.bmp" />
-    <Content Include="Docking\Resources\DockPane_Dock.bmp" />
-    <Content Include="Docking\Resources\DockPane_Option.bmp" />
-    <Content Include="Docking\Resources\DockPane_OptionOverflow.bmp" />
     <Content Include="Readme.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

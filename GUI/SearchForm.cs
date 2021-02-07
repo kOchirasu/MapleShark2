@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using Be.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace MapleShark
@@ -15,7 +16,7 @@ namespace MapleShark
         public SearchForm()
         {
             InitializeComponent();
-            mSequenceHex.ByteProvider = new DynamicByteProvider(new ByteCollection());
+            mSequenceHex.ByteProvider = new DynamicByteProvider(new List<byte>());
             (mSequenceHex.ByteProvider as DynamicByteProvider).Changed += mSequenceHex_ByteProviderChanged;
         }
 

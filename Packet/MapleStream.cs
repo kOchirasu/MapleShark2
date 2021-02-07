@@ -1,8 +1,5 @@
 ﻿using System;
 using MapleShark.Packet;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace MapleShark {
     public sealed class MapleStream {

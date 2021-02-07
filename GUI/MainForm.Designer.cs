@@ -81,18 +81,18 @@
             this.mMenu.SuspendLayout();
             this.toolStrip.SuspendLayout();
             this.SuspendLayout();
-            // 
+            //
             // mMenu
-            // 
+            //
             this.mMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {this.mFileMenu, this.mViewMenu});
             this.mMenu.Location = new System.Drawing.Point(0, 0);
             this.mMenu.Name = "mMenu";
             this.mMenu.Padding = new System.Windows.Forms.Padding(7, 2, 0, 2);
             this.mMenu.Size = new System.Drawing.Size(1101, 24);
             this.mMenu.TabIndex = 1;
-            // 
+            //
             // mFileMenu
-            // 
+            //
             this.mFileMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
                 this.mFileOpenMenu, this.mFileImportMenu, this.importJavapropertiesFileToolStripMenuItem,
                 this.importMSnifferToolStripMenuItem, this.toolStripSeparator4, this.setupToolStripMenuItem,
@@ -101,76 +101,76 @@
             this.mFileMenu.Name = "mFileMenu";
             this.mFileMenu.Size = new System.Drawing.Size(37, 20);
             this.mFileMenu.Text = "&File";
-            // 
+            //
             // mFileOpenMenu
-            // 
+            //
             this.mFileOpenMenu.Name = "mFileOpenMenu";
             this.mFileOpenMenu.ShortcutKeys =
                 ((System.Windows.Forms.Keys) ((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
             this.mFileOpenMenu.Size = new System.Drawing.Size(218, 22);
             this.mFileOpenMenu.Text = "&Open";
             this.mFileOpenMenu.Click += new System.EventHandler(this.mFileOpenMenu_Click);
-            // 
+            //
             // mFileImportMenu
-            // 
+            //
             this.mFileImportMenu.Name = "mFileImportMenu";
             this.mFileImportMenu.Size = new System.Drawing.Size(218, 22);
             this.mFileImportMenu.Text = "Import .pcap file";
             this.mFileImportMenu.Click += new System.EventHandler(this.mFileImportMenu_Click);
-            // 
+            //
             // importJavapropertiesFileToolStripMenuItem
-            // 
+            //
             this.importJavapropertiesFileToolStripMenuItem.Name = "importJavapropertiesFileToolStripMenuItem";
             this.importJavapropertiesFileToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
             this.importJavapropertiesFileToolStripMenuItem.Text = "Import Java *.properties file";
             this.importJavapropertiesFileToolStripMenuItem.Click +=
                 new System.EventHandler(this.importJavapropertiesFileToolStripMenuItem_Click);
-            // 
+            //
             // importMSnifferToolStripMenuItem
-            // 
+            //
             this.importMSnifferToolStripMenuItem.Name = "importMSnifferToolStripMenuItem";
             this.importMSnifferToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
             this.importMSnifferToolStripMenuItem.Text = "Import MSniffer logfile";
             this.importMSnifferToolStripMenuItem.Click +=
                 new System.EventHandler(this.importMSnifferToolStripMenuItem_Click);
-            // 
+            //
             // toolStripSeparator4
-            // 
+            //
             this.toolStripSeparator4.Name = "toolStripSeparator4";
             this.toolStripSeparator4.Size = new System.Drawing.Size(215, 6);
-            // 
+            //
             // setupToolStripMenuItem
-            // 
+            //
             this.setupToolStripMenuItem.Name = "setupToolStripMenuItem";
             this.setupToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
             this.setupToolStripMenuItem.Text = "MapleShark Setup";
             this.setupToolStripMenuItem.Click += new System.EventHandler(this.setupToolStripMenuItem_Click);
-            // 
+            //
             // mFileSeparatorMenu
-            // 
+            //
             this.mFileSeparatorMenu.Name = "mFileSeparatorMenu";
             this.mFileSeparatorMenu.Size = new System.Drawing.Size(215, 6);
-            // 
+            //
             // mFileQuit
-            // 
+            //
             this.mFileQuit.Name = "mFileQuit";
             this.mFileQuit.ShortcutKeys =
                 ((System.Windows.Forms.Keys) ((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
             this.mFileQuit.Size = new System.Drawing.Size(218, 22);
             this.mFileQuit.Text = "&Quit";
             this.mFileQuit.Click += new System.EventHandler(this.mFileQuit_Click);
-            // 
+            //
             // mViewMenu
-            // 
+            //
             this.mViewMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[]
                 {this.mViewSearchMenu, this.mViewDataMenu, this.mViewStructureMenu, this.mViewPropertiesMenu});
             this.mViewMenu.Name = "mViewMenu";
             this.mViewMenu.Size = new System.Drawing.Size(44, 20);
             this.mViewMenu.Text = "&View";
             this.mViewMenu.DropDownOpening += new System.EventHandler(this.mViewMenu_DropDownOpening);
-            // 
+            //
             // mViewSearchMenu
-            // 
+            //
             this.mViewSearchMenu.Checked = true;
             this.mViewSearchMenu.CheckOnClick = true;
             this.mViewSearchMenu.CheckState = System.Windows.Forms.CheckState.Checked;
@@ -179,9 +179,9 @@
             this.mViewSearchMenu.Size = new System.Drawing.Size(152, 22);
             this.mViewSearchMenu.Text = "Sea&rch";
             this.mViewSearchMenu.CheckedChanged += new System.EventHandler(this.mViewSearchMenu_CheckedChanged);
-            // 
+            //
             // mViewDataMenu
-            // 
+            //
             this.mViewDataMenu.Checked = true;
             this.mViewDataMenu.CheckOnClick = true;
             this.mViewDataMenu.CheckState = System.Windows.Forms.CheckState.Checked;
@@ -190,9 +190,9 @@
             this.mViewDataMenu.Size = new System.Drawing.Size(152, 22);
             this.mViewDataMenu.Text = "&Data";
             this.mViewDataMenu.CheckedChanged += new System.EventHandler(this.mViewDataMenu_CheckedChanged);
-            // 
+            //
             // mViewStructureMenu
-            // 
+            //
             this.mViewStructureMenu.Checked = true;
             this.mViewStructureMenu.CheckOnClick = true;
             this.mViewStructureMenu.CheckState = System.Windows.Forms.CheckState.Checked;
@@ -201,9 +201,9 @@
             this.mViewStructureMenu.Size = new System.Drawing.Size(152, 22);
             this.mViewStructureMenu.Text = "&Structure";
             this.mViewStructureMenu.CheckedChanged += new System.EventHandler(this.mViewStructureMenu_CheckedChanged);
-            // 
+            //
             // mViewPropertiesMenu
-            // 
+            //
             this.mViewPropertiesMenu.Checked = true;
             this.mViewPropertiesMenu.CheckOnClick = true;
             this.mViewPropertiesMenu.CheckState = System.Windows.Forms.CheckState.Checked;
@@ -212,29 +212,29 @@
             this.mViewPropertiesMenu.Size = new System.Drawing.Size(152, 22);
             this.mViewPropertiesMenu.Text = "&Properties";
             this.mViewPropertiesMenu.CheckedChanged += new System.EventHandler(this.mViewPropertiesMenu_CheckedChanged);
-            // 
+            //
             // mTimer
-            // 
+            //
             this.mTimer.Interval = 300;
             this.mTimer.Tick += new System.EventHandler(this.mTimer_Tick);
-            // 
+            //
             // mImportDialog
-            // 
+            //
             this.mImportDialog.Filter = "PCap Files|*.pcap";
             this.mImportDialog.ReadOnlyChecked = true;
             this.mImportDialog.RestoreDirectory = true;
             this.mImportDialog.Title = "Import";
-            // 
+            //
             // mOpenDialog
-            // 
+            //
             this.mOpenDialog.Filter = "MapleShark Binary Files|*.msb";
             this.mOpenDialog.Multiselect = true;
             this.mOpenDialog.ReadOnlyChecked = true;
             this.mOpenDialog.RestoreDirectory = true;
             this.mOpenDialog.Title = "Open";
-            // 
+            //
             // toolStrip
-            // 
+            //
             this.toolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
                 this.openToolStripButton, this.saveToolStripButton, this.toolStripSeparator1, this.mStopStartButton,
                 this.toolStripSeparator2, this.helpToolStripButton
@@ -244,9 +244,9 @@
             this.toolStrip.Size = new System.Drawing.Size(1101, 25);
             this.toolStrip.TabIndex = 11;
             this.toolStrip.Text = "ToolStrip";
-            // 
+            //
             // openToolStripButton
-            // 
+            //
             this.openToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.openToolStripButton.Image =
                 ((System.Drawing.Image) (resources.GetObject("openToolStripButton.Image")));
@@ -255,9 +255,9 @@
             this.openToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.openToolStripButton.Text = "Open";
             this.openToolStripButton.Click += new System.EventHandler(this.mFileOpenMenu_Click);
-            // 
+            //
             // saveToolStripButton
-            // 
+            //
             this.saveToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.saveToolStripButton.Image =
                 ((System.Drawing.Image) (resources.GetObject("saveToolStripButton.Image")));
@@ -266,27 +266,27 @@
             this.saveToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.saveToolStripButton.Text = "Save";
             this.saveToolStripButton.Click += new System.EventHandler(this.saveToolStripButton_Click);
-            // 
+            //
             // toolStripSeparator1
-            // 
+            //
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
-            // 
+            //
             // mStopStartButton
-            // 
+            //
             this.mStopStartButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.mStopStartButton.Name = "mStopStartButton";
             this.mStopStartButton.Size = new System.Drawing.Size(78, 22);
             this.mStopStartButton.Text = "Stop sniffing";
             this.mStopStartButton.Click += new System.EventHandler(this.toolStripButton1_Click);
-            // 
+            //
             // toolStripSeparator2
-            // 
+            //
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
-            // 
+            //
             // helpToolStripButton
-            // 
+            //
             this.helpToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.helpToolStripButton.Image =
                 ((System.Drawing.Image) (resources.GetObject("helpToolStripButton.Image")));
@@ -295,9 +295,9 @@
             this.helpToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.helpToolStripButton.Text = "Help";
             this.helpToolStripButton.Click += new System.EventHandler(this.helpToolStripButton_Click);
-            // 
+            //
             // mDockPanel
-            // 
+            //
             this.mDockPanel.ActiveAutoHideContent = null;
             this.mDockPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mDockPanel.DockBackColor = System.Drawing.SystemColors.ControlDark;
@@ -351,12 +351,12 @@
             dockPaneStripToolWindowGradient1.InactiveTabGradient = tabGradient7;
             dockPaneStripSkin1.ToolWindowGradient = dockPaneStripToolWindowGradient1;
             dockPanelSkin1.DockPaneStripSkin = dockPaneStripSkin1;
-            this.mDockPanel.Skin = dockPanelSkin1;
+            //this.mDockPanel.Theme.Skin = dockPanelSkin1;
             this.mDockPanel.TabIndex = 4;
             this.mDockPanel.ActiveDocumentChanged += new System.EventHandler(this.mDockPanel_ActiveDocumentChanged);
-            // 
+            //
             // MainForm
-            // 
+            //
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;

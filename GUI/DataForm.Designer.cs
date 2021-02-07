@@ -28,14 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.mHex = new System.Windows.Forms.HexBox();
+            this.mHex = new Be.Windows.Forms.HexBox();
             this.SuspendLayout();
-            // 
+            //
             // mHex
-            // 
+            //
             this.mHex.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mHex.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.mHex.LineInfoForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
+            this.mHex.InfoForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.mHex.LineInfoVisible = true;
             this.mHex.Location = new System.Drawing.Point(0, 0);
             this.mHex.Name = "mHex";
@@ -49,9 +49,9 @@
             this.mHex.VScrollBarVisible = true;
             this.mHex.SelectionLengthChanged += new System.EventHandler(this.mHex_SelectionLengthChanged);
             this.mHex.KeyDown += new System.Windows.Forms.KeyEventHandler(this.mHex_KeyDown);
-            // 
+            //
             // DataForm
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(613, 147);
@@ -71,6 +71,6 @@
 
         #endregion
 
-        private System.Windows.Forms.HexBox mHex;
+        private Be.Windows.Forms.HexBox mHex;
     }
 }

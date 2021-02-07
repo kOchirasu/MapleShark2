@@ -215,7 +215,7 @@ namespace ScriptNET.Runtime
     /// </summary>
     /// <param name="name">Short, Alias or FullType name</param>
     /// <returns>Type</returns>
-    /// <exception cref="ScriptNET.ScriptException">
+    /// <exception cref="ScriptException">
     ///  If type not found
     /// </exception>
     public Type GetType(string name)

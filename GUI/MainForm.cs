@@ -5,6 +5,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
+using Be.Windows.Forms;
 using PacketDotNet;
 using SharpPcap;
 using SharpPcap.LibPcap;
@@ -46,11 +47,6 @@ namespace MapleShark
         {
             SessionForm session = new SessionForm();
             return session;
-        }
-
-        public void CloseSession(SessionForm form)
-        {
-            mDockPanel.Contents.Remove(form);
         }
 
         public void CopyPacketHex(KeyEventArgs pArgs)
@@ -148,10 +144,10 @@ namespace MapleShark
             mDataForm.Show(mDockPanel);
             mStructureForm.Show(mDockPanel);
             mPropertyForm.Show(mDockPanel);
-            DockPane rightPane1 = new DockPane(mStructureForm, DockState.DockRight, true);
+            /*DockPane rightPane1 = new DockPane(mStructureForm, DockState.DockRight, true);
             DockPane rightPane2 = new DockPane(mPropertyForm, DockState.DockRight, true);
             rightPane1.Show();
-            rightPane2.Show();
+            rightPane2.Show();*/
 
 
             foreach (string arg in _startupArguments)
@@ -525,7 +521,7 @@ namespace MapleShark
                         return;
                     }
                 }
-                mDockPanel.Contents.Remove(ses);
+                //mDockPanel.Contents.Remove(ses);
                 sessionForms.Remove(ses);
             }
 

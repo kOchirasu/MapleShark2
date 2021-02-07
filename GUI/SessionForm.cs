@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using Be.Windows.Forms;
 using MapleLib.PacketLib;
 using MapleShark.Tools;
 using PacketDotNet;
