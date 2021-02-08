@@ -124,7 +124,7 @@
             this.importJavapropertiesFileToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
             this.importJavapropertiesFileToolStripMenuItem.Text = "Import Java *.properties file";
             this.importJavapropertiesFileToolStripMenuItem.Click +=
-                new System.EventHandler(this.importJavapropertiesFileToolStripMenuItem_Click);
+                new System.EventHandler(this.importJavaPropertiesFileToolStripMenuItem_Click);
             //
             // importMSnifferToolStripMenuItem
             //

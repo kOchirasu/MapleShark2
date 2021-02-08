@@ -112,7 +112,7 @@
             // mLengthColumn
             //
             this.mLengthColumn.Text = "Length";
-            this.mLengthColumn.Width = 64;
+            this.mLengthColumn.Width = 65;
             //
             // mOpcodeColumn
             //
@@ -121,7 +121,7 @@
             // mNameColumn
             //
             this.mNameColumn.Text = "Name";
-            this.mNameColumn.Width = 147;
+            this.mNameColumn.Width = 175;
             //
             // mPacketContextMenu
             //

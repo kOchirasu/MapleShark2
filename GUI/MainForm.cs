@@ -6,20 +6,19 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using Be.Windows.Forms;
+using MapleShark.Properties;
 using PacketDotNet;
 using SharpPcap;
 using SharpPcap.LibPcap;
 using WeifenLuo.WinFormsUI.Docking;
-using Resources = MapleShark.Properties.Resources;
 
-namespace MapleShark
-{
-    public partial class MainForm : Form
-    {
+namespace MapleShark {
+    public partial class MainForm : Form {
         private const string LAYOUT_FILE = "Layout.xml";
 
-        private bool mClosed = false;
-        private LibPcapLiveDevice mDevice = null;
+        private bool mClosed;
+        private LibPcapLiveDevice mDevice;
+        private PcapDevice device;
 
         // DockContent Controls
         private SearchForm mSearchForm;
@@ -28,19 +27,18 @@ namespace MapleShark
         private PropertyForm mPropertyForm;
 
         private DeserializeDockContent mDeserializeDockContent;
-        private string[] _startupArguments = null;
+        private readonly string[] startupArguments;
 
-        private List<RawCapture> PacketQueue = new List<RawCapture>();
+        private List<RawCapture> packetQueue = new List<RawCapture>();
 
-        public MainForm(string[] startupArguments)
-        {
+        public MainForm(string[] startupArguments) {
             InitializeComponent();
             CreateStandardControls();
 
             Text = "MapleShark2 (Build: " + Program.AssemblyVersion + ")";
 
             mDeserializeDockContent = GetContentFromPersistString;
-            _startupArguments = startupArguments;
+            this.startupArguments = startupArguments;
         }
 
         private void CreateStandardControls() {
@@ -54,12 +52,15 @@ namespace MapleShark
             if (persistString == typeof(SearchForm).ToString()) {
                 return mSearchForm;
             }
+
             if (persistString == typeof(DataForm).ToString()) {
                 return mDataForm;
             }
+
             if (persistString == typeof(StructureForm).ToString()) {
                 return mStructureForm;
             }
+
             if (persistString == typeof(PropertyForm).ToString()) {
                 return mPropertyForm;
             }
@@ -73,106 +74,97 @@ namespace MapleShark
         public PropertyForm PropertyForm => mPropertyForm;
         public byte Locale => ((SessionForm) mDockPanel.ActiveDocument).Locale;
 
-        PcapDevice device;
-
-        private SessionForm NewSession()
-        {
-            SessionForm session = new SessionForm();
+        private SessionForm NewSession() {
+            var session = new SessionForm();
             return session;
         }
 
-        public void CopyPacketHex(KeyEventArgs pArgs)
-        {
-            if (mDataForm.HexBox.SelectionLength > 0 && pArgs.Modifiers == Keys.Control && pArgs.KeyCode == Keys.C)
-            {
-                Clipboard.SetText(BitConverter.ToString((mDataForm.HexBox.ByteProvider as DynamicByteProvider).Bytes.ToArray(), (int)mDataForm.HexBox.SelectionStart, (int)mDataForm.HexBox.SelectionLength).Replace("-", " "));
+        public void CopyPacketHex(KeyEventArgs pArgs) {
+            if (mDataForm.HexBox.SelectionLength > 0 && pArgs.Modifiers == Keys.Control && pArgs.KeyCode == Keys.C) {
+                Clipboard.SetText(BitConverter
+                    .ToString((mDataForm.HexBox.ByteProvider as DynamicByteProvider).Bytes.ToArray(),
+                        (int) mDataForm.HexBox.SelectionStart, (int) mDataForm.HexBox.SelectionLength)
+                    .Replace("-", " "));
                 pArgs.SuppressKeyPress = true;
-            }
-            else if (mDataForm.HexBox.SelectionLength > 0 && pArgs.Control && pArgs.Shift && pArgs.KeyCode == Keys.C)
-            {
+            } else if (mDataForm.HexBox.SelectionLength > 0
+                       && pArgs.Control
+                       && pArgs.Shift
+                       && pArgs.KeyCode == Keys.C) {
                 byte[] buffer = new byte[mDataForm.HexBox.SelectionLength];
-                Buffer.BlockCopy((mDataForm.HexBox.ByteProvider as DynamicByteProvider).Bytes.ToArray(), (int)mDataForm.HexBox.SelectionStart, buffer, 0, (int)mDataForm.HexBox.SelectionLength);
+                Buffer.BlockCopy((mDataForm.HexBox.ByteProvider as DynamicByteProvider).Bytes.ToArray(),
+                    (int) mDataForm.HexBox.SelectionStart, buffer, 0, (int) mDataForm.HexBox.SelectionLength);
                 mSearchForm.HexBox.ByteProvider.DeleteBytes(0, mSearchForm.HexBox.ByteProvider.Length);
                 mSearchForm.HexBox.ByteProvider.InsertBytes(0, buffer);
                 pArgs.SuppressKeyPress = true;
             }
         }
 
-        private DialogResult ShowSetupForm()
-        {
+        private DialogResult ShowSetupForm() {
             return new SetupForm().ShowDialog(this);
         }
 
-        private void SetupAdapter()
-        {
-            if (mDevice != null)
-            {
+        private void SetupAdapter() {
+            if (mDevice != null) {
                 mDevice.StopCapture();
                 mDevice.Close();
             }
 
-            foreach (LibPcapLiveDevice device in LibPcapLiveDeviceList.Instance)
-            {
-                if (device.Interface.Name == Config.Instance.Interface)
-                {
-                    mDevice = device;
+            foreach (LibPcapLiveDevice pcapDevice in LibPcapLiveDeviceList.Instance) {
+                if (pcapDevice.Interface.Name == Config.Instance.Interface) {
+                    mDevice = pcapDevice;
                     break;
                 }
             }
 
-            if (mDevice == null)
-            {
+            if (mDevice == null) {
                 // Well shit...
 
-                MessageBox.Show("Invalid configuration. Please re-setup your MapleShark configuration.", "MapleShark", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                if (ShowSetupForm() != DialogResult.OK)
-                {
+                MessageBox.Show("Invalid configuration. Please re-setup your MapleShark configuration.", "MapleShark",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                if (ShowSetupForm() != DialogResult.OK) {
                     Close();
                     return;
                 }
+
                 SetupAdapter();
             }
 
-            try
-            {
+            try {
                 mDevice.OnPacketArrival += mDevice_OnPacketArrival;
                 mDevice.Open(DeviceMode.Promiscuous, 10);
                 mDevice.Filter = $"tcp portrange {Config.Instance.LowPort}-{Config.Instance.HighPort}";
                 mDevice.StartCapture();
-            }
-            catch
-            {
+            } catch {
                 MessageBox.Show("Failed to set the device in Promiscuous mode! But that doesn't really matter lol.");
                 mDevice.Open();
             }
         }
 
-        private void mDevice_OnPacketArrival(object sender, CaptureEventArgs e)
-        {
+        private void mDevice_OnPacketArrival(object sender, CaptureEventArgs e) {
             if (!started) return;
 
-            lock (PacketQueue)
-            {
-                PacketQueue.Add(e.Packet);
+            lock (packetQueue) {
+                packetQueue.Add(e.Packet);
             }
         }
 
-        private void MainForm_Load(object pSender, EventArgs pArgs)
-        {
-            if (!Config.Instance.LoadedFromFile)
-            {
-                if (ShowSetupForm() != DialogResult.OK)
-                {
+        private void MainForm_Load(object pSender, EventArgs pArgs) {
+            if (!Config.Instance.LoadedFromFile) {
+                if (ShowSetupForm() != DialogResult.OK) {
                     Close();
                     return;
                 }
             }
 
-            try {
+            bool useDefaults = true;
+            // TODO: Loading from XML, currently this bugs because SessionForm gets serialized
+            /*try {
                 mDockPanel.LoadFromXml(LAYOUT_FILE, mDeserializeDockContent);
-            } catch {
+                useDefaults = false;
+            } catch (Exception e) {
                 // If we fail to load, it will just use the default layout.
-            }
+                Console.WriteLine(e);
+            }*/
 
             SetupAdapter();
 
@@ -182,185 +174,152 @@ namespace MapleShark
             mDataForm.Show(mDockPanel);
             mStructureForm.Show(mDockPanel);
             mPropertyForm.Show(mDockPanel);
-            /*DockPane rightPane1 = new DockPane(mStructureForm, DockState.DockRight, true);
-            DockPane rightPane2 = new DockPane(mPropertyForm, DockState.DockRight, true);
-            rightPane1.Show();
-            rightPane2.Show();*/
 
-            foreach (string arg in _startupArguments)
-            {
+            if (useDefaults) {
+                // Docking can only be done after adding to panel.
+                mStructureForm.DockState = DockState.DockRight;
+                mPropertyForm.DockState = DockState.DockRight;
+            }
+
+            foreach (string arg in startupArguments) {
                 SessionForm session = NewSession();
                 session.OpenReadOnly(arg);
                 session.Show(mDockPanel, DockState.Document);
             }
         }
 
-        private void Shutdown()
-        {
+        private void Shutdown() {
             mTimer.Enabled = false;
-            if (mDevice != null)
-            {
-                mDevice.StopCapture();
-                mDevice.Close();
-            }
+            mDevice?.StopCapture();
+            mDevice?.Close();
         }
 
-        private void MainForm_FormClosed(object pSender, FormClosedEventArgs pArgs)
-        {
+        private void MainForm_FormClosed(object pSender, FormClosedEventArgs pArgs) {
             Shutdown();
             mClosed = true;
         }
 
-        private void mDockPanel_ActiveDocumentChanged(object pSender, EventArgs pArgs)
-        {
-            if (!mClosed)
-            {
-                SessionForm session = mDockPanel.ActiveDocument as SessionForm;
+        private void mDockPanel_ActiveDocumentChanged(object pSender, EventArgs pArgs) {
+            if (!mClosed) {
                 mSearchForm.ComboBox.Items.Clear();
-                if (session != null)
-                {
+                if (mDockPanel.ActiveDocument is SessionForm session) {
                     //   session.RefreshPackets();
-
                     mSearchForm.RefreshOpcodes(false);
                     session.ReselectPacket();
-                }
-                else
-                {
-                    if (mDataForm.HexBox.ByteProvider != null) mDataForm.HexBox.ByteProvider.DeleteBytes(0, mDataForm.HexBox.ByteProvider.Length);
+                } else {
+                    mDataForm.HexBox.ByteProvider?.DeleteBytes(0, mDataForm.HexBox.ByteProvider.Length);
                     mStructureForm.Tree.Nodes.Clear();
                     mPropertyForm.Properties.SelectedObject = null;
                 }
             }
         }
 
-        private void mFileImportMenu_Click(object pSender, EventArgs pArgs)
-        {
-            if (mImportDialog.ShowDialog(this) != DialogResult.OK) return;
+        private void mFileImportMenu_Click(object pSender, EventArgs pArgs) {
+            if (mImportDialog.ShowDialog(this) != DialogResult.OK) {
+                return;
+            }
+
             device = new CaptureFileReaderDevice(mImportDialog.FileName);
             device.Open();
             new Thread(ParseImportedFile).Start();
         }
 
-        void ParseImportedFile()
-        {
+        private void ParseImportedFile() {
             RawCapture packet = null;
             SessionForm session = null;
 
-            this.Invoke((MethodInvoker)delegate
-            {
-                while ((packet = device.GetNextPacket()) != null)
-                {
+            this.Invoke((MethodInvoker) delegate {
+                while ((packet = device.GetNextPacket()) != null) {
                     if (!started)
                         continue;
 
-                    TcpPacket tcpPacket = PacketDotNet.Packet.ParsePacket(packet.LinkLayerType, packet.Data).Extract<TcpPacket>();
+                    var tcpPacket = PacketDotNet.Packet.ParsePacket(packet.LinkLayerType, packet.Data)
+                        .Extract<TcpPacket>();
                     if (tcpPacket == null)
                         continue;
 
-                    if ((tcpPacket.SourcePort < Config.Instance.LowPort || tcpPacket.SourcePort > Config.Instance.HighPort) &&
-                        (tcpPacket.DestinationPort < Config.Instance.LowPort || tcpPacket.DestinationPort > Config.Instance.HighPort))
+                    if ((tcpPacket.SourcePort < Config.Instance.LowPort
+                         || tcpPacket.SourcePort > Config.Instance.HighPort)
+                        && (tcpPacket.DestinationPort < Config.Instance.LowPort
+                            || tcpPacket.DestinationPort > Config.Instance.HighPort))
                         continue;
-                    try
-                    {
-                        if (tcpPacket.Synchronize && !tcpPacket.Acknowledgment)
-                        {
-                            if (session != null)
-                                session.Show(mDockPanel, DockState.Document);
-
+                    try {
+                        if (tcpPacket.Synchronize && !tcpPacket.Acknowledgment) {
+                            session?.Show(mDockPanel, DockState.Document);
                             session = NewSession();
-                            var res = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
-                            if (res == SessionForm.Results.Continue)
-                            {
+                            SessionForm.Results res = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
+                            if (res == SessionForm.Results.Continue) {
                                 //    mDockPanel.Contents.Add(session);
                                 //session.Show(mDockPanel, DockState.Document);
                             }
-                        }
-                        else if (session != null && session.MatchTcpPacket(tcpPacket))
-                        {
-                            var res = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
-                            if (res == SessionForm.Results.CloseMe)
-                            {
+                        } else if (session != null && session.MatchTcpPacket(tcpPacket)) {
+                            SessionForm.Results res = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
+                            if (res == SessionForm.Results.CloseMe) {
                                 session.Close();
                             }
                         }
-
-                    }
-                    catch (Exception ex)
-                    {
+                    } catch (Exception ex) {
                         Console.WriteLine("Exception while parsing logfile: {0}", ex);
-                        session.Close();
+                        session?.Close();
                         session = null;
                     }
                 }
 
-
-                if (session != null)
+                if (session != null) {
                     session.Show(mDockPanel, DockState.Document);
-
-                if (session != null)
-                {
                     mSearchForm.RefreshOpcodes(false);
                 }
             });
         }
 
-        private void mFileOpenMenu_Click(object pSender, EventArgs pArgs)
-        {
-            if (mOpenDialog.ShowDialog(this) == DialogResult.OK)
-            {
-                foreach (string path in mOpenDialog.FileNames)
-                {
-                    SessionForm session = NewSession();
-                    session.OpenReadOnly(path);
-                    session.Show(mDockPanel, DockState.Document);
-                }
-                mSearchForm.RefreshOpcodes(false);
+        private void mFileOpenMenu_Click(object pSender, EventArgs pArgs) {
+            if (mOpenDialog.ShowDialog(this) != DialogResult.OK) {
+                return;
             }
+
+            foreach (string path in mOpenDialog.FileNames) {
+                SessionForm session = NewSession();
+                session.OpenReadOnly(path);
+                session.Show(mDockPanel, DockState.Document);
+            }
+
+            mSearchForm.RefreshOpcodes(false);
         }
 
-        private void mFileQuit_Click(object pSender, EventArgs pArgs)
-        {
+        private void mFileQuit_Click(object pSender, EventArgs pArgs) {
             Close();
         }
 
-        private void mViewMenu_DropDownOpening(object pSender, EventArgs pArgs)
-        {
+        private void mViewMenu_DropDownOpening(object pSender, EventArgs pArgs) {
             mViewSearchMenu.Checked = mSearchForm.Visible;
             mViewDataMenu.Checked = mDataForm.Visible;
             mViewStructureMenu.Checked = mStructureForm.Visible;
             mViewPropertiesMenu.Checked = mPropertyForm.Visible;
         }
 
-        private void mViewSearchMenu_CheckedChanged(object pSender, EventArgs pArgs)
-        {
+        private void mViewSearchMenu_CheckedChanged(object pSender, EventArgs pArgs) {
             if (mViewSearchMenu.Checked) mSearchForm.Show();
             else mSearchForm.Hide();
-
         }
 
-        private void mViewDataMenu_CheckedChanged(object pSender, EventArgs pArgs)
-        {
+        private void mViewDataMenu_CheckedChanged(object pSender, EventArgs pArgs) {
             if (mViewDataMenu.Checked) mDataForm.Show();
             else mDataForm.Hide();
         }
 
-        private void mViewStructureMenu_CheckedChanged(object pSender, EventArgs pArgs)
-        {
+        private void mViewStructureMenu_CheckedChanged(object pSender, EventArgs pArgs) {
             if (mViewStructureMenu.Checked) mStructureForm.Show();
             else mStructureForm.Hide();
         }
 
-        private void mViewPropertiesMenu_CheckedChanged(object pSender, EventArgs pArgs)
-        {
+        private void mViewPropertiesMenu_CheckedChanged(object pSender, EventArgs pArgs) {
             if (mViewPropertiesMenu.Checked) mPropertyForm.Show();
             else mPropertyForm.Hide();
         }
 
-        List<SessionForm> closes = new List<SessionForm>();
-        private void mTimer_Tick(object sender, EventArgs e)
-        {
-            try
-            {
+        private readonly List<SessionForm> closes = new List<SessionForm>();
+        private void mTimer_Tick(object sender, EventArgs e) {
+            try {
                 mTimer.Enabled = false;
 
                 DateTime now = DateTime.Now;
@@ -369,111 +328,94 @@ namespace MapleShark
                     if (ses.CloseMe(now))
                         closes.Add(ses);
                 }
+
                 closes.ForEach((a) => { a.Close(); });
                 closes.Clear();
 
                 List<RawCapture> curQueue;
-                lock (PacketQueue)
-                {
-                    curQueue = PacketQueue;
-                    PacketQueue = new List<RawCapture>();
+                lock (packetQueue) {
+                    curQueue = packetQueue;
+                    packetQueue = new List<RawCapture>();
                 }
 
-                foreach (RawCapture packet in curQueue)
-                {
-                    if (!started)
+                foreach (RawCapture packet in curQueue) {
+                    if (!started) {
                         continue;
+                    }
 
-                    var tcpPacket = PacketDotNet.Packet.ParsePacket(packet.LinkLayerType, packet.Data).Extract<TcpPacket>();
+                    var tcpPacket = PacketDotNet.Packet.ParsePacket(packet.LinkLayerType, packet.Data)
+                        .Extract<TcpPacket>();
                     SessionForm session = null;
-                    try
-                    {
-                        if (tcpPacket.Synchronize && !tcpPacket.Acknowledgment && tcpPacket.DestinationPort >= Config.Instance.LowPort && tcpPacket.DestinationPort <= Config.Instance.HighPort)
-                        {
+                    try {
+                        if (tcpPacket.Synchronize
+                            && !tcpPacket.Acknowledgment
+                            && tcpPacket.DestinationPort >= Config.Instance.LowPort
+                            && tcpPacket.DestinationPort <= Config.Instance.HighPort) {
                             session = NewSession();
-                            var res = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
+                            SessionForm.Results res = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
                             if (res == SessionForm.Results.Continue) {
                                 session.Show(mDockPanel, DockState.Document);
                             }
-                        }
-                        else
-                        {
-                            session = Array.Find(MdiChildren, f => ((SessionForm) f).MatchTcpPacket(tcpPacket)) as SessionForm;
-                            if (session != null)
-                            {
-                                var res = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
-                                if (res == SessionForm.Results.CloseMe) {
-                                    session.Close();
-                                }
+                        } else {
+                            session =
+                                Array.Find(MdiChildren,
+                                    f => ((SessionForm) f).MatchTcpPacket(tcpPacket)) as SessionForm;
+                            SessionForm.Results? res = session?.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
+                            if (res == SessionForm.Results.CloseMe) {
+                                session.Close();
                             }
                         }
-                    }
-                    catch (Exception ex)
-                    {
+                    } catch (Exception ex) {
                         Console.WriteLine(ex.ToString());
                         File.AppendAllText("MapleShark Error.txt", ex + "\n" + ex.StackTrace);
                         session?.Close();
-                        session = null;
                     }
                 }
+
                 mTimer.Enabled = true;
-            }
-            catch (Exception)
-            {
-                if (!mDevice.Opened)
+            } catch (Exception) {
+                if (!mDevice.Opened) {
                     mDevice.Open(DeviceMode.Promiscuous, 1);
+                }
             }
         }
 
-        bool started = true;
-        private void toolStripButton1_Click(object sender, EventArgs e)
-        {
-            if (started)
-            {
+        private bool started = true;
+
+        private void toolStripButton1_Click(object sender, EventArgs e) {
+            if (started) {
                 started = false;
                 mStopStartButton.Image = Resources.Button_Blank_Green_icon;
                 mStopStartButton.Text = "Start sniffing";
-            }
-            else
-            {
+            } else {
                 started = true;
                 mStopStartButton.Image = Resources.Button_Blank_Red_icon;
                 mStopStartButton.Text = "Stop sniffing";
             }
         }
 
-        private void helpToolStripButton_Click(object sender, EventArgs e)
-        {
-            if (File.Exists("Readme.txt"))
-            {
+        private void helpToolStripButton_Click(object sender, EventArgs e) {
+            if (File.Exists("Readme.txt")) {
                 Process.Start(Environment.CurrentDirectory + @"\Readme.txt");
             }
         }
 
-        private void saveToolStripButton_Click(object sender, EventArgs e)
-        {
-            SessionForm session = mDockPanel.ActiveDocument as SessionForm;
-            if (session != null)
-            {
+        private void saveToolStripButton_Click(object sender, EventArgs e) {
+            if (mDockPanel.ActiveDocument is SessionForm session) {
                 session.RunSaveCMD();
             }
         }
 
-        private void importJavapropertiesFileToolStripMenuItem_Click(object sender, EventArgs e)
-        {
+        private void importJavaPropertiesFileToolStripMenuItem_Click(object sender, EventArgs e) {
             new frmImportProps().ShowDialog();
         }
 
-        private void MainForm_DragEnter(object sender, DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-            {
-                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+        private void MainForm_DragEnter(object sender, DragEventArgs e) {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop)) {
+                string[] files = (string[]) e.Data.GetData(DataFormats.FileDrop);
                 bool okay = false;
-                foreach (var file in files)
-                {
-                    switch (Path.GetExtension(file))
-                    {
+                foreach (string file in files) {
+                    switch (Path.GetExtension(file)) {
                         case ".msb":
                         case ".pcap":
                         case ".txt":
@@ -483,145 +425,139 @@ namespace MapleShark
                 }
 
                 e.Effect = okay ? DragDropEffects.Move : DragDropEffects.None;
-            }
-            else
-            {
+            } else {
                 e.Effect = DragDropEffects.None;
             }
         }
 
-        private void MainForm_DragDrop(object sender, DragEventArgs e)
-        {
-            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            foreach (var file in files)
-            {
+        private void MainForm_DragDrop(object sender, DragEventArgs e) {
+            string[] files = (string[]) e.Data.GetData(DataFormats.FileDrop);
+            foreach (string file in files) {
                 if (!File.Exists(file)) continue;
 
-                switch (Path.GetExtension(file))
-                {
-                    case ".msb":
-                        {
-                            SessionForm session = NewSession();
-                            session.OpenReadOnly(file);
-                            session.Show(mDockPanel, DockState.Document);
-                            mSearchForm.RefreshOpcodes(false);
-                            break;
-                        }
-                    case ".pcap":
-                        {
-                            device = new CaptureFileReaderDevice(file);
-                            device.Open();
-                            ParseImportedFile();
-                            break;
-                        }
-                    case ".txt":
-                        {
-                            ReadMSnifferFile(file);
-                            break;
-                        }
+                switch (Path.GetExtension(file)) {
+                    case ".msb": {
+                        SessionForm session = NewSession();
+                        session.OpenReadOnly(file);
+                        session.Show(mDockPanel, DockState.Document);
+                        mSearchForm.RefreshOpcodes(false);
+                        break;
+                    }
+                    case ".pcap": {
+                        device = new CaptureFileReaderDevice(file);
+                        device.Open();
+                        ParseImportedFile();
+                        break;
+                    }
+                    case ".txt": {
+                        ReadMSnifferFile(file);
+                        break;
+                    }
                 }
             }
         }
 
-        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e) {
             // Try to close all sessions
             List<SessionForm> sessionForms = new List<SessionForm>();
-
-            foreach (var form in mDockPanel.Contents)
-                if (form is SessionForm)
-                    sessionForms.Add(form as SessionForm);
+            foreach (IDockContent form in mDockPanel.Contents) {
+                if (form is SessionForm sessionForm) {
+                    sessionForms.Add(sessionForm);
+                }
+            }
 
             int sessions = sessionForms.Count;
             bool doSaveQuestioning = true;
-            if (sessions > 5)
-            {
-                doSaveQuestioning = MessageBox.Show("You've got " + sessions + " sessions open. Say 'Yes' if you want to get a question for each session, 'No' if you want to quit MapleShark.", "MapleShark", MessageBoxButtons.YesNo) == DialogResult.Yes;
+            if (sessions > 5) {
+                doSaveQuestioning =
+                    MessageBox.Show(
+                        $"You've got {sessions} sessions open. Say 'Yes' if you want to get a question for each session, 'No' if you want to quit MapleShark.",
+                        "MapleShark", MessageBoxButtons.YesNo)
+                    == DialogResult.Yes;
             }
 
-            while (doSaveQuestioning && sessionForms.Count > 0)
-            {
+            while (doSaveQuestioning && sessionForms.Count > 0) {
                 SessionForm ses = sessionForms[0];
-                if (!ses.Saved)
-                {
+                if (!ses.Saved) {
                     ses.Focus();
-                    DialogResult result = MessageBox.Show(string.Format("Do you want to save the session '{0}'?", ses.Text), "MapleShark", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                    DialogResult result =
+                        MessageBox.Show($"Do you want to save the session '{ses.Text}'?", "MapleShark",
+                            MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
 
-                    if (result == DialogResult.Yes)
-                    {
-                        ses.RunSaveCMD();
-                    }
-                    else if (result == DialogResult.Cancel)
-                    {
-                        e.Cancel = true;
-
-                        return;
+                    switch (result) {
+                        case DialogResult.Yes:
+                            ses.RunSaveCMD();
+                            break;
+                        case DialogResult.Cancel:
+                            e.Cancel = true;
+                            return;
                     }
                 }
+
                 //mDockPanel.Contents.Remove(ses);
                 sessionForms.Remove(ses);
             }
 
             DefinitionsContainer.Instance.Save();
-            mDockPanel.SaveAsXml(LAYOUT_FILE);
+            //mDockPanel.SaveAsXml(LAYOUT_FILE);
         }
 
-        private void setupToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (ShowSetupForm() == DialogResult.OK)
-            {
-                // Restart sniffing
-                var lastTimerState = mTimer.Enabled;
-                if (lastTimerState) mTimer.Enabled = false;
+        private void setupToolStripMenuItem_Click(object sender, EventArgs e) {
+            if (ShowSetupForm() != DialogResult.OK) {
+                return;
+            }
 
-                SetupAdapter();
+            // Restart sniffing
+            bool lastTimerState = mTimer.Enabled;
+            if (lastTimerState) {
+                mTimer.Enabled = false;
+            }
 
-                if (lastTimerState) mTimer.Enabled = true;
+            SetupAdapter();
+
+            if (lastTimerState) {
+                mTimer.Enabled = true;
             }
         }
 
-        private void importMSnifferToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Title = "Select MSniffer logfile";
-            ofd.Filter = "All files|*.*";
-            if (ofd.ShowDialog() == DialogResult.OK)
+        private void importMSnifferToolStripMenuItem_Click(object sender, EventArgs e) {
+            var ofd = new OpenFileDialog {
+                Title = "Select MSniffer logfile",
+                Filter = "All files|*.*",
+            };
+            if (ofd.ShowDialog() == DialogResult.OK) {
                 ReadMSnifferFile(ofd.FileName);
+            }
         }
 
-        private void ReadMSnifferFile(string filename)
-        {
+        private void ReadMSnifferFile(string filename) {
             SessionForm currentSession = null;
-            Regex captureRegex = new Regex(@"Capturing MapleStory version (\d+) on ([0-9\.]+):(\d+) with unknown ""(.*)"".*");
-            using (StreamReader sr = new StreamReader(filename))
-            {
-                while (!sr.EndOfStream)
-                {
+            var captureRegex =
+                new Regex(@"Capturing MapleStory version (\d+) on ([0-9\.]+):(\d+) with unknown ""(.*)"".*");
+            using (var sr = new StreamReader(filename)) {
+                while (!sr.EndOfStream) {
                     string line = sr.ReadLine();
-                    if (line == "" || (line[0] != '[' && line[0] != 'C')) continue;
+                    if (string.IsNullOrEmpty(line) || (line[0] != '[' && line[0] != 'C')) continue;
 
-                    if (line[0] == 'C')
-                    {
+                    if (line[0] == 'C') {
                         // Most likely capturing text
-                        var matches = captureRegex.Match(line);
+                        Match matches = captureRegex.Match(line);
                         if (matches.Captures.Count == 0) continue;
 
-                        Console.WriteLine("Version: {0}.{1} IP {2} Port {3}", matches.Groups[1].Value, matches.Groups[4].Value, matches.Groups[2].Value, matches.Groups[3].Value);
+                        Console.WriteLine("Version: {0}.{1} IP {2} Port {3}", matches.Groups[1].Value,
+                            matches.Groups[4].Value, matches.Groups[2].Value, matches.Groups[3].Value);
 
-                        if (currentSession != null)
-                            currentSession.Show(mDockPanel, DockState.Document);
-
+                        currentSession?.Show(mDockPanel, DockState.Document);
                         currentSession = NewSession();
-                        currentSession.SetMapleInfo(ushort.Parse(matches.Groups[1].Value), matches.Groups[4].Value, 8, matches.Groups[2].Value, ushort.Parse(matches.Groups[3].Value));
-
+                        currentSession.SetMapleInfo(ushort.Parse(matches.Groups[1].Value), matches.Groups[4].Value, 8,
+                            matches.Groups[2].Value, ushort.Parse(matches.Groups[3].Value));
+                    } else if (line[0] == '[') {
+                        currentSession?.ParseMSnifferLine(line);
                     }
-                    else if (line[0] == '[' && currentSession != null)
-                        currentSession.ParseMSnifferLine(line);
                 }
             }
 
-            if (currentSession != null)
-                currentSession.Show(mDockPanel, DockState.Document);
+            currentSession?.Show(mDockPanel, DockState.Document);
         }
     }
 }

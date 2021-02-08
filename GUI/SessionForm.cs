@@ -49,7 +49,18 @@ namespace MapleShark {
         internal SessionForm() {
             ClearedPackets = false;
             InitializeComponent();
+            ScaleColumns();
             Saved = false;
+        }
+
+        // Fix column widths when using screen scaling.
+        private void ScaleColumns() {
+            float scale = CreateGraphics().DpiX / 96;
+            mTimestampColumn.Width = (int) (mTimestampColumn.Width * scale);
+            mDirectionColumn.Width = (int) (mDirectionColumn.Width * scale);
+            mLengthColumn.Width = (int) (mLengthColumn.Width * scale);
+            mOpcodeColumn.Width = (int) (mOpcodeColumn.Width * scale);
+            mNameColumn.Width = (int) (mNameColumn.Width * scale);
         }
 
         public MainForm MainForm => ParentForm as MainForm;
