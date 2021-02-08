@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -39,11 +38,15 @@ namespace MapleShark {
         }
 
         public new void EndUpdate() {
+            UpdateCount();
+            updating = false;
+            base.EndUpdate();
+        }
+
+        public void UpdateCount() {
             try {
                 VirtualListSize = mFilteredPackets.Count;
             } catch { /* ignored */ }
-            updating = false;
-            base.EndUpdate();
         }
 
         public int AddPacket(MaplePacket packetItem) {

@@ -238,7 +238,7 @@ namespace MapleShark
                                 //session.Show(mDockPanel, DockState.Document);
                             }
                         }
-                        else if (session != null && session.MatchTCPPacket(tcpPacket))
+                        else if (session != null && session.MatchTcpPacket(tcpPacket))
                         {
                             var res = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
                             if (res == SessionForm.Results.CloseMe)
@@ -361,7 +361,7 @@ namespace MapleShark
                         }
                         else
                         {
-                            session = Array.Find(MdiChildren, f => ((SessionForm) f).MatchTCPPacket(tcpPacket)) as SessionForm;
+                            session = Array.Find(MdiChildren, f => ((SessionForm) f).MatchTcpPacket(tcpPacket)) as SessionForm;
                             if (session != null)
                             {
                                 var res = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);

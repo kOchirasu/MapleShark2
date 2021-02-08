@@ -402,7 +402,7 @@
             this.sendpropertiesToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.D1)));
             this.sendpropertiesToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
             this.sendpropertiesToolStripMenuItem.Text = "Open send.properties";
-            this.sendpropertiesToolStripMenuItem.Click += new System.EventHandler(this.sendpropertiesToolStripMenuItem_Click);
+            this.sendpropertiesToolStripMenuItem.Click += new System.EventHandler(this.sendPropertiesToolStripMenuItem_Click);
             //
             // recvpropertiesToolStripMenuItem
             //
@@ -410,7 +410,7 @@
             this.recvpropertiesToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.D2)));
             this.recvpropertiesToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
             this.recvpropertiesToolStripMenuItem.Text = "Open recv.properties";
-            this.recvpropertiesToolStripMenuItem.Click += new System.EventHandler(this.recvpropertiesToolStripMenuItem_Click);
+            this.recvpropertiesToolStripMenuItem.Click += new System.EventHandler(this.recvPropertiesToolStripMenuItem_Click);
             //
             // dataToolStripMenuItem
             //
