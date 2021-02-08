@@ -81,7 +81,7 @@ namespace MapleShark
 
             foreach (LibPcapLiveDevice device in LibPcapLiveDeviceList.Instance)
             {
-                if (device.Interface.FriendlyName == Config.Instance.Interface)
+                if (device.Interface.Name == Config.Instance.Interface)
                 {
                     mDevice = device;
                     break;

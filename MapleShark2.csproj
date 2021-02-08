@@ -214,6 +214,7 @@
       <DependentUpon>OutputForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Tools\Helpers.cs" />
+    <Compile Include="Tools\LibPcapLiveDeviceExtensions.cs" />
     <Compile Include="Tools\ListViewUtil.cs" />
     <Compile Include="Tools\PacketReader.cs" />
     <Compile Include="Program.cs" />

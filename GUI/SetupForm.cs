@@ -1,73 +1,85 @@
-﻿using SharpPcap;
-using SharpPcap.LibPcap;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Net.Sockets;
-using System.Text;
+﻿using System;
 using System.Windows.Forms;
+using MapleShark.Tools;
+using SharpPcap.LibPcap;
 
-namespace MapleShark
-{
-    public partial class SetupForm : Form
-    {
-        public SetupForm()
-        {
+namespace MapleShark {
+    public partial class SetupForm : Form {
+        private class DeviceEntry {
+            public string Name;
+            public PcapDevice Device;
+
+            public override string ToString() => Name;
+        }
+
+        public SetupForm() {
             InitializeComponent();
+            Text = "MapleShark " + Program.AssemblyVersion;
 
-            Text = "MapleShark " + Program.AssemblyVersion + ", " + Program.AssemblyCopyright;
-            bool selected = false;
-            int localAreaConnection = -1;
+            bool configured = false;
+            int activeConnection = 0;
+            foreach (LibPcapLiveDevice device in LibPcapLiveDeviceList.Instance) {
+                // Active devices must be up and running
+                if (!device.IsUp() || !device.IsRunning()) {
+                    continue;
+                }
 
-            foreach (LibPcapLiveDevice device in LibPcapLiveDeviceList.Instance)
-            {
-                if (!device.Interface.Addresses.Exists(a => a != null && a.Addr != null && a.Addr.ipAddress != null)) continue;
-                var devInterface = device.Interface;
-                var friendlyName = devInterface.FriendlyName;
-                var description = devInterface.Description;
+                // Loopback devices do not require "connection"
+                if (!device.IsLoopback()) {
+                    // Skip any device that is not connected or not used for networking (NdisWan).
+                    if (!device.IsConnected() || device.Addresses.Count == 0) {
+                        continue;
+                    }
+                }
 
-                int index = mInterfaceCombo.Items.Add(friendlyName);
-                if ((friendlyName == "Local Area Connection" || friendlyName.Contains("LAN")) && !description.Contains("TAP") && !description.Contains("VPN")) localAreaConnection = index;
+                string description = device.Interface.Description;
+                string friendlyName = device.Interface.FriendlyName ?? description;
+                int index = mInterfaceCombo.Items.Add(new DeviceEntry {
+                    Name = friendlyName,
+                    Device = device,
+                });
 
-                if (!selected && (selected = (friendlyName == Config.Instance.Interface))) mInterfaceCombo.SelectedIndex = index;
+                if (device.IsConnected()) {
+                    activeConnection = index;
+                }
+
+                // Load selected device from config
+                if (!configured && device.Interface.Name == Config.Instance.Interface) {
+                    mInterfaceCombo.SelectedIndex = index;
+                    configured = true;
+                }
             }
 
-            if (!selected && localAreaConnection >= 0) mInterfaceCombo.SelectedIndex = localAreaConnection;
-            else if (!selected && mInterfaceCombo.Items.Count > 0) mInterfaceCombo.SelectedIndex = 0;
+            if (!configured) {
+                mInterfaceCombo.SelectedIndex = activeConnection;
+            }
+
             mLowPortNumeric.Value = Config.Instance.LowPort;
             mHighPortNumeric.Value = Config.Instance.HighPort;
         }
 
-        private void mInterfaceCombo_SelectedIndexChanged(object pSender, EventArgs pArgs)
-        {
+        private void mInterfaceCombo_SelectedIndexChanged(object pSender, EventArgs pArgs) {
             mOKButton.Enabled = mInterfaceCombo.SelectedIndex >= 0;
         }
 
-        private void mLowPortNumeric_ValueChanged(object pSender, EventArgs pArgs)
-        {
+        private void mLowPortNumeric_ValueChanged(object pSender, EventArgs pArgs) {
             if (mLowPortNumeric.Value > mHighPortNumeric.Value) mLowPortNumeric.Value = mHighPortNumeric.Value;
         }
 
-        private void mHighPortNumeric_ValueChanged(object pSender, EventArgs pArgs)
-        {
+        private void mHighPortNumeric_ValueChanged(object pSender, EventArgs pArgs) {
             if (mHighPortNumeric.Value < mLowPortNumeric.Value) mHighPortNumeric.Value = mLowPortNumeric.Value;
         }
 
-        private void mOKButton_Click(object pSender, EventArgs pArgs)
-        {
-            Config.Instance.Interface = (string)mInterfaceCombo.SelectedItem;
-            Config.Instance.LowPort = (ushort)mLowPortNumeric.Value;
-            Config.Instance.HighPort = (ushort)mHighPortNumeric.Value;
+        private void mOKButton_Click(object pSender, EventArgs pArgs) {
+            var entry = (DeviceEntry) mInterfaceCombo.SelectedItem;
+            Config.Instance.Interface = entry.Device.Name;
+            Config.Instance.LowPort = (ushort) mLowPortNumeric.Value;
+            Config.Instance.HighPort = (ushort) mHighPortNumeric.Value;
             Config.Instance.Save();
 
             DialogResult = DialogResult.OK;
         }
 
-        private void SetupForm_Load(object sender, EventArgs e)
-        {
-
-        }
+        private void SetupForm_Load(object sender, EventArgs e) { }
     }
 }
