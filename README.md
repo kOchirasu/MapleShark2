@@ -1,20 +1,34 @@
-﻿Interface
+﻿MapleShark2
 =========
 
-Reserved.
-
-Scripting
-=========
+## Scripting
 
 The script engine used is called ScriptDotNet, also known as S#.
 Information regarding the syntax of S# itself can be found at http://www.protsyk.com/scriptdotnet/
 
-Functions defined below follow a simple syntax: <return type> <function name>(<parameters>)
-
-Scripts have only one object exposed to them named ScriptAPI.
-All of the following functions are called from the context of ScriptAPI, IE: ScriptAPI.AddByte("Example");
 
 
+Shared functions can be written in `Common.txt` which is located at the root of the script-version directory.
+
+---
+
+All of the following functions are called from the context of ScriptAPI.
+
+```
+ScriptAPI.AddByte("Example");
+```
+
+```
+using (ScriptAPI) {
+  AddByte("Example")
+}
+```
+
+---
+
+Functions defined below follow a simple syntax: `<return type> <function name>(<parameters>)`
+
+```
 byte AddByte(string name)
 
   Adds unsigned byte as a field with given name to the structure view, and returns the value.
@@ -38,6 +52,10 @@ uint AddUInt(string name)
 int AddInt(string name)
 
   Adds signed int as a field with given name to the structure view, and returns the value.
+  
+long AddLong(string name)
+
+  Adds signed long as a field with given name to the structure view, and returns the value.
 
 float AddFloat(string name)
 
@@ -45,19 +63,19 @@ float AddFloat(string name)
 
 double AddDouble(string name)
 
-  Adds 4 byte double as a field with given name to the structure view, and returns the value.
+  Adds 8 byte double as a field with given name to the structure view, and returns the value.
 
 bool AddBool(string name)
 
   Adds 1 byte bool as a field with given name to the structure view, and returns the value (false when byte is 0, true when byte is 1).
 
-long AddLong(string name)
+string AddString(string name)
 
-  Adds signed long as a field with given name to the structure view, and returns the value.
+  Adds a 1-byte/character string preceeded by its length as a short, and returns the value. ([NN NN] [SS SS ...])
+  
+string AddUnicodeString(string name)
 
-double AddDouble(string name)
-
-  Adds 8 byte double float as a field with given name to the structure view, and returns the value.
+  Adds a 2-byte/character string preceeded by its length as a short, and returns the value. ([NN NN] [SSSS SSSS ...])
 
 string AddPaddedString(string name, int length)
 
@@ -66,6 +84,10 @@ string AddPaddedString(string name, int length)
 void AddField(string name, int length)
 
   Adds a field with given name and length to the structure view, and returns nothing.
+  
+void AddComment(string comment)
+
+  Adds a node with the specified comment, and returns nothing.
 
 void StartNode(string name)
 
@@ -82,4 +104,4 @@ void Write(string file, string line)
 int Remaining()
 
   Returns the number of bytes remaining unprocessed in the packet.
-
+```

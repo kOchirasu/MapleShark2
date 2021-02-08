@@ -12,7 +12,7 @@
     <AssemblyName>MapleShark2</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <ApplicationIcon>Shark.ico</ApplicationIcon>
+    <ApplicationIcon>Resources/Shark.ico</ApplicationIcon>
     <StartupObject>MapleShark.Program</StartupObject>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <ManifestCertificateThumbprint>09088DB6DCFDD112D4F31A78C8AEF9DB7160C60A</ManifestCertificateThumbprint>
@@ -330,14 +330,14 @@
       <DependentUpon>StructureForm.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <Content Include="Readme.txt">
+    <Content Include="README.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Resources\Button-Blank-Green-icon.png" />
     <None Include="Resources\Button-Blank-Red-icon.png" />
     <None Include="Resources\save-icon.png" />
-    <Content Include="Shark.ico" />
-    <Content Include="SharkLogo.png" />
+    <Content Include="Resources\Shark.ico" />
+    <Content Include="Resources\SharkLogo.png" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -376,7 +376,7 @@
       <Visible>False</Visible>
       <Description>MapleShark Database</Description>
       <Progid>122314</Progid>
-      <DefaultIcon>Shark.ico</DefaultIcon>
+      <DefaultIcon>Resources/Shark.ico</DefaultIcon>
     </FileAssociation>
   </ItemGroup>
   <ItemGroup />

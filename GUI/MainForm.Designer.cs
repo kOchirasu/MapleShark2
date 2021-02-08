@@ -277,6 +277,7 @@
             this.mStopStartButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.mStopStartButton.Name = "mStopStartButton";
             this.mStopStartButton.Size = new System.Drawing.Size(78, 22);
+            this.mStopStartButton.Image = MapleShark.Properties.Resources.Button_Blank_Red_icon;
             this.mStopStartButton.Text = "Stop sniffing";
             this.mStopStartButton.Click += new System.EventHandler(this.toolStripButton1_Click);
             //

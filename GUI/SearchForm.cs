@@ -1,113 +1,113 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using Be.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
 
-namespace MapleShark
-{
-    public partial class SearchForm : DockContent
-    {
-        public SearchForm()
-        {
+namespace MapleShark {
+    public partial class SearchForm : DockContent {
+        public SearchForm() {
             InitializeComponent();
             mSequenceHex.ByteProvider = new DynamicByteProvider(new List<byte>());
-            (mSequenceHex.ByteProvider as DynamicByteProvider).Changed += mSequenceHex_ByteProviderChanged;
+            ((DynamicByteProvider) mSequenceHex.ByteProvider).Changed += mSequenceHex_ByteProviderChanged;
         }
 
-        public MainForm MainForm { get { return ParentForm as MainForm; } }
-        public ComboBox ComboBox { get { return mOpcodeCombo; } }
-        public HexBox HexBox { get { return mSequenceHex; } }
+        public MainForm MainForm => ParentForm as MainForm;
+        public ComboBox ComboBox => mOpcodeCombo;
+        public HexBox HexBox => mSequenceHex;
 
-        public void RefreshOpcodes(bool pReselect)
-        {
-            SessionForm session = DockPanel.ActiveDocument as SessionForm;
-            Opcode selected = pReselect && session != null && mOpcodeCombo.SelectedIndex >= 0 && session.Opcodes.Count > mOpcodeCombo.SelectedIndex ? session.Opcodes[mOpcodeCombo.SelectedIndex] : null;
+        public void RefreshOpcodes(bool pReselect) {
+            if (!(DockPanel.ActiveDocument is SessionForm session)) {
+                mOpcodeCombo.Items.Clear();
+                return;
+            }
+
+            Opcode selected =
+                pReselect
+                && mOpcodeCombo.SelectedIndex >= 0
+                && session.Opcodes.Count > mOpcodeCombo.SelectedIndex
+                    ? session.Opcodes[mOpcodeCombo.SelectedIndex]
+                    : null;
             mOpcodeCombo.Items.Clear();
-            if (session == null) return;
             session.UpdateOpcodeList();
-            foreach (Opcode op in session.Opcodes)
-            {
-                Definition definition = Config.Instance.GetDefinition(session.Build, session.Locale, op.Outbound, op.Header);
-                int addedIndex = mOpcodeCombo.Items.Add(string.Format("{0} 0x{1:X4} {2}", (op.Outbound ? "Outbound  " : "Inbound   "), op.Header, definition == null || string.IsNullOrEmpty(definition.Name) ? "" : definition.Name));
 
-                if (selected != null && selected.Outbound == op.Outbound && selected.Header == op.Header)
-                {
+            foreach (Opcode op in session.Opcodes) {
+                Definition definition =
+                    Config.Instance.GetDefinition(session.Build, session.Locale, op.Outbound, op.Header);
+                int addedIndex = mOpcodeCombo.Items.Add(
+                    $"{(op.Outbound ? "OUT " : "IN  ")} 0x{op.Header:X4} {definition?.Name ?? ""}");
+
+                if (selected != null && selected.Outbound == op.Outbound && selected.Header == op.Header) {
                     mOpcodeCombo.SelectedIndex = addedIndex;
                 }
             }
         }
 
-        private void mOpcodeCombo_SelectedIndexChanged(object pSender, EventArgs pArgs)
-        {
+        private void mOpcodeCombo_SelectedIndexChanged(object pSender, EventArgs pArgs) {
             mNextOpcodeButton.Enabled = mPrevOpcodeButton.Enabled = mOpcodeCombo.SelectedIndex >= 0;
         }
 
-        private void mNextOpcodeButton_Click(object pSender, EventArgs pArgs)
-        {
-            SessionForm session = DockPanel.ActiveDocument as SessionForm;
-            if (session == null || mOpcodeCombo.SelectedIndex == -1)
+        private void mNextOpcodeButton_Click(object pSender, EventArgs pArgs) {
+            if (!(DockPanel.ActiveDocument is SessionForm session) || mOpcodeCombo.SelectedIndex == -1) {
                 return;
-            Opcode search = (DockPanel.ActiveDocument as SessionForm).Opcodes[mOpcodeCombo.SelectedIndex];
-            int initialIndex = session.ListView.SelectedIndices.Count == 0 ? 0 : session.ListView.SelectedIndices[0] + 1;
-            for (int index = initialIndex; index < session.ListView.VirtualListSize; ++index)
-            {
+            }
+
+            Opcode search = session.Opcodes[mOpcodeCombo.SelectedIndex];
+            int initialIndex = session.ListView.SelectedIndices.Count == 0
+                ? 0
+                : session.ListView.SelectedIndices[0] + 1;
+            for (int index = initialIndex; index < session.ListView.VirtualListSize; ++index) {
                 MaplePacket packetItem = session.FilteredPackets[index];
-                if (packetItem.Outbound == search.Outbound && packetItem.Opcode == search.Header)
-                {
+                if (packetItem.Outbound == search.Outbound && packetItem.Opcode == search.Header) {
                     session.ListView.Select(index);
                     session.ListView.Focus();
                     return;
                 }
             }
-            MessageBox.Show("No further packets found with the selected opcode.", "End Of Search", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            MessageBox.Show("No further packets found with the selected opcode.", "End Of Search", MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
             session.ListView.Focus();
         }
 
-        private void mSequenceHex_ByteProviderChanged(object pSender, EventArgs pArgs)
-        {
-            mNextSequenceButton.Enabled/* = mPrevSequenceButton.Enabled*/ = mSequenceHex.ByteProvider.Length > 0;
+        private void mSequenceHex_ByteProviderChanged(object pSender, EventArgs pArgs) {
+            mNextSequenceButton.Enabled /* = mPrevSequenceButton.Enabled*/ = mSequenceHex.ByteProvider.Length > 0;
         }
 
-        private void mSequenceHex_KeyPress(object pSender, KeyPressEventArgs pArgs)
-        {
-            if (pArgs.KeyChar == (char)Keys.Enter)
-            {
+        private void mSequenceHex_KeyPress(object pSender, KeyPressEventArgs pArgs) {
+            if (pArgs.KeyChar == (char) Keys.Enter) {
                 pArgs.Handled = true;
                 NextSequence();
             }
         }
 
-        private void mNextSequenceButton_Click(object pSender, EventArgs pArgs)
-        {
+        private void mNextSequenceButton_Click(object pSender, EventArgs pArgs) {
             NextSequence();
         }
 
-        private void NextSequence()
-        {
-            if (!(DockPanel.ActiveDocument is SessionForm session)) return;
+        private void NextSequence() {
+            if (!(DockPanel.ActiveDocument is SessionForm session)) {
+                return;
+            }
+
             int initialIndex = session.ListView.SelectedIndices.Count == 0 ? 0 : session.ListView.SelectedIndices[0];
             byte[] pattern = (mSequenceHex.ByteProvider as DynamicByteProvider)?.Bytes.ToArray();
-            long startIndex = MainForm.DataForm.HexBox.SelectionLength > 0 ? MainForm.DataForm.HexBox.SelectionStart : -1;
-            for (int index = initialIndex; index < session.ListView.VirtualListSize; ++index)
-            {
+            long startIndex = MainForm.DataForm.HexBox.SelectionLength > 0
+                ? MainForm.DataForm.HexBox.SelectionStart
+                : -1;
+            for (int index = initialIndex; index < session.ListView.VirtualListSize; ++index) {
                 MaplePacket packetItem = session.FilteredPackets[index];
                 long searchIndex = startIndex + 1;
                 bool found = false;
-                while (pattern != null && searchIndex <= packetItem.Buffer.Length - pattern.Length)
-                {
+                while (pattern != null && searchIndex <= packetItem.Buffer.Length - pattern.Length) {
                     found = true;
-                    for (int patternIndex = 0; found && patternIndex < pattern.Length; ++patternIndex) found = packetItem.Buffer[searchIndex + patternIndex] == pattern[patternIndex];
+                    for (int patternIndex = 0; found && patternIndex < pattern.Length; ++patternIndex)
+                        found = packetItem.Buffer[searchIndex + patternIndex] == pattern[patternIndex];
                     if (found) break;
                     ++searchIndex;
                 }
-                if (found)
-                {
+
+                if (found) {
                     session.ListView.Select(index);
                     MainForm.DataForm.HexBox.SelectionStart = searchIndex;
                     MainForm.DataForm.HexBox.SelectionLength = pattern.Length;
@@ -115,36 +115,36 @@ namespace MapleShark
                     session.ListView.Focus();
                     return;
                 }
+
                 startIndex = -1;
             }
-            MessageBox.Show("No further sequences found.", "End Of Search", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            MessageBox.Show("No further sequences found.", "End Of Search", MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
             session.ListView.Focus();
         }
 
-        private void mPrevOpcodeButton_Click(object sender, EventArgs e)
-        {
-            SessionForm session = DockPanel.ActiveDocument as SessionForm;
-            if (session == null || mOpcodeCombo.SelectedIndex == -1)
+        private void mPrevOpcodeButton_Click(object sender, EventArgs e) {
+            if (!(DockPanel.ActiveDocument is SessionForm session) || mOpcodeCombo.SelectedIndex == -1) {
                 return;
-            Opcode search = (DockPanel.ActiveDocument as SessionForm).Opcodes[mOpcodeCombo.SelectedIndex];
+            }
+
+            Opcode search = session.Opcodes[mOpcodeCombo.SelectedIndex];
             int initialIndex = session.ListView.SelectedIndices.Count == 0 ? 0 : session.ListView.SelectedIndices[0];
-            for (int index = initialIndex - 1; index > 0; --index)
-            {
+            for (int index = initialIndex - 1; index > 0; --index) {
                 MaplePacket packetItem = session.FilteredPackets[index];
-                if (packetItem.Outbound == search.Outbound && packetItem.Opcode == search.Header)
-                {
+                if (packetItem.Outbound == search.Outbound && packetItem.Opcode == search.Header) {
                     session.ListView.Select(index);
                     session.ListView.Focus();
                     return;
                 }
             }
-            MessageBox.Show("No further packets found with the selected opcode.", "End Of Search", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            MessageBox.Show("No further packets found with the selected opcode.", "End Of Search", MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
             session.ListView.Focus();
         }
 
-        private void SearchForm_Load(object sender, EventArgs e)
-        {
-
-        }
+        private void SearchForm_Load(object sender, EventArgs e) { }
     }
 }
