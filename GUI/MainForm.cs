@@ -16,13 +16,18 @@ namespace MapleShark
 {
     public partial class MainForm : Form
     {
+        private const string LAYOUT_FILE = "Layout.xml";
+
         private bool mClosed = false;
         private LibPcapLiveDevice mDevice = null;
-        private SearchForm mSearchForm = new SearchForm();
-        private DataForm mDataForm = new DataForm();
-        private StructureForm mStructureForm = new StructureForm();
-        private PropertyForm mPropertyForm = new PropertyForm();
 
+        // DockContent Controls
+        private SearchForm mSearchForm;
+        private DataForm mDataForm;
+        private StructureForm mStructureForm;
+        private PropertyForm mPropertyForm;
+
+        private DeserializeDockContent mDeserializeDockContent;
         private string[] _startupArguments = null;
 
         private List<RawCapture> PacketQueue = new List<RawCapture>();
@@ -30,16 +35,43 @@ namespace MapleShark
         public MainForm(string[] startupArguments)
         {
             InitializeComponent();
+            CreateStandardControls();
+
             Text = "MapleShark2 (Build: " + Program.AssemblyVersion + ")";
 
+            mDeserializeDockContent = GetContentFromPersistString;
             _startupArguments = startupArguments;
         }
 
-        public SearchForm SearchForm { get { return mSearchForm; } }
-        public DataForm DataForm { get { return mDataForm; } }
-        public StructureForm StructureForm { get { return mStructureForm; } }
-        public PropertyForm PropertyForm { get { return mPropertyForm; } }
-        public byte Locale { get { return (mDockPanel.ActiveDocument as SessionForm).Locale; } }
+        private void CreateStandardControls() {
+            mSearchForm = new SearchForm();
+            mDataForm = new DataForm();
+            mStructureForm = new StructureForm();
+            mPropertyForm = new PropertyForm();
+        }
+
+        private IDockContent GetContentFromPersistString(string persistString) {
+            if (persistString == typeof(SearchForm).ToString()) {
+                return mSearchForm;
+            }
+            if (persistString == typeof(DataForm).ToString()) {
+                return mDataForm;
+            }
+            if (persistString == typeof(StructureForm).ToString()) {
+                return mStructureForm;
+            }
+            if (persistString == typeof(PropertyForm).ToString()) {
+                return mPropertyForm;
+            }
+
+            throw new ArgumentException("Invalid layout found from config.");
+        }
+
+        public SearchForm SearchForm => mSearchForm;
+        public DataForm DataForm => mDataForm;
+        public StructureForm StructureForm => mStructureForm;
+        public PropertyForm PropertyForm => mPropertyForm;
+        public byte Locale => ((SessionForm) mDockPanel.ActiveDocument).Locale;
 
         PcapDevice device;
 
@@ -136,6 +168,12 @@ namespace MapleShark
                 }
             }
 
+            try {
+                mDockPanel.LoadFromXml(LAYOUT_FILE, mDeserializeDockContent);
+            } catch {
+                // If we fail to load, it will just use the default layout.
+            }
+
             SetupAdapter();
 
             mTimer.Enabled = true;
@@ -148,7 +186,6 @@ namespace MapleShark
             DockPane rightPane2 = new DockPane(mPropertyForm, DockState.DockRight, true);
             rightPane1.Show();
             rightPane2.Show();*/
-
 
             foreach (string arg in _startupArguments)
             {
@@ -526,6 +563,7 @@ namespace MapleShark
             }
 
             DefinitionsContainer.Instance.Save();
+            mDockPanel.SaveAsXml(LAYOUT_FILE);
         }
 
         private void setupToolStripMenuItem_Click(object sender, EventArgs e)
