@@ -549,7 +549,7 @@ namespace MapleShark {
 
                         currentSession?.Show(mDockPanel, DockState.Document);
                         currentSession = NewSession();
-                        currentSession.SetMapleInfo(ushort.Parse(matches.Groups[1].Value), matches.Groups[4].Value, 8,
+                        currentSession.SetMapleInfo(ushort.Parse(matches.Groups[1].Value), MapleLocale.GLOBAL,
                             matches.Groups[2].Value, ushort.Parse(matches.Groups[3].Value));
                     } else if (line[0] == '[') {
                         currentSession?.ParseMSnifferLine(line);

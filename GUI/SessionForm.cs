@@ -30,7 +30,6 @@ namespace MapleShark {
         private ushort mProxyPort = 0;
         private uint mBuild = 0;
         private byte mLocale = 0;
-        private string mPatchLocation = "";
         private MapleStream mOutboundStream = null;
         private MapleStream mInboundStream = null;
         private TcpReassembler tcpReassembler = new TcpReassembler();
@@ -95,10 +94,9 @@ namespace MapleShark {
             return false;
         }
 
-        internal void SetMapleInfo(ushort version, string patchLocation, byte locale, string ip, ushort port) {
+        internal void SetMapleInfo(ushort version, byte locale, string ip, ushort port) {
             if (mPackets.Count > 0) return;
             mBuild = version;
-            mPatchLocation = patchLocation;
             mLocale = locale;
 
             mRemoteEndpoint = ip;
@@ -152,9 +150,6 @@ namespace MapleShark {
         // TcpPacket ordering is guaranteed at this point
         private Results ProcessTcpPacket(byte[] tcpData, bool isOutbound, DateTime pArrivalTime) {
             if (mTerminated) return Results.Terminated;
-            if (!Config.Instance.Maple2) {
-                throw new ArgumentException("Only Config.Maple2 is supported.");
-            }
 
             if (mBuild == 0) {
                 byte[] headerData = new byte[tcpData.Length];
@@ -184,7 +179,6 @@ namespace MapleShark {
 
                 mBuild = version;
                 mLocale = 0; //TODO: Handle regions somehow since handshake doesn't contain it
-                mPatchLocation = "MST";
 
                 mOutboundStream = new MapleStream(true, mBuild, localIV, blockIV);
                 mInboundStream = new MapleStream(false, mBuild, remoteIV, blockIV);
@@ -203,12 +197,13 @@ namespace MapleShark {
                 // Generate HandShake packet
                 Definition definition = Config.Instance.GetDefinition(mBuild, mLocale, false, header);
                 if (definition == null) {
-                    definition = new Definition();
-                    definition.Outbound = false;
-                    definition.Locale = mLocale;
-                    definition.Opcode = header;
-                    definition.Name = "RequestVersion";
-                    definition.Build = mBuild;
+                    definition = new Definition {
+                        Outbound = false,
+                        Locale = mLocale,
+                        Opcode = header,
+                        Name = "RequestVersion",
+                        Build = mBuild
+                    };
                     SaveDefinition(definition);
                 }
 
@@ -328,10 +323,6 @@ namespace MapleShark {
 
                         mLocale = reader.ReadByte();
                         mBuild = reader.ReadUInt32();
-
-                        if (MapleSharkVersion >= 0x2021 && !Config.Instance.Maple2) {
-                            mPatchLocation = reader.ReadString();
-                        }
                     } else {
                         MessageBox.Show("I have no idea how to open this MSB file. It looks to me as a version "
                                         + $"{v1}.{v2}.{v3}.{v4}"
@@ -472,9 +463,6 @@ namespace MapleShark {
                 writer.Write(mRemotePort);
                 writer.Write(mLocale);
                 writer.Write(mBuild);
-                if (!Config.Instance.Maple2) {
-                    writer.Write(mPatchLocation);
-                }
 
                 mPackets.ForEach(p => {
                     writer.Write((ulong) p.Timestamp.Ticks);
@@ -705,7 +693,6 @@ namespace MapleShark {
         private void sessionInformationToolStripMenuItem_Click(object sender, EventArgs e) {
             var info = new SessionInformation {
                 txtVersion = {Text = mBuild.ToString()},
-                txtPatchLocation = {Text = mPatchLocation},
                 txtLocale = {Text = mLocale.ToString()},
                 txtAdditionalInfo = {
                     Text = "Connection info:\r\n"
@@ -715,25 +702,6 @@ namespace MapleShark {
                            + (mProxyEndpoint != "???" ? "\r\nProxy:" + mProxyEndpoint : "")
                 }
             };
-
-            if (mLocale == 1 || mLocale == 2) {
-                info.txtAdditionalInfo.Text += "\r\nRecording session of a MapleStory Korea"
-                                               + (mLocale == 2 ? " Test" : "")
-                                               + " server.\r\nAdditional KMS info:\r\n";
-
-                try {
-                    int test = int.Parse(mPatchLocation);
-                    ushort maplerVersion = (ushort) (test & 0x7FFF);
-                    int extraOption = (test >> 15) & 1;
-                    int subVersion = (test >> 16) & 0xFF;
-                    info.txtAdditionalInfo.Text += "Real Version: "
-                                                   + maplerVersion
-                                                   + "\r\nSubversion: "
-                                                   + subVersion
-                                                   + "\r\nExtra flag: "
-                                                   + extraOption;
-                } catch { }
-            }
 
             info.Show();
         }

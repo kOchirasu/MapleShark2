@@ -11,7 +11,6 @@ namespace MapleShark
         public string Interface = "";
         public ushort LowPort = 30000;//MS2 Gateway
         public ushort HighPort = 33001;//MS2 Channel Ranges
-        public bool Maple2 = true;
 
         [XmlIgnore]
         public bool LoadedFromFile = false;

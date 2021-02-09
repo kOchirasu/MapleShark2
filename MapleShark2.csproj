@@ -166,7 +166,6 @@
     <Compile Include="Packet\TableCrypter.cs" />
     <Compile Include="Packet\TcpReassembler.cs" />
     <Compile Include="Packet\XORCrypter.cs" />
-    <Compile Include="Tools\AppUpdates.cs" />
     <Compile Include="Tools\Config.cs" />
     <Compile Include="GUI\DataForm.cs">
       <SubType>Form</SubType>
