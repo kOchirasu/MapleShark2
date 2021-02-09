@@ -1,35 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-
 using System.IO;
+using System.Windows.Forms;
+using MapleShark2.Logging;
+using MapleShark2.Tools;
 
-namespace MapleShark
-{
-    public partial class frmImportProps : Form
-    {
-        public frmImportProps()
-        {
+namespace MapleShark2.UI {
+    public partial class frmImportProps : Form {
+        public frmImportProps() {
             InitializeComponent();
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            if (ofdPropFile.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
+        private void button1_Click(object sender, EventArgs e) {
+            if (ofdPropFile.ShowDialog() == DialogResult.OK) {
                 txtPropFile.Text = ofdPropFile.FileName;
             }
         }
 
-        private void btnImport_Click(object sender, EventArgs e)
-        {
-            if (!File.Exists(txtPropFile.Text))
-            {
+        private void btnImport_Click(object sender, EventArgs e) {
+            if (!File.Exists(txtPropFile.Text)) {
                 MessageBox.Show("The file you selected doesn't exist!");
                 return;
             }
@@ -40,9 +29,8 @@ namespace MapleShark
 
             string[] opcodes = File.ReadAllLines(txtPropFile.Text);
             List<ushort> loadedOps = new List<ushort>();
-            foreach (string opcode in opcodes)
-            {
-                var val = opcode;
+            foreach (string opcode in opcodes) {
+                string val = opcode;
                 if (val.Contains("#"))
                     val = val.Remove(val.IndexOf('#'));
 
@@ -63,19 +51,16 @@ namespace MapleShark
 
                 AddOpcode(version, locale, !chkIsSend.Checked, header, name);
             }
+
             Config.Instance.Save();
         }
 
-        private void AddOpcode(ushort pBuild, byte pLocale, bool pOutbound, ushort pOpcode, string pName)
-        {
+        private void AddOpcode(ushort pBuild, byte pLocale, bool pOutbound, ushort pOpcode, string pName) {
             Definition def = Config.Instance.GetDefinition(pBuild, pLocale, pOutbound, pOpcode);
-            if (def == null)
-            {
+            if (def == null) {
                 def = new Definition();
                 txtLog.AppendText(string.Format("Adding opcode {1}: 0x{0:X4}\r\n", pOpcode, pName));
-            }
-            else
-            {
+            } else {
                 txtLog.AppendText(string.Format("Replacing opcode {1} 0x{0:X4} for {2}\r\n", pOpcode, def.Name, pName));
             }
 

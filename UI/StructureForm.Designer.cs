@@ -1,4 +1,4 @@
-﻿namespace MapleShark
+﻿namespace MapleShark2.UI
 {
     partial class StructureForm
     {
@@ -28,9 +28,9 @@
         private void InitializeComponent() {
             this.mTree = new System.Windows.Forms.TreeView();
             this.SuspendLayout();
-            // 
+            //
             // mTree
-            // 
+            //
             this.mTree.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mTree.FullRowSelect = true;
             this.mTree.HideSelection = false;
@@ -40,9 +40,9 @@
             this.mTree.TabIndex = 3;
             this.mTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.mTree_AfterSelect);
             this.mTree.KeyDown += new System.Windows.Forms.KeyEventHandler(this.mTree_KeyDown);
-            // 
+            //
             // StructureForm
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(288, 364);

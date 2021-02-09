@@ -1,12 +1,11 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("MapleShark2")]
-[assembly: AssemblyDescription("This is a program to sniff packets from MapleStory connections.")]
+[assembly: AssemblyDescription("This is a program to sniff packets from MapleStory2 connections.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("MapleShark2")]

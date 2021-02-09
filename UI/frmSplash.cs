@@ -4,10 +4,12 @@ using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
+using MapleShark2.Logging;
+using MapleShark2.Tools;
 using Microsoft.Win32;
 using Scripting.SSharp.Runtime;
 
-namespace MapleShark
+namespace MapleShark2.UI
 {
     public partial class frmSplash : Form
     {

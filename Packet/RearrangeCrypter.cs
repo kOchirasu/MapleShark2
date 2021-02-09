@@ -1,4 +1,4 @@
-﻿namespace MapleShark.Packet {
+﻿namespace MapleShark2.Packet {
     // Reverses the source data
     public class RearrangeCrypter : ICrypter {
         private const int INDEX = 1;

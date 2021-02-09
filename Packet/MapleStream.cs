@@ -1,7 +1,7 @@
 ﻿using System;
-using MapleShark.Packet;
+using MapleShark2.Logging;
 
-namespace MapleShark {
+namespace MapleShark2.Packet {
     public sealed class MapleStream {
         private const int DEFAULT_SIZE = 4096;
         private const int HEADER_SIZE = 6;

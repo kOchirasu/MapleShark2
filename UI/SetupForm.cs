@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Windows.Forms;
-using MapleShark.Tools;
+using MapleShark2.Tools;
 using SharpPcap.LibPcap;
 
-namespace MapleShark {
+namespace MapleShark2.UI {
     public partial class SetupForm : Form {
         private class DeviceEntry {
             public string Name;

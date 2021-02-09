@@ -1,6 +1,6 @@
 ﻿using SharpPcap.LibPcap;
 
-namespace MapleShark.Tools {
+namespace MapleShark2.Tools {
     public enum PcapConnectionStatus : byte {
         Unknown = 0x00,
         Connected = 0x10,

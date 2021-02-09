@@ -1,4 +1,4 @@
-﻿namespace MapleShark.Packet {
+﻿namespace MapleShark2.Packet {
     public class XORCrypter : ICrypter {
         private const int INDEX = 2;
 

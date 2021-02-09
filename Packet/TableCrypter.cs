@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MapleShark.Packet {
+namespace MapleShark2.Packet {
     public class TableCrypter : ICrypter {
         private const int INDEX = 3;
 

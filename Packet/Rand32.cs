@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MapleShark.Packet {
+namespace MapleShark2.Packet {
     public class Rand32 {
         private uint s1;
         private uint s2;

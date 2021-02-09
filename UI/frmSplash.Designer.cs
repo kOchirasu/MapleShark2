@@ -1,4 +1,4 @@
-﻿namespace MapleShark
+﻿namespace MapleShark2.UI
 {
     partial class frmSplash
     {
@@ -36,26 +36,26 @@
             this.label2 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize) (this.pictureBox1)).BeginInit();
             this.SuspendLayout();
-            // 
+            //
             // pictureBox1
-            // 
+            //
             this.pictureBox1.ErrorImage = null;
-            this.pictureBox1.Image = global::MapleShark.Properties.Resources.SharkLogo;
+            this.pictureBox1.Image = global::MapleShark2.Properties.Resources.SharkLogo;
             this.pictureBox1.Location = new System.Drawing.Point(86, 12);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(196, 119);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
-            // 
+            //
             // timer1
-            // 
+            //
             this.timer1.Enabled = true;
             this.timer1.Interval = 50;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
-            // 
+            //
             // label1
-            // 
+            //
             this.label1.Anchor =
                 ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Bottom |
                                                         System.Windows.Forms.AnchorStyles.Left) |
@@ -68,18 +68,18 @@
             this.label1.TabIndex = 1;
             this.label1.Text = "Loading MapleShark2...";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
+            //
             // initialisator
-            // 
+            //
             this.initialisator.WorkerReportsProgress = true;
             this.initialisator.DoWork += new System.ComponentModel.DoWorkEventHandler(this.initialisator_DoWork);
             this.initialisator.ProgressChanged +=
                 new System.ComponentModel.ProgressChangedEventHandler(this.initialisator_ProgressChanged);
             this.initialisator.RunWorkerCompleted +=
                 new System.ComponentModel.RunWorkerCompletedEventHandler(this.initialisator_RunWorkerCompleted);
-            // 
+            //
             // label2
-            // 
+            //
             this.label2.Anchor =
                 ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Bottom |
                                                         System.Windows.Forms.AnchorStyles.Left) |
@@ -89,9 +89,9 @@
             this.label2.Size = new System.Drawing.Size(341, 27);
             this.label2.TabIndex = 2;
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
+            //
             // frmSplash
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(374, 227);

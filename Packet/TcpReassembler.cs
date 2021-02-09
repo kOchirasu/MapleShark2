@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using PacketDotNet;
 
-namespace MapleShark.Packet {
+namespace MapleShark2.Packet {
     public class TcpReassembler {
         /// <summary>
         /// A class that represent a node in a linked list that holds partial Tcp session

@@ -2,22 +2,20 @@
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace MapleShark.Tools {
-    public static class ListViewUtil
-    {
+namespace MapleShark2.Tools {
+    public static class ListViewUtil {
         /// <summary>
         /// Performs <c>LVM_SETITEMCOUNT</c> on the given <c>ListView</c>.
         /// Also sets <c>LVSICF_NOINVALIDATEALL</c> and <c>LVSICF_NOSCROLL</c> flags
         /// to avoid expensive (and ugly) redrawing on frequent item additions.
         /// See http://msdn.microsoft.com/en-us/library/bb761188%28v=VS.85%29.aspx for more.
         /// </summary>
-        public static void SetVirtualListSizeWithoutRefresh(this ListView listView, int count)
-        {
+        public static void SetVirtualListSizeWithoutRefresh(this ListView listView, int count) {
             SendMessage(listView.Handle,
-                (uint)ListViewMessages.LVM_SETITEMCOUNT,
-                (IntPtr)count,
-                (IntPtr)(ListViewSetItemCountFlags.LVSICF_NOINVALIDATEALL |
-                ListViewSetItemCountFlags.LVSICF_NOSCROLL));
+                (uint) ListViewMessages.LVM_SETITEMCOUNT,
+                (IntPtr) count,
+                (IntPtr) (ListViewSetItemCountFlags.LVSICF_NOINVALIDATEALL
+                          | ListViewSetItemCountFlags.LVSICF_NOSCROLL));
 
             // The ListView.VirtualListSize property drives a private member
             // virtualListSize that is used in the implementation of
@@ -28,10 +26,8 @@ namespace MapleShark.Tools {
             listViewVirtualListSizeField.SetValue(listView, count);
         }
 
-
         [Flags]
-        private enum ListViewSetItemCountFlags
-        {
+        private enum ListViewSetItemCountFlags {
             //#if (_WIN32_IE >= 0x0300)
             // these flags only apply to LVS_OWNERDATA listviews in report or list mode
             LVSICF_NOINVALIDATEALL = 0x00000001,
@@ -39,19 +35,19 @@ namespace MapleShark.Tools {
             //#endif
         }
 
-        private enum ListViewMessages
-        {
-            LVM_FIRST = 0x1000,      // ListView messages
+        private enum ListViewMessages {
+            LVM_FIRST = 0x1000, // ListView messages
             LVM_SETITEMCOUNT = (LVM_FIRST + 47),
         }
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         private static extern IntPtr SendMessage(IntPtr handle, uint messg, IntPtr wparam, IntPtr lparam);
 
-        static ListViewUtil()
-        {
-            listViewVirtualListSizeField = typeof(ListView).GetField("virtualListSize", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-            System.Diagnostics.Debug.Assert(listViewVirtualListSizeField != null, "System.Windows.Forms.ListView class no longer has a virtualListSize field.");
+        static ListViewUtil() {
+            listViewVirtualListSizeField = typeof(ListView).GetField("virtualListSize",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            System.Diagnostics.Debug.Assert(listViewVirtualListSizeField != null,
+                "System.Windows.Forms.ListView class no longer has a virtualListSize field.");
         }
 
         private static readonly System.Reflection.FieldInfo listViewVirtualListSizeField;

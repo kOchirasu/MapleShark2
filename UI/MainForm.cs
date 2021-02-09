@@ -6,13 +6,16 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using Be.Windows.Forms;
-using MapleShark.Properties;
+using MapleShark2.Logging;
+using MapleShark2.Packet;
+using MapleShark2.Properties;
+using MapleShark2.Tools;
 using PacketDotNet;
 using SharpPcap;
 using SharpPcap.LibPcap;
 using WeifenLuo.WinFormsUI.Docking;
 
-namespace MapleShark {
+namespace MapleShark2.UI {
     public partial class MainForm : Form {
         private const string LAYOUT_FILE = "Layout.xml";
 
@@ -318,6 +321,7 @@ namespace MapleShark {
         }
 
         private readonly List<SessionForm> closes = new List<SessionForm>();
+
         private void mTimer_Tick(object sender, EventArgs e) {
             try {
                 mTimer.Enabled = false;

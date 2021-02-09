@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace MapleShark
-{
-    public static class MapleLocale
-    {
+﻿namespace MapleShark2.Packet {
+    public static class MapleLocale {
         public const byte KOREA = 1;
         public const byte KOREA_TEST = 2;
         public const byte JAPAN = 3;

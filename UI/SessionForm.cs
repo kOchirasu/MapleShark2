@@ -9,12 +9,14 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Be.Windows.Forms;
-using MapleLib.PacketLib;
-using MapleShark.Packet;
+using MapleShark2.Logging;
+using MapleShark2.Packet;
+using MapleShark2.Tools;
+using MapleShark2.UI.Control;
 using PacketDotNet;
 using WeifenLuo.WinFormsUI.Docking;
 
-namespace MapleShark {
+namespace MapleShark2.UI {
     public partial class SessionForm : DockContent {
         public enum Results {
             Show,

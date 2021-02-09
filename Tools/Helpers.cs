@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 using System.Windows.Forms;
 
-namespace MapleShark
-{
-    class Helpers
-    {
-        public static string GetScriptFolder(byte locale, uint build)
-        {
+namespace MapleShark2.Tools {
+    public static class Helpers {
+        public static string GetScriptFolder(byte locale, uint build) {
             return string.Format(
                 "{1}{0}Scripts{0}{2}{0}{3}{0}",
                 Path.DirectorySeparatorChar,
@@ -20,8 +13,7 @@ namespace MapleShark
             );
         }
 
-        public static string GetScriptPath(byte locale, uint build, bool outbound, ushort opcode)
-        {
+        public static string GetScriptPath(byte locale, uint build, bool outbound, ushort opcode) {
             return string.Format(
                 "{1}{2}{0}0x{3:X4}.txt",
                 Path.DirectorySeparatorChar,
@@ -31,17 +23,14 @@ namespace MapleShark
             );
         }
 
-        public static string GetCommonScriptPath(byte locale, uint build)
-        {
+        public static string GetCommonScriptPath(byte locale, uint build) {
             return Path.Combine(GetScriptFolder(locale, build), "Common.txt");
         }
 
-        public static void MakeSureFileDirectoryExists(string path)
-        {
-            var dirname = Path.GetDirectoryName(path);
+        public static void MakeSureFileDirectoryExists(string path) {
+            string dirname = Path.GetDirectoryName(path);
             if (!Directory.Exists(dirname))
                 Directory.CreateDirectory(dirname);
         }
-
     }
 }

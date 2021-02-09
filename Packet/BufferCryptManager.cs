@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace MapleShark.Packet {
+namespace MapleShark2.Packet {
     public class BufferCryptManager {
         private readonly ICrypter[] encryptSeq;
         private readonly ICrypter[] decryptSeq;

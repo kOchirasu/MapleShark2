@@ -2,9 +2,10 @@
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-using MapleShark.Tools;
+using MapleShark2.Logging;
+using MapleShark2.Tools;
 
-namespace MapleShark {
+namespace MapleShark2.UI.Control {
     public sealed class PacketListView : ListView {
         public IReadOnlyList<MaplePacket> FilteredPackets => mFilteredPackets;
         public MaplePacket Selected =>

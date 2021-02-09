@@ -1,6 +1,6 @@
-﻿namespace MapleShark
+﻿namespace MapleShark2.UI
 {
-    partial class PropertyForm
+    partial class OutputForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,43 +28,44 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.mProperties = new System.Windows.Forms.PropertyGrid();
+            this.mTextBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
-            // mProperties
+            // mTextBox
             // 
-            this.mProperties.CommandsVisibleIfAvailable = false;
-            this.mProperties.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mProperties.HelpVisible = false;
-            this.mProperties.Location = new System.Drawing.Point(0, 0);
-            this.mProperties.Name = "mProperties";
-            this.mProperties.PropertySort = System.Windows.Forms.PropertySort.NoSort;
-            this.mProperties.Size = new System.Drawing.Size(292, 273);
-            this.mProperties.TabIndex = 4;
-            this.mProperties.ToolbarVisible = false;
+            this.mTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.mTextBox.Location = new System.Drawing.Point(0, 0);
+            this.mTextBox.Multiline = true;
+            this.mTextBox.Name = "mTextBox";
+            this.mTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.mTextBox.Size = new System.Drawing.Size(392, 376);
+            this.mTextBox.TabIndex = 0;
             // 
-            // PropertyForm
+            // OutputForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(292, 273);
-            this.Controls.Add(this.mProperties);
+            this.ClientSize = new System.Drawing.Size(392, 376);
+            this.Controls.Add(this.mTextBox);
             this.DockAreas = ((WeifenLuo.WinFormsUI.Docking.DockAreas)(((((WeifenLuo.WinFormsUI.Docking.DockAreas.Float | WeifenLuo.WinFormsUI.Docking.DockAreas.DockLeft)
                         | WeifenLuo.WinFormsUI.Docking.DockAreas.DockRight)
                         | WeifenLuo.WinFormsUI.Docking.DockAreas.DockTop)
                         | WeifenLuo.WinFormsUI.Docking.DockAreas.DockBottom)));
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.HideOnClose = true;
-            this.Name = "PropertyForm";
-            this.ShowHint = WeifenLuo.WinFormsUI.Docking.DockState.DockBottom;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
+            this.Name = "OutputForm";
+            this.ShowHint = WeifenLuo.WinFormsUI.Docking.DockState.Float;
             this.ShowInTaskbar = false;
-            this.Text = "Properties";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.PropertyGrid mProperties;
+        private System.Windows.Forms.TextBox mTextBox;
     }
 }

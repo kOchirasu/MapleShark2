@@ -1,7 +1,7 @@
-﻿﻿using System;
+﻿using System;
 using System.Text;
 
-namespace MapleShark {
+namespace MapleShark2.Logging {
     public class MaplePacket {
         public DateTime Timestamp { get; private set; }
         public bool Outbound { get; private set; }
@@ -11,8 +11,8 @@ namespace MapleShark {
 
         public byte[] Buffer { get; private set; }
         public int Cursor { get; private set; }
-        public int Length { get { return Buffer.Length; } }
-        public int Remaining { get { return Length - Cursor; } }
+        public int Length => Buffer.Length;
+        public int Remaining => Length - Cursor;
         public uint PreDecodeIV { get; private set; }
         public uint PostDecodeIV { get; private set; }
 

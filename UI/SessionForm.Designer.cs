@@ -1,4 +1,6 @@
-﻿namespace MapleShark
+﻿using MapleShark2.UI.Control;
+
+namespace MapleShark2.UI
 {
     partial class SessionForm
     {
@@ -29,7 +31,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.mPacketList = new MapleShark.PacketListView();
+            this.mPacketList = new PacketListView();
             this.mTimestampColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.mDirectionColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.mLengthColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));

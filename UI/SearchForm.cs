@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 using Be.Windows.Forms;
+using MapleShark2.Logging;
+using MapleShark2.Tools;
 using WeifenLuo.WinFormsUI.Docking;
 
-namespace MapleShark {
+namespace MapleShark2.UI {
     public partial class SearchForm : DockContent {
         public SearchForm() {
             InitializeComponent();

@@ -3,9 +3,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
+using MapleShark2.UI;
 using SharpPcap.LibPcap;
 
-namespace MapleShark
+namespace MapleShark2
 {
     internal static class Program
     {
@@ -49,7 +50,7 @@ namespace MapleShark
             }
         }
 
-        internal static string AssemblyVersion { get { return Assembly.GetExecutingAssembly().GetName().Version.ToString(); } }
-        internal static string AssemblyCopyright { get { return ((AssemblyCopyrightAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false)[0]).Copyright; } }
+        internal static string AssemblyVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        internal static string AssemblyCopyright => ((AssemblyCopyrightAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false)[0]).Copyright;
     }
 }
