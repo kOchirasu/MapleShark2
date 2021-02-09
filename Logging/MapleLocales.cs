@@ -1,4 +1,4 @@
-﻿namespace MapleShark2.Packet {
+﻿namespace MapleShark2.Logging {
     public static class MapleLocale {
         public const byte KOREA = 1;
         public const byte KOREA_TEST = 2;

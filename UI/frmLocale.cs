@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
-using MapleShark2.Packet;
+using MapleShark2.Logging;
 
 namespace MapleShark2.UI {
     public partial class frmLocale : Form {

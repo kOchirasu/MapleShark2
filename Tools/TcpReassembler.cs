@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using Maple2.PacketLib.Tools;
 using PacketDotNet;
 
-namespace MapleShark2.Packet {
+namespace MapleShark2.Tools {
     public class TcpReassembler {
         /// <summary>
         /// A class that represent a node in a linked list that holds partial Tcp session
@@ -25,8 +26,8 @@ namespace MapleShark2.Packet {
         private readonly uint[] srcPort = new uint[2];
 
 
-        public readonly Queue<byte[]> InQueue = new Queue<byte[]>();
-        public readonly Queue<byte[]> OutQueue = new Queue<byte[]>();
+        public readonly MapleStream InStream = new MapleStream();
+        public readonly MapleStream OutStream = new MapleStream();
 
         /// <summary>
         /// Buffers tcp data to reassemble the packet stream.
@@ -213,16 +214,10 @@ namespace MapleShark2.Packet {
                 return;
             }
 
-            if (offset > 0) {
-                byte[] writeData = new byte[dataLength];
-                Buffer.BlockCopy(data, offset, writeData, 0, dataLength);
-                data = writeData;
-            }
-
             if (index == 0) {
-                InQueue.Enqueue(data);
+                InStream.Write(data, offset, dataLength);
             } else {
-                OutQueue.Enqueue(data);
+                OutStream.Write(data, offset, dataLength);
             }
         }
     }

@@ -31,7 +31,7 @@ namespace MapleShark2.UI
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.mPacketList = new PacketListView();
+            this.ListView = new PacketListView();
             this.mTimestampColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.mDirectionColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.mLengthColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -79,27 +79,27 @@ namespace MapleShark2.UI
             //
             // mPacketList
             //
-            this.mPacketList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.ListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.mTimestampColumn,
             this.mDirectionColumn,
             this.mLengthColumn,
             this.mOpcodeColumn,
             this.mNameColumn});
-            this.mPacketList.ContextMenuStrip = this.mPacketContextMenu;
-            this.mPacketList.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mPacketList.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.mPacketList.FullRowSelect = true;
-            this.mPacketList.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this.mPacketList.HideSelection = false;
-            this.mPacketList.Location = new System.Drawing.Point(0, 24);
-            this.mPacketList.MultiSelect = false;
-            this.mPacketList.Name = "mPacketList";
-            this.mPacketList.Size = new System.Drawing.Size(752, 427);
-            this.mPacketList.TabIndex = 0;
-            this.mPacketList.UseCompatibleStateImageBehavior = false;
-            this.mPacketList.View = System.Windows.Forms.View.Details;
-            this.mPacketList.ItemActivate += new System.EventHandler(this.mPacketList_ItemActivate);
-            this.mPacketList.SelectedIndexChanged += new System.EventHandler(this.mPacketList_SelectedIndexChanged);
+            this.ListView.ContextMenuStrip = this.mPacketContextMenu;
+            this.ListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ListView.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ListView.FullRowSelect = true;
+            this.ListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.ListView.HideSelection = false;
+            this.ListView.Location = new System.Drawing.Point(0, 24);
+            this.ListView.MultiSelect = false;
+            this.ListView.Name = "ListView";
+            this.ListView.Size = new System.Drawing.Size(752, 427);
+            this.ListView.TabIndex = 0;
+            this.ListView.UseCompatibleStateImageBehavior = false;
+            this.ListView.View = System.Windows.Forms.View.Details;
+            this.ListView.ItemActivate += new System.EventHandler(this.mPacketList_ItemActivate);
+            this.ListView.SelectedIndexChanged += new System.EventHandler(this.mPacketList_SelectedIndexChanged);
             //
             // mTimestampColumn
             //
@@ -447,7 +447,7 @@ namespace MapleShark2.UI
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(752, 451);
             this.ControlBox = false;
-            this.Controls.Add(this.mPacketList);
+            this.Controls.Add(this.ListView);
             this.Controls.Add(this.mMenu);
             this.DockAreas = WeifenLuo.WinFormsUI.Docking.DockAreas.Document;
             this.DoubleBuffered = true;
@@ -509,6 +509,5 @@ namespace MapleShark2.UI
         private System.Windows.Forms.ToolStripMenuItem allToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem onlyVisibleToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem allToolStripMenuItem1;
-        private PacketListView mPacketList;
     }
 }

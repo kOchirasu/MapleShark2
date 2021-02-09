@@ -7,7 +7,6 @@ using System.Threading;
 using System.Windows.Forms;
 using Be.Windows.Forms;
 using MapleShark2.Logging;
-using MapleShark2.Packet;
 using MapleShark2.Properties;
 using MapleShark2.Tools;
 using PacketDotNet;

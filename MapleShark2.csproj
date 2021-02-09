@@ -33,6 +33,8 @@
         <WarningLevel>4</WarningLevel>
     </PropertyGroup>
     <ItemGroup>
+        <Compile Include="Logging\MapleLocales.cs" />
+        <Compile Include="Tools\TcpReassembler.cs" />
         <Compile Include="UI\Control\MaplePacketItem.cs" />
         <Compile Include="UI\Control\PacketListView.cs" />
         <Compile Include="UI\Control\StructureNode.cs" />
@@ -67,15 +69,6 @@
         <Compile Include="Logging\MaplePacket.cs" />
         <Compile Include="Logging\Opcode.cs" />
         <Compile Include="Logging\StructureSegment.cs" />
-        <Compile Include="Packet\BufferCryptManager.cs" />
-        <Compile Include="Packet\ICrypter.cs" />
-        <Compile Include="Packet\MapleLocales.cs" />
-        <Compile Include="Packet\MapleStream.cs" />
-        <Compile Include="Packet\Rand32.cs" />
-        <Compile Include="Packet\RearrangeCrypter.cs" />
-        <Compile Include="Packet\TableCrypter.cs" />
-        <Compile Include="Packet\TcpReassembler.cs" />
-        <Compile Include="Packet\XORCrypter.cs" />
         <Compile Include="Program.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="Properties\Resources.Designer.cs" />
@@ -83,7 +76,6 @@
         <Compile Include="Tools\Helpers.cs" />
         <Compile Include="Tools\LibPcapLiveDeviceExtensions.cs" />
         <Compile Include="Tools\ListViewUtil.cs" />
-        <Compile Include="Tools\PacketReader.cs" />
         <Compile Include="Tools\ScriptAPI.cs" />
     </ItemGroup>
     <ItemGroup>
@@ -162,6 +154,12 @@
     </ItemGroup>
     <ItemGroup>
       <None Include="packages.config" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="Maple2.PacketLib\Maple2.PacketLib.csproj">
+        <Project>{79460545-477b-4f86-98cf-c48f34f4173b}</Project>
+        <Name>Maple2.PacketLib</Name>
+      </ProjectReference>
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <Import Project="packages\ILRepack.Lib.MSBuild.Task.2.0.18.2\build\ILRepack.Lib.MSBuild.Task.targets" Condition="Exists('packages\ILRepack.Lib.MSBuild.Task.2.0.18.2\build\ILRepack.Lib.MSBuild.Task.targets')" />

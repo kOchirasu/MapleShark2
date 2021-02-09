@@ -16,7 +16,7 @@ namespace MapleShark2.Logging {
         public uint PreDecodeIV { get; private set; }
         public uint PostDecodeIV { get; private set; }
 
-        internal MaplePacket(DateTime pTimestamp, bool pOutbound, uint pBuild, ushort pOpcode, byte[] pBuffer, uint pPreDecodeIV, uint pPostDecodeIV) {
+        internal MaplePacket(DateTime pTimestamp, bool pOutbound, uint pBuild, ushort pOpcode, byte[] pBuffer, uint pPreDecodeIV = 0, uint pPostDecodeIV = 0) {
             Timestamp = pTimestamp;
             Outbound = pOutbound;
             Build = pBuild;

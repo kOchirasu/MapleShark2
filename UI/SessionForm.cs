@@ -9,8 +9,9 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Be.Windows.Forms;
+using Maple2.PacketLib.Crypto;
+using Maple2.PacketLib.Tools;
 using MapleShark2.Logging;
-using MapleShark2.Packet;
 using MapleShark2.Tools;
 using MapleShark2.UI.Control;
 using PacketDotNet;
@@ -30,19 +31,28 @@ namespace MapleShark2.UI {
         private ushort mLocalPort = 0;
         private ushort mRemotePort = 0;
         private ushort mProxyPort = 0;
-        private uint mBuild = 0;
-        private byte mLocale = 0;
-        private MapleStream mOutboundStream = null;
-        private MapleStream mInboundStream = null;
-        private TcpReassembler tcpReassembler = new TcpReassembler();
-        private List<MaplePacket> mPackets = new List<MaplePacket>();
 
-        private List<Opcode> mOpcodes = new List<Opcode>();
-        private int socks5 = 0;
+        private MapleCipher.Decryptor outDecryptor;
+        private MapleCipher.Decryptor inDecryptor;
+        private readonly TcpReassembler tcpReassembler = new TcpReassembler();
+        private List<MaplePacket> mPackets = new List<MaplePacket>();
 
         private string mRemoteEndpoint = "???";
         private string mLocalEndpoint = "???";
         private string mProxyEndpoint = "???";
+
+        public MainForm MainForm => ParentForm as MainForm;
+
+        public PacketListView ListView { get; private set; }
+        public IReadOnlyList<MaplePacket> FilteredPackets => ListView.FilteredPackets;
+
+        public uint Build { get; private set; }
+        public byte Locale { get; private set; }
+        public List<Opcode> Opcodes { get; private set; } = new List<Opcode>();
+
+        public bool Saved { get; private set; }
+
+        private DateTime startTime;
 
         // Used for determining if the session did receive a packet at all, or if it just emptied its buffers
         public bool ClearedPackets { get; private set; }
@@ -64,19 +74,8 @@ namespace MapleShark2.UI {
             mNameColumn.Width = (int) (mNameColumn.Width * scale);
         }
 
-        public MainForm MainForm => ParentForm as MainForm;
-        public PacketListView ListView => mPacketList;
-        public IReadOnlyList<MaplePacket> FilteredPackets => mPacketList.FilteredPackets;
-        public uint Build => mBuild;
-        public byte Locale => mLocale;
-        public List<Opcode> Opcodes => mOpcodes;
-
-        public bool Saved { get; private set; }
-
-        private DateTime startTime;
-
         public void UpdateOpcodeList() {
-            mOpcodes = mOpcodes.OrderBy(a => a.Header).ToList();
+            Opcodes = Opcodes.OrderBy(a => a.Header).ToList();
         }
 
         internal bool MatchTcpPacket(TcpPacket tcpPacket) {
@@ -98,8 +97,8 @@ namespace MapleShark2.UI {
 
         internal void SetMapleInfo(ushort version, byte locale, string ip, ushort port) {
             if (mPackets.Count > 0) return;
-            mBuild = version;
-            mLocale = locale;
+            Build = version;
+            Locale = locale;
 
             mRemoteEndpoint = ip;
             mRemotePort = port;
@@ -136,148 +135,109 @@ namespace MapleShark2.UI {
                 return Results.Continue;
             }
 
+            //
             bool isOutbound = pTcpPacket.SourcePort == mLocalPort;
             tcpReassembler.ReassembleStream(pTcpPacket);
-            Queue<byte[]> queue = isOutbound ? tcpReassembler.OutQueue : tcpReassembler.InQueue;
-            while (queue.Count > 0) {
-                Results result = ProcessTcpPacket(queue.Dequeue(), isOutbound, pArrivalTime);
-                if (result != Results.Continue) {
-                    return result;
+
+            MapleStream packetStream = isOutbound ? tcpReassembler.OutStream : tcpReassembler.InStream;
+            int opcodeCount = Opcodes.Count;
+            try {
+                ListView.BeginUpdate();
+                while (packetStream.TryRead(out byte[] packet)) {
+                    Results result = ProcessPacket(packet, isOutbound, pArrivalTime);
+                    if (result != Results.Continue) {
+                        ListView.EndUpdate();
+                        return result;
+                    }
                 }
+                ListView.EndUpdate();
+
+                // This should be called after EndUpdate so VirtualListSize is set properly
+                if (ListView.SelectedIndices.Count == 0 && FilteredPackets.Count > 0) {
+                    ListView.Items[FilteredPackets.Count - 1]?.EnsureVisible();
+                }
+            } catch (Exception ex) {
+                Console.WriteLine(ex);
+                Terminate();
+                return Results.Terminated;
+            }
+
+            if (DockPanel != null && DockPanel.ActiveDocument == this && opcodeCount != Opcodes.Count) {
+                MainForm.SearchForm.RefreshOpcodes(true);
             }
 
             return Results.Continue;
         }
 
-        // TcpPacket ordering is guaranteed at this point
-        private Results ProcessTcpPacket(byte[] tcpData, bool isOutbound, DateTime pArrivalTime) {
+        private Results ProcessPacket(byte[] bytes, bool isOutbound, DateTime timestamp) {
             if (mTerminated) return Results.Terminated;
 
-            if (mBuild == 0) {
-                byte[] headerData = new byte[tcpData.Length];
-                Buffer.BlockCopy(tcpData, 0, headerData, 0, tcpData.Length);
-
-                PacketReader pr = new PacketReader(headerData);
-                ushort rawSeq = pr.ReadUShort();
-                int length = pr.ReadInt();
-                if (headerData.Length - 6 < length) {
+            if (Build == 0) {
+                var packet = new ByteReader(bytes);
+                packet.Read<ushort>(); // rawSeq
+                int length = packet.ReadInt();
+                if (bytes.Length - 6 < length) {
                     Console.WriteLine("Connection on port {0} did not have a MapleStory2 Handshake", mLocalEndpoint);
                     return Results.CloseMe;
                 }
 
-                ushort header = pr.ReadUShort();
-                if (header != 1) //RequestVersion
-                {
+                ushort opcode = packet.Read<ushort>();
+                if (opcode != 0x01) { // RequestVersion
                     Console.WriteLine("Connection on port {0} did not have a valid MapleStory2 Connection Header",
                         mLocalEndpoint);
                     return Results.CloseMe;
                 }
 
-                uint version = pr.ReadUInt();
-                uint localIV = pr.ReadUInt();
-                uint remoteIV = pr.ReadUInt();
-                uint blockIV = pr.ReadUInt();
-                byte ignored = pr.ReadByte();
+                uint version = packet.Read<uint>();
+                uint siv = packet.Read<uint>();
+                uint riv = packet.Read<uint>();
+                uint blockIV = packet.Read<uint>();
+                byte type = packet.ReadByte();
 
-                mBuild = version;
-                mLocale = 0; //TODO: Handle regions somehow since handshake doesn't contain it
+                Build = version;
+                Locale = MapleLocale.GLOBAL;
 
-                mOutboundStream = new MapleStream(true, mBuild, localIV, blockIV);
-                mInboundStream = new MapleStream(false, mBuild, remoteIV, blockIV);
+                outDecryptor = new MapleCipher.Decryptor(Build, siv, blockIV);
+                inDecryptor = new MapleCipher.Decryptor(Build, riv, blockIV);
 
-                if (mInboundStream.DecodeSeqBase(rawSeq) != version) {
-                    Console.WriteLine("Connection on port {0} has invalid header sequence number", mLocalEndpoint);
-                    return Results.CloseMe;
-                }
-
-                // Another packet was sent with handshake...
-                if (pr.Remaining > 0) {
-                    // Buffer it since it is encrypted
-                    mInboundStream.Append(pr.ReadBytes(pr.Remaining));
-                }
+                inDecryptor.Decrypt(bytes); // Advance the IV
 
                 // Generate HandShake packet
-                Definition definition = Config.Instance.GetDefinition(mBuild, mLocale, false, header);
+                Definition definition = Config.Instance.GetDefinition(Build, Locale, false, opcode);
                 if (definition == null) {
                     definition = new Definition {
                         Outbound = false,
-                        Locale = mLocale,
-                        Opcode = header,
+                        Locale = Locale,
+                        Opcode = opcode,
                         Name = "RequestVersion",
-                        Build = mBuild
+                        Build = Build
                     };
                     SaveDefinition(definition);
                 }
 
-                {
-                    var filename = Helpers.GetScriptPath(mLocale, mBuild, false, header);
-                    Helpers.MakeSureFileDirectoryExists(filename);
-
-                    // Create main script
-                    if (!File.Exists(filename)) {
-                        string contents = @"using (ScriptAPI) {
-                                                AddShort(""Raw Sequence"");
-                                                AddField(""Packet Length"", 4);
-                                                AddShort(""Opcode"");
-                                                AddField(""MapleStory2 Version"", 4);
-                                                AddField(""Local Initializing Vector (IV)"", 4);
-                                                AddField(""Remote Initializing Vector (IV)"", 4);
-                                                AddField(""Block Initializing Vector (IV)"", 4);
-                                            }";
-                        File.WriteAllText(filename, contents);
-                    }
+                var maplePacket = new MaplePacket(timestamp, isOutbound, Build, opcode, packet.Buffer);
+                // Add to list of not exist (TODO: SortedSet?)
+                if (!Opcodes.Exists(op => op.Outbound == maplePacket.Outbound && op.Header == maplePacket.Opcode)) { // Should be false, but w/e
+                    Opcodes.Add(new Opcode(maplePacket.Outbound, maplePacket.Opcode));
                 }
+                AddPacket(maplePacket, true);
 
-                // Initial TCP packet may not be split up properly, copy only handshake portion
-                byte[] handshakePacketData = new byte[6 + length];
-                Buffer.BlockCopy(tcpData, 0, handshakePacketData, 0, length + 6);
+                Console.WriteLine("[CONNECTION] MapleStory2 V{0}", Build);
 
-                MaplePacket packetItem =
-                    new MaplePacket(pArrivalTime, false, mBuild, header, handshakePacketData, 0, remoteIV);
-                if (!mOpcodes.Exists(op => op.Outbound == packetItem.Outbound && op.Header == packetItem.Opcode)
-                ) // Should be false, but w/e
-                {
-                    mOpcodes.Add(new Opcode(packetItem.Outbound, packetItem.Opcode));
-                }
-
-                AddPacket(packetItem, true);
-
-                Console.WriteLine("[CONNECTION] MapleStory2 V{0}", mBuild);
-
-                ProcessPacketBuffer(mInboundStream, pArrivalTime);
                 return Results.Show;
             }
 
-            MapleStream stream = isOutbound ? mOutboundStream : mInboundStream;
-            stream.Append(tcpData);
-            ProcessPacketBuffer(stream, pArrivalTime);
-            return Results.Continue;
-        }
-
-        private void ProcessPacketBuffer(MapleStream pStream, DateTime pArrivalDate) {
-            if (mTerminated) return;
-
-            int opcodeCount = mOpcodes.Count;
             try {
-                mPacketList.BeginUpdate();
-                while (pStream.TryRead(pArrivalDate, out MaplePacket packetItem)) {
-                    AddPacket(packetItem);
-                }
+                MapleCipher.Decryptor decryptor = isOutbound ? outDecryptor : inDecryptor;
+                ByteReader packet = decryptor.Decrypt(bytes);
+                ushort opcode = packet.Peek<ushort>();
+                var maplePacket = new MaplePacket(timestamp, isOutbound, Build, opcode, packet.Buffer);
+                AddPacket(maplePacket);
 
-                mPacketList.EndUpdate();
-
-                // This should be called after EndUpdate so VirtualListSize is set properly
-                if (mPacketList.SelectedIndices.Count == 0 && FilteredPackets.Count > 0) {
-                    mPacketList.Items[FilteredPackets.Count - 1]?.EnsureVisible();
-                }
-            } catch (Exception ex) {
+                return Results.Continue;
+            } catch (ArgumentException ex) {
                 Console.WriteLine(ex);
-                Terminate();
-                return;
-            }
-
-            if (DockPanel != null && DockPanel.ActiveDocument == this && opcodeCount != mOpcodes.Count) {
-                MainForm.SearchForm.RefreshOpcodes(true);
+                return Results.CloseMe;
             }
         }
 
@@ -289,14 +249,14 @@ namespace MapleShark2.UI {
             using (FileStream stream = new FileStream(pFilename, FileMode.Open, FileAccess.Read)) {
                 BinaryReader reader = new BinaryReader(stream);
                 ushort MapleSharkVersion = reader.ReadUInt16();
-                mBuild = MapleSharkVersion;
+                Build = MapleSharkVersion;
                 if (MapleSharkVersion < 0x2000) {
                     mLocalPort = reader.ReadUInt16();
                     // Old version
                     frmLocale loc = new frmLocale();
                     var res = loc.ShowDialog();
                     if (res == DialogResult.OK) {
-                        mLocale = loc.ChosenLocale;
+                        Locale = loc.ChosenLocale;
                     }
                 } else {
                     byte v1 = (byte) ((MapleSharkVersion >> 12) & 0xF),
@@ -306,8 +266,8 @@ namespace MapleShark2.UI {
                     Console.WriteLine("Loading MSB file, saved by MapleShark V{0}.{1}.{2}.{3}", v1, v2, v3, v4);
 
                     if (MapleSharkVersion == 0x2012) {
-                        mLocale = (byte) reader.ReadUInt16();
-                        mBuild = reader.ReadUInt16();
+                        Locale = (byte) reader.ReadUInt16();
+                        Build = reader.ReadUInt16();
                         mLocalPort = reader.ReadUInt16();
                     } else if (MapleSharkVersion == 0x2014) {
                         mLocalEndpoint = reader.ReadString();
@@ -315,16 +275,16 @@ namespace MapleShark2.UI {
                         mRemoteEndpoint = reader.ReadString();
                         mRemotePort = reader.ReadUInt16();
 
-                        mLocale = (byte) reader.ReadUInt16();
-                        mBuild = reader.ReadUInt16();
+                        Locale = (byte) reader.ReadUInt16();
+                        Build = reader.ReadUInt16();
                     } else if (MapleSharkVersion == 0x2015 || MapleSharkVersion >= 0x2020) {
                         mLocalEndpoint = reader.ReadString();
                         mLocalPort = reader.ReadUInt16();
                         mRemoteEndpoint = reader.ReadString();
                         mRemotePort = reader.ReadUInt16();
 
-                        mLocale = reader.ReadByte();
-                        mBuild = reader.ReadUInt32();
+                        Locale = reader.ReadByte();
+                        Build = reader.ReadUInt32();
                     } else {
                         MessageBox.Show("I have no idea how to open this MSB file. It looks to me as a version "
                                         + $"{v1}.{v2}.{v3}.{v4}"
@@ -333,7 +293,7 @@ namespace MapleShark2.UI {
                     }
                 }
 
-                mPacketList.BeginUpdate();
+                ListView.BeginUpdate();
                 while (stream.Position < stream.Length) {
                     long timestamp = reader.ReadInt64();
                     int size = MapleSharkVersion < 0x2027 ? reader.ReadUInt16() : reader.ReadInt32();
@@ -355,13 +315,13 @@ namespace MapleShark2.UI {
                         postDecodeIV = reader.ReadUInt32();
                     }
 
-                    var packet = new MaplePacket(new DateTime(timestamp), outbound, mBuild, opcode, buffer, preDecodeIV,
+                    var packet = new MaplePacket(new DateTime(timestamp), outbound, Build, opcode, buffer, preDecodeIV,
                         postDecodeIV);
                     AddPacket(packet);
                 }
 
-                mPacketList.EndUpdate();
-                if (mPacketList.VirtualListSize > 0) mPacketList.EnsureVisible(0);
+                ListView.EndUpdate();
+                if (ListView.VirtualListSize > 0) ListView.EnsureVisible(0);
             }
 
             Text = $"{Path.GetFileName(pFilename)} (ReadOnly)";
@@ -369,13 +329,13 @@ namespace MapleShark2.UI {
         }
 
         public void RefreshPackets() {
-            mPacketList.BeginUpdate();
+            ListView.BeginUpdate();
 
-            MaplePacket previous = mPacketList.SelectedIndices.Count > 0
-                ? FilteredPackets[mPacketList.SelectedIndices[0]]
+            MaplePacket previous = ListView.SelectedIndices.Count > 0
+                ? FilteredPackets[ListView.SelectedIndices[0]]
                 : null;
-            mOpcodes.Clear();
-            mPacketList.Clear();
+            Opcodes.Clear();
+            ListView.Clear();
 
             MainForm.DataForm.HexBox.ByteProvider = null;
             MainForm.StructureForm.Tree.Nodes.Clear();
@@ -386,14 +346,14 @@ namespace MapleShark2.UI {
             foreach (MaplePacket packet in mPackets) {
                 if (packet.Outbound && !mViewOutboundMenu.Checked) continue;
                 if (!packet.Outbound && !mViewInboundMenu.Checked) continue;
-                if (!mOpcodes.Exists(op => op.Outbound == packet.Outbound && op.Header == packet.Opcode)) {
-                    mOpcodes.Add(new Opcode(packet.Outbound, packet.Opcode));
+                if (!Opcodes.Exists(op => op.Outbound == packet.Outbound && op.Header == packet.Opcode)) {
+                    Opcodes.Add(new Opcode(packet.Outbound, packet.Opcode));
                 }
 
                 Definition definition = Config.Instance.GetDefinition(packet);
                 if (definition != null && !mViewIgnoredMenu.Checked && definition.Ignore) continue;
 
-                int index = mPacketList.AddPacket(packet);
+                int index = ListView.AddPacket(packet);
                 if (packet == previous) {
                     previousIndex = index;
                 }
@@ -401,12 +361,12 @@ namespace MapleShark2.UI {
 
             MainForm.SearchForm.RefreshOpcodes(true);
 
-            mPacketList.EndUpdate();
+            ListView.EndUpdate();
 
             // This should be called after EndUpdate so VirtualListSize is set properly
             if (previous != null && previousIndex >= 0) {
-                mPacketList.Items[previousIndex].Selected = true;
-                mPacketList.Items[previousIndex].EnsureVisible();
+                ListView.Items[previousIndex].Selected = true;
+                ListView.Items[previousIndex].EnsureVisible();
             }
         }
 
@@ -439,7 +399,7 @@ namespace MapleShark2.UI {
                 buffer[i - 2] = byte.Parse(bytesText[i], NumberStyles.HexNumber);
             }
 
-            var packet = new MaplePacket(date, outbound, mBuild, opcode, buffer, 0, 0);
+            var packet = new MaplePacket(date, outbound, Build, opcode, buffer);
             AddPacket(packet);
         }
 
@@ -463,8 +423,8 @@ namespace MapleShark2.UI {
                 writer.Write(mLocalPort);
                 writer.Write(mRemoteEndpoint);
                 writer.Write(mRemotePort);
-                writer.Write(mLocale);
-                writer.Write(mBuild);
+                writer.Write(Locale);
+                writer.Write(Build);
 
                 mPackets.ForEach(p => {
                     writer.Write((ulong) p.Timestamp.Ticks);
@@ -496,7 +456,7 @@ namespace MapleShark2.UI {
                 == DialogResult.Yes;
 
             string tmp = "";
-            tmp += $"=== MapleStory2 Version: {mBuild}; Region: {mLocale} ===\r\n";
+            tmp += $"=== MapleStory2 Version: {Build}; Region: {Locale} ===\r\n";
             tmp += $"Endpoint From: {mLocalEndpoint}\r\n";
             tmp += $"Endpoint To: {mRemoteEndpoint}\r\n";
             tmp += $"- Packets: {mPackets.Count}\r\n";
@@ -536,7 +496,7 @@ namespace MapleShark2.UI {
         }
 
         private void mViewCommonScriptMenu_Click(object pSender, EventArgs pArgs) {
-            var scriptPath = Helpers.GetCommonScriptPath(mLocale, mBuild);
+            var scriptPath = Helpers.GetCommonScriptPath(Locale, Build);
             Helpers.MakeSureFileDirectoryExists(scriptPath);
 
             ScriptForm script = new ScriptForm(scriptPath, null);
@@ -545,8 +505,8 @@ namespace MapleShark2.UI {
         }
 
         private void CommonScript_FormClosed(object pSender, FormClosedEventArgs pArgs) {
-            if (mPacketList.SelectedIndices.Count == 0) return;
-            MaplePacket packet = mPacketList.Selected;
+            if (ListView.SelectedIndices.Count == 0) return;
+            MaplePacket packet = ListView.Selected;
             MainForm.StructureForm.ParseMaplePacket(packet);
             Activate();
         }
@@ -568,22 +528,22 @@ namespace MapleShark2.UI {
         }
 
         private void mPacketList_SelectedIndexChanged(object pSender, EventArgs pArgs) {
-            if (mPacketList.SelectedIndices.Count == 0) {
+            if (ListView.SelectedIndices.Count == 0) {
                 MainForm.DataForm.HexBox.ByteProvider = null;
                 MainForm.StructureForm.Tree.Nodes.Clear();
                 MainForm.PropertyForm.Properties.SelectedObject = null;
                 return;
             }
 
-            MainForm.DataForm.HexBox.ByteProvider = new DynamicByteProvider(mPacketList.Selected.Buffer);
-            MainForm.StructureForm.ParseMaplePacket(mPacketList.Selected);
+            MainForm.DataForm.HexBox.ByteProvider = new DynamicByteProvider(ListView.Selected.Buffer);
+            MainForm.StructureForm.ParseMaplePacket(ListView.Selected);
         }
 
         private void mPacketList_ItemActivate(object pSender, EventArgs pArgs) {
-            if (mPacketList.SelectedIndices.Count == 0) return;
-            MaplePacket packet = mPacketList.Selected;
+            if (ListView.SelectedIndices.Count == 0) return;
+            MaplePacket packet = ListView.Selected;
 
-            var scriptPath = Helpers.GetScriptPath(mLocale, mBuild, packet.Outbound, packet.Opcode);
+            var scriptPath = Helpers.GetScriptPath(Locale, Build, packet.Outbound, packet.Opcode);
             Helpers.MakeSureFileDirectoryExists(scriptPath);
 
             ScriptForm script = new ScriptForm(scriptPath, packet);
@@ -604,10 +564,10 @@ namespace MapleShark2.UI {
             openingContextMenu = true;
             mPacketContextNameBox.Text = "";
             mPacketContextIgnoreMenu.Checked = false;
-            if (mPacketList.SelectedIndices.Count == 0) {
+            if (ListView.SelectedIndices.Count == 0) {
                 pArgs.Cancel = true;
             } else {
-                MaplePacket packet = mPacketList.Selected;
+                MaplePacket packet = ListView.Selected;
                 Definition definition = Config.Instance.GetDefinition(packet);
                 if (definition != null) {
                     mPacketContextNameBox.Text = definition.Name;
@@ -620,21 +580,21 @@ namespace MapleShark2.UI {
             mPacketContextNameBox.Focus();
             mPacketContextNameBox.SelectAll();
 
-            mPacketList.Items[mPacketList.SelectedIndices[0]]?.EnsureVisible();
+            ListView.Items[ListView.SelectedIndices[0]]?.EnsureVisible();
             openingContextMenu = false;
         }
 
         private void mPacketContextNameBox_KeyDown(object pSender, KeyEventArgs pArgs) {
-            if (pArgs.Modifiers == Keys.None && pArgs.KeyCode == Keys.Enter && mPacketList.SelectedIndices.Count > 0) {
-                int index = mPacketList.SelectedIndices[0];
-                MaplePacket packet = mPacketList.Selected;
+            if (pArgs.Modifiers == Keys.None && pArgs.KeyCode == Keys.Enter && ListView.SelectedIndices.Count > 0) {
+                int index = ListView.SelectedIndices[0];
+                MaplePacket packet = ListView.Selected;
                 Definition definition = Config.Instance.GetDefinition(packet);
                 if (definition == null) {
                     definition = new Definition {
-                        Build = mBuild,
+                        Build = Build,
                         Outbound = packet.Outbound,
                         Opcode = packet.Opcode,
-                        Locale = mLocale
+                        Locale = Locale
                     };
                 }
 
@@ -645,20 +605,20 @@ namespace MapleShark2.UI {
                 mPacketContextMenu.Close();
                 RefreshPackets();
 
-                mPacketList.Items[index]?.EnsureVisible();
+                ListView.Items[index]?.EnsureVisible();
             }
         }
 
         private void mPacketContextIgnoreMenu_CheckedChanged(object pSender, EventArgs pArgs) {
-            if (openingContextMenu || mPacketList.SelectedIndices.Count == 0) return;
-            int index = mPacketList.SelectedIndices[0];
-            MaplePacket packetItem = mPacketList.Selected;
+            if (openingContextMenu || ListView.SelectedIndices.Count == 0) return;
+            int index = ListView.SelectedIndices[0];
+            MaplePacket packetItem = ListView.Selected;
             Definition definition =
-                Config.Instance.GetDefinition(mBuild, mLocale, packetItem.Outbound, packetItem.Opcode);
+                Config.Instance.GetDefinition(Build, Locale, packetItem.Outbound, packetItem.Opcode);
             if (definition == null) {
                 definition = new Definition {
-                    Locale = mLocale,
-                    Build = mBuild,
+                    Locale = Locale,
+                    Build = Build,
                     Outbound = packetItem.Outbound,
                     Opcode = packetItem.Opcode,
                 };
@@ -672,8 +632,8 @@ namespace MapleShark2.UI {
 
             int newIndex = index - 1;
             for (int i = index - 1; i > 0; i--) {
-                MaplePacket pack = mPacketList.FilteredPackets[i];
-                Definition def = Config.Instance.GetDefinition(mBuild, mLocale, pack.Outbound, pack.Opcode);
+                MaplePacket pack = ListView.FilteredPackets[i];
+                Definition def = Config.Instance.GetDefinition(Build, Locale, pack.Outbound, pack.Opcode);
                 if (def == definition) {
                     newIndex--;
                 }
@@ -681,8 +641,8 @@ namespace MapleShark2.UI {
 
             RefreshPackets();
 
-            if (newIndex != 0 && mPacketList.FilteredPackets[newIndex] != null) {
-                ListViewItem listItem = mPacketList.Items[newIndex];
+            if (newIndex != 0 && ListView.FilteredPackets[newIndex] != null) {
+                ListViewItem listItem = ListView.Items[newIndex];
                 listItem.Selected = true;
                 listItem.EnsureVisible();
             }
@@ -694,8 +654,8 @@ namespace MapleShark2.UI {
 
         private void sessionInformationToolStripMenuItem_Click(object sender, EventArgs e) {
             var info = new SessionInformation {
-                txtVersion = {Text = mBuild.ToString()},
-                txtLocale = {Text = mLocale.ToString()},
+                txtVersion = {Text = Build.ToString()},
+                txtLocale = {Text = Locale.ToString()},
                 txtAdditionalInfo = {
                     Text = "Connection info:\r\n"
                            + mLocalEndpoint
@@ -710,13 +670,13 @@ namespace MapleShark2.UI {
 
         private void sendPropertiesToolStripMenuItem_Click(object sender, EventArgs e) {
             DefinitionsContainer.Instance.SaveProperties();
-            string tmp = Config.GetPropertiesFile(true, (byte) mLocale, mBuild);
+            string tmp = Config.GetPropertiesFile(true, (byte) Locale, Build);
             Process.Start(tmp);
         }
 
         private void recvPropertiesToolStripMenuItem_Click(object sender, EventArgs e) {
             DefinitionsContainer.Instance.SaveProperties();
-            string tmp = Config.GetPropertiesFile(false, (byte) mLocale, mBuild);
+            string tmp = Config.GetPropertiesFile(false, (byte) Locale, Build);
             Process.Start(tmp);
         }
 
@@ -730,23 +690,23 @@ namespace MapleShark2.UI {
             ClearedPackets = true;
 
             mPackets.Clear();
-            mPacketList.Clear();
-            mOpcodes.Clear();
+            ListView.Clear();
+            Opcodes.Clear();
             RefreshPackets();
         }
 
         private void mFileSeparatorMenu_Click(object sender, EventArgs e) { }
 
         private void thisPacketOnlyToolStripMenuItem_Click(object sender, EventArgs e) {
-            if (mPacketList.SelectedIndices.Count == 0) return;
-            int index = mPacketList.SelectedIndices[0];
-            ListViewItem packetItem = mPacketList.Items[index];
-            mPackets.Remove(mPacketList.FilteredPackets[index]);
+            if (ListView.SelectedIndices.Count == 0) return;
+            int index = ListView.SelectedIndices[0];
+            ListViewItem packetItem = ListView.Items[index];
+            mPackets.Remove(ListView.FilteredPackets[index]);
 
             packetItem.Selected = false;
             if (index > 0) {
                 index--;
-                packetItem = mPacketList.Items[index];
+                packetItem = ListView.Items[index];
                 packetItem.Selected = true;
             }
 
@@ -756,16 +716,16 @@ namespace MapleShark2.UI {
         private void allBeforeThisOneToolStripMenuItem_Click(object sender, EventArgs e) { }
 
         private void onlyVisibleToolStripMenuItem_Click(object sender, EventArgs e) {
-            if (mPacketList.SelectedIndices.Count == 0) return;
-            int index = mPacketList.SelectedIndices[0];
+            if (ListView.SelectedIndices.Count == 0) return;
+            int index = ListView.SelectedIndices[0];
 
             for (int i = 0; i < index; i++)
-                mPackets.Remove(mPacketList.FilteredPackets[i]);
+                mPackets.Remove(ListView.FilteredPackets[i]);
             RefreshPackets();
         }
 
         private void allToolStripMenuItem_Click(object sender, EventArgs e) {
-            MaplePacket packet = mPacketList.Selected;
+            MaplePacket packet = ListView.Selected;
             if (packet == default) return;
 
             mPackets.RemoveRange(0, mPackets.FindIndex((p) => p == packet));
@@ -773,16 +733,16 @@ namespace MapleShark2.UI {
         }
 
         private void onlyVisibleToolStripMenuItem1_Click(object sender, EventArgs e) {
-            if (mPacketList.SelectedIndices.Count == 0) return;
-            int index = mPacketList.SelectedIndices[0];
+            if (ListView.SelectedIndices.Count == 0) return;
+            int index = ListView.SelectedIndices[0];
 
-            for (int i = index + 1; i < mPacketList.VirtualListSize; i++)
-                mPackets.Remove(mPacketList.FilteredPackets[i]);
+            for (int i = index + 1; i < ListView.VirtualListSize; i++)
+                mPackets.Remove(ListView.FilteredPackets[i]);
             RefreshPackets();
         }
 
         private void allToolStripMenuItem1_Click(object sender, EventArgs e) {
-            MaplePacket packet = mPacketList.Selected;
+            MaplePacket packet = ListView.Selected;
             if (packet == default) return;
 
             int startIndex = mPackets.FindIndex((p) => p == packet) + 1;
@@ -798,9 +758,9 @@ namespace MapleShark2.UI {
             mPackets.Add(packetItem);
 
             Definition definition =
-                Config.Instance.GetDefinition(mBuild, mLocale, packetItem.Outbound, packetItem.Opcode);
-            if (!mOpcodes.Exists(op => op.Outbound == packetItem.Outbound && op.Header == packetItem.Opcode)) {
-                mOpcodes.Add(new Opcode(packetItem.Outbound, packetItem.Opcode));
+                Config.Instance.GetDefinition(Build, Locale, packetItem.Outbound, packetItem.Opcode);
+            if (!Opcodes.Exists(op => op.Outbound == packetItem.Outbound && op.Header == packetItem.Opcode)) {
+                Opcodes.Add(new Opcode(packetItem.Outbound, packetItem.Opcode));
             }
 
             if (!forceAdd) {
@@ -809,7 +769,7 @@ namespace MapleShark2.UI {
                 if (!packetItem.Outbound && !mViewInboundMenu.Checked) return;
             }
 
-            mPacketList.AddPacket(packetItem);
+            ListView.AddPacket(packetItem);
         }
 
         private void Terminate() {
