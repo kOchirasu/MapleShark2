@@ -18,21 +18,20 @@ namespace MapleShark2.UI {
         private void mHex_SelectionLengthChanged(object pSender, EventArgs pArgs) {
             if (mHex.SelectionLength == 0) MainForm.PropertyForm.Properties.SelectedObject = null;
             else {
-                byte[] buffer = null;
+                ArraySegment<byte> buffer = default;
                 StructureNode match = null;
                 foreach (TreeNode node in MainForm.StructureForm.Tree.Nodes) {
-                    StructureNode realNode = node as StructureNode;
-                    buffer = realNode.Buffer;
-                    if (mHex.SelectionStart == realNode.Cursor && mHex.SelectionLength == realNode.Length) {
+                    var realNode = (StructureNode) node;
+                    buffer = realNode.Data;
+                    if (mHex.SelectionStart == realNode.Data.Offset && mHex.SelectionLength == realNode.Data.Count) {
                         match = realNode;
                         break;
                     }
                 }
 
                 MainForm.StructureForm.Tree.SelectedNode = match;
-                if (buffer != null)
-                    MainForm.PropertyForm.Properties.SelectedObject = new StructureSegment(buffer,
-                        (int) mHex.SelectionStart, (int) mHex.SelectionLength, MainForm.Locale);
+                if (buffer.Count > 0)
+                    MainForm.PropertyForm.Properties.SelectedObject = new StructureSegment(buffer, MainForm.Locale);
                 else MainForm.PropertyForm.Properties.SelectedObject = null;
             }
         }

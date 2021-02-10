@@ -134,12 +134,16 @@ namespace MapleShark2.UI {
             try {
                 mDevice.OnPacketArrival += mDevice_OnPacketArrival;
                 mDevice.Open(DeviceMode.Promiscuous, 10);
-                mDevice.Filter = $"tcp portrange {Config.Instance.LowPort}-{Config.Instance.HighPort}";
+                UpdatePortRange();
                 mDevice.StartCapture();
             } catch {
                 MessageBox.Show("Failed to set the device in Promiscuous mode! But that doesn't really matter lol.");
                 mDevice.Open();
             }
+        }
+
+        public void UpdatePortRange() {
+            mDevice.Filter = $"tcp portrange {Config.Instance.LowPort}-{Config.Instance.HighPort}";
         }
 
         private void mDevice_OnPacketArrival(object sender, CaptureEventArgs e) {
@@ -346,27 +350,30 @@ namespace MapleShark2.UI {
                         continue;
                     }
 
-                    var tcpPacket = PacketDotNet.Packet.ParsePacket(packet.LinkLayerType, packet.Data)
-                        .Extract<TcpPacket>();
+                    var tcpPacket = Packet.ParsePacket(packet.LinkLayerType, packet.Data).Extract<TcpPacket>();
                     SessionForm session = null;
                     try {
+                        SessionForm.Results? result;
                         if (tcpPacket.Synchronize
                             && !tcpPacket.Acknowledgment
                             && tcpPacket.DestinationPort >= Config.Instance.LowPort
                             && tcpPacket.DestinationPort <= Config.Instance.HighPort) {
                             session = NewSession();
-                            SessionForm.Results res = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
-                            if (res == SessionForm.Results.Continue) {
-                                session.Show(mDockPanel, DockState.Document);
-                            }
+                            result = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
                         } else {
                             session =
                                 Array.Find(MdiChildren,
                                     f => ((SessionForm) f).MatchTcpPacket(tcpPacket)) as SessionForm;
-                            SessionForm.Results? res = session?.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
-                            if (res == SessionForm.Results.CloseMe) {
-                                session.Close();
-                            }
+                            result = session?.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
+                        }
+
+                        switch (result) {
+                           case SessionForm.Results.Show:
+                               session.Show(mDockPanel, DockState.Document);
+                               break;
+                           case SessionForm.Results.CloseMe:
+                               session.Close();
+                               break;
                         }
                     } catch (Exception ex) {
                         Console.WriteLine(ex.ToString());

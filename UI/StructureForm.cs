@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows.Forms;
 using MapleShark2.Logging;
@@ -12,7 +13,7 @@ using WeifenLuo.WinFormsUI.Docking;
 
 namespace MapleShark2.UI {
     public partial class StructureForm : DockContent {
-        private MaplePacket mParsing = null;
+        private MaplePacket packet;
         private Stack<StructureNode> mSubNodes = new Stack<StructureNode>();
 
         public StructureForm() {
@@ -25,15 +26,14 @@ namespace MapleShark2.UI {
         public void ParseMaplePacket(MaplePacket pPacketItem) {
             mTree.Nodes.Clear();
             mSubNodes.Clear();
-            pPacketItem.Rewind();
+            pPacketItem.Reset(); // Seek back to beginning
+            packet = pPacketItem;
 
             var scriptPath = Helpers.GetScriptPath(pPacketItem.Locale, pPacketItem.Build, pPacketItem.Outbound,
                 pPacketItem.Opcode);
             var commonPath = Helpers.GetCommonScriptPath(pPacketItem.Locale, pPacketItem.Build);
 
             if (File.Exists(scriptPath)) {
-                mParsing = pPacketItem;
-
                 try {
                     StringBuilder scriptCode = new StringBuilder();
                     scriptCode.Append(File.ReadAllText(scriptPath));
@@ -46,13 +46,11 @@ namespace MapleShark2.UI {
                     output.Append(exc.ToString());
                     output.Show(DockPanel, new Rectangle(MainForm.Location, new Size(400, 400)));
                 }
-
-                mParsing = null;
             }
 
-            if (pPacketItem.Remaining > 0)
-                mTree.Nodes.Add(new StructureNode("Undefined", pPacketItem.Buffer, pPacketItem.Cursor,
-                    pPacketItem.Remaining));
+            if (packet.Available > 0) {
+                APIAddField("Undefined", packet.Available);
+            }
         }
 
         private TreeNodeCollection CurrentNodes => mSubNodes.Count > 0 ? mSubNodes.Peek().Nodes : mTree.Nodes;
@@ -62,82 +60,25 @@ namespace MapleShark2.UI {
             return ret;
         }
 
-        internal byte APIAddByte(string pName) {
-            byte value;
-            if (!mParsing.ReadByte(out value)) throw new Exception("Insufficient packet data");
-            CurrentNodes.Add(new StructureNode(pName, mParsing.Buffer, mParsing.Cursor - 1, 1));
-            return value;
-        }
+        internal byte APIAddByte(string pName) => ReadToNode<byte>(pName);
 
-        internal sbyte APIAddSByte(string pName) {
-            sbyte value;
-            if (!mParsing.ReadSByte(out value)) throw new Exception("Insufficient packet data");
-            CurrentNodes.Add(new StructureNode(pName, mParsing.Buffer, mParsing.Cursor - 1, 1));
-            return value;
-        }
+        internal sbyte APIAddSByte(string pName) => ReadToNode<sbyte>(pName);
 
-        internal ushort APIAddUShort(string pName) {
-            ushort value;
-            if (!mParsing.ReadUShort(out value)) throw new Exception("Insufficient packet data");
-            CurrentNodes.Add(new StructureNode(pName, mParsing.Buffer, mParsing.Cursor - 2, 2));
-            return value;
-        }
+        internal ushort APIAddUShort(string pName) => ReadToNode<ushort>(pName);
 
-        internal short APIAddShort(string pName) {
-            short value;
-            if (!mParsing.ReadShort(out value)) throw new Exception("Insufficient packet data");
-            CurrentNodes.Add(new StructureNode(pName, mParsing.Buffer, mParsing.Cursor - 2, 2));
-            return value;
-        }
+        internal short APIAddShort(string pName) => ReadToNode<short>(pName);
 
-        internal uint APIAddUInt(string pName) {
-            uint value;
-            if (!mParsing.ReadUInt(out value)) throw new Exception("Insufficient packet data");
-            CurrentNodes.Add(new StructureNode(pName, mParsing.Buffer, mParsing.Cursor - 4, 4));
-            return value;
-        }
+        internal uint APIAddUInt(string pName) => ReadToNode<uint>(pName);
 
-        internal int APIAddInt(string pName) {
-            int value;
-            if (!mParsing.ReadInt(out value)) throw new Exception("Insufficient packet data");
-            CurrentNodes.Add(new StructureNode(pName, mParsing.Buffer, mParsing.Cursor - 4, 4));
-            return value;
-        }
+        internal int APIAddInt(string pName) => ReadToNode<int>(pName);
 
-        internal float APIAddFloat(string pName) {
-            float value;
-            if (!mParsing.ReadFloat(out value)) throw new Exception("Insufficient packet data");
-            CurrentNodes.Add(new StructureNode(pName, mParsing.Buffer, mParsing.Cursor - 4, 4));
-            return value;
-        }
+        internal float APIAddFloat(string pName) => ReadToNode<float>(pName);
 
-        internal bool APIAddBool(string pName) {
-            byte value;
-            if (!mParsing.ReadByte(out value)) throw new Exception("Insufficient packet data");
-            CurrentNodes.Add(new StructureNode(pName, mParsing.Buffer, mParsing.Cursor - 1, 1));
-            return Convert.ToBoolean(value);
-        }
+        internal bool APIAddBool(string pName) => ReadToNode<bool>(pName);
 
-        internal long APIAddLong(string pName) {
-            long value;
-            if (!mParsing.ReadLong(out value)) throw new Exception("Insufficient packet data");
-            CurrentNodes.Add(new StructureNode(pName, mParsing.Buffer, mParsing.Cursor - 8, 8));
-            return value;
-        }
+        internal long APIAddLong(string pName) => ReadToNode<long>(pName);
 
-        internal long APIAddFlippedLong(string pName) {
-            long value;
-            if (!mParsing.ReadFlippedLong(out value)) throw new Exception("Insufficient packet data");
-            CurrentNodes.Add(new StructureNode(pName, mParsing.Buffer, mParsing.Cursor - 8, 8));
-            return value;
-        }
-
-        internal double APIAddDouble(string pName) {
-            double value;
-            if (!mParsing.ReadDouble(out value)) throw new Exception("Insufficient packet data");
-            CurrentNodes.Add(new StructureNode(pName, mParsing.Buffer, mParsing.Cursor - 8, 8));
-            return value;
-        }
+        internal double APIAddDouble(string pName) => ReadToNode<double>(pName);
 
         internal string APIAddString(string pName) {
             APIStartNode(pName);
@@ -150,32 +91,28 @@ namespace MapleShark2.UI {
         internal string APIAddUnicodeString(string pName) {
             APIStartNode(pName);
             short size = APIAddShort("Size");
-            if (!mParsing.ReadUnicodeString(out string value, size)) throw new Exception("Insufficient packet data");
-            int length = size * 2;
-            CurrentNodes.Add(new StructureNode(pName, mParsing.Buffer, mParsing.Cursor - length, length));
+            CurrentNodes.Add(new StructureNode(pName, packet.GetSegment(size * 2))); // Unicode is 2-width
+            string value = packet.ReadRawUnicodeString(size);
             APIEndNode(false);
             return value;
         }
 
         internal string APIAddPaddedString(string pName, int pLength) {
-            string value;
-            if (!mParsing.ReadPaddedString(out value, pLength)) throw new Exception("Insufficient packet data");
-            CurrentNodes.Add(new StructureNode(pName, mParsing.Buffer, mParsing.Cursor - pLength, pLength));
-            return value;
+            CurrentNodes.Add(new StructureNode(pName, packet.GetSegment(pLength)));
+            return packet.ReadRawString(pLength);
         }
 
         internal void APIAddField(string pName, int pLength) {
-            byte[] buffer = new byte[pLength];
-            if (!mParsing.ReadBytes(buffer)) throw new Exception("Insufficient packet data");
-            CurrentNodes.Add(new StructureNode(pName, mParsing.Buffer, mParsing.Cursor - pLength, pLength));
+            CurrentNodes.Add(new StructureNode(pName, packet.GetSegment(pLength)));
+            packet.Skip(pLength);
         }
 
         internal void APIAddComment(string pComment) {
-            CurrentNodes.Add(new StructureNode(pComment, mParsing.Buffer, mParsing.Cursor, 0));
+            CurrentNodes.Add(new StructureNode(pComment, packet.GetSegment(0)));
         }
 
         internal void APIStartNode(string pName) {
-            StructureNode node = new StructureNode(pName, mParsing.Buffer, mParsing.Cursor, 0);
+            var node = new StructureNode(pName, packet.GetSegment(0));
             if (mSubNodes.Count > 0) mSubNodes.Peek().Nodes.Add(node);
             else mTree.Nodes.Add(node);
             mSubNodes.Push(node);
@@ -184,13 +121,20 @@ namespace MapleShark2.UI {
         internal void APIEndNode(bool pExpand) {
             if (mSubNodes.Count > 0) {
                 StructureNode node = mSubNodes.Pop();
-                node.Length = mParsing.Cursor - node.Cursor;
+                int length = packet.Position - node.Data.Offset;
+                node.UpdateData(packet.GetSegment(node.Data.Offset, length));
                 if (pExpand) node.Expand();
             }
         }
 
         internal int APIRemaining() {
-            return mParsing.Remaining;
+            return packet.Available;
+        }
+
+        private T ReadToNode<T>(string name) where T : struct {
+            int size = Unsafe.SizeOf<T>();
+            CurrentNodes.Add(new StructureNode(name, packet.GetSegment(size)));
+            return packet.Read<T>();
         }
 
         private void mTree_AfterSelect(object pSender, TreeViewEventArgs pArgs) {
@@ -201,10 +145,9 @@ namespace MapleShark2.UI {
                 return;
             }
 
-            MainForm.DataForm.HexBox.SelectionStart = node.Cursor;
-            MainForm.DataForm.HexBox.SelectionLength = node.Length;
-            MainForm.PropertyForm.Properties.SelectedObject =
-                new StructureSegment(node.Buffer, node.Cursor, node.Length, MainForm.Locale);
+            MainForm.DataForm.HexBox.SelectionStart = node.Data.Offset;
+            MainForm.DataForm.HexBox.SelectionLength = node.Data.Count;
+            MainForm.PropertyForm.Properties.SelectedObject = new StructureSegment(node.Data, MainForm.Locale);
         }
 
         private void mTree_KeyDown(object pSender, KeyEventArgs pArgs) {

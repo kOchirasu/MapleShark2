@@ -135,7 +135,6 @@ namespace MapleShark2.UI {
                 return Results.Continue;
             }
 
-            //
             bool isOutbound = pTcpPacket.SourcePort == mLocalPort;
             tcpReassembler.ReassembleStream(pTcpPacket);
 
@@ -215,7 +214,8 @@ namespace MapleShark2.UI {
                     SaveDefinition(definition);
                 }
 
-                var maplePacket = new MaplePacket(timestamp, isOutbound, Build, opcode, packet.Buffer);
+                ArraySegment<byte> segment = new ArraySegment<byte>(packet.Buffer, 2, packet.Length - 2);
+                var maplePacket = new MaplePacket(timestamp, isOutbound, Build, opcode, segment);
                 // Add to list of not exist (TODO: SortedSet?)
                 if (!Opcodes.Exists(op => op.Outbound == maplePacket.Outbound && op.Header == maplePacket.Opcode)) { // Should be false, but w/e
                     Opcodes.Add(new Opcode(maplePacket.Outbound, maplePacket.Opcode));
@@ -231,7 +231,8 @@ namespace MapleShark2.UI {
                 MapleCipher.Decryptor decryptor = isOutbound ? outDecryptor : inDecryptor;
                 ByteReader packet = decryptor.Decrypt(bytes);
                 ushort opcode = packet.Peek<ushort>();
-                var maplePacket = new MaplePacket(timestamp, isOutbound, Build, opcode, packet.Buffer);
+                ArraySegment<byte> segment = new ArraySegment<byte>(packet.Buffer, 2, packet.Length - 2);
+                var maplePacket = new MaplePacket(timestamp, isOutbound, Build, opcode, segment);
                 AddPacket(maplePacket);
 
                 return Results.Continue;
@@ -308,15 +309,12 @@ namespace MapleShark2.UI {
                     }
 
                     byte[] buffer = reader.ReadBytes(size);
-
-                    uint preDecodeIV = 0, postDecodeIV = 0;
-                    if (MapleSharkVersion >= 0x2025) {
-                        preDecodeIV = reader.ReadUInt32();
-                        postDecodeIV = reader.ReadUInt32();
+                    if (MapleSharkVersion >= 0x2025 && MapleSharkVersion < 0x2030) {
+                        reader.ReadUInt32(); // preDecodeIV
+                        reader.ReadUInt32(); // postDecodeIV
                     }
 
-                    var packet = new MaplePacket(new DateTime(timestamp), outbound, Build, opcode, buffer, preDecodeIV,
-                        postDecodeIV);
+                    var packet = new MaplePacket(new DateTime(timestamp), outbound, Build, opcode, new ArraySegment<byte>(buffer));
                     AddPacket(packet);
                 }
 
@@ -399,7 +397,7 @@ namespace MapleShark2.UI {
                 buffer[i - 2] = byte.Parse(bytesText[i], NumberStyles.HexNumber);
             }
 
-            var packet = new MaplePacket(date, outbound, Build, opcode, buffer);
+            var packet = new MaplePacket(date, outbound, Build, opcode, new ArraySegment<byte>(buffer));
             AddPacket(packet);
         }
 
@@ -415,7 +413,7 @@ namespace MapleShark2.UI {
             }
 
             using (FileStream stream = new FileStream(mFilename, FileMode.Create, FileAccess.Write)) {
-                var version = (ushort) 0x2027;
+                var version = (ushort) 0x2030;
 
                 BinaryWriter writer = new BinaryWriter(stream);
                 writer.Write(version);
@@ -428,12 +426,10 @@ namespace MapleShark2.UI {
 
                 mPackets.ForEach(p => {
                     writer.Write((ulong) p.Timestamp.Ticks);
-                    writer.Write((int) p.Length);
-                    writer.Write((ushort) p.Opcode);
+                    writer.Write(p.Length);
+                    writer.Write(p.Opcode);
                     writer.Write((byte) (p.Outbound ? 1 : 0));
-                    writer.Write(p.Buffer);
-                    writer.Write(p.PreDecodeIV);
-                    writer.Write(p.PostDecodeIV);
+                    writer.Write(p.AsSpan().ToArray());
                 });
 
                 stream.Flush();
@@ -463,7 +459,7 @@ namespace MapleShark2.UI {
 
             long dataSize = 0;
             foreach (var packet in mPackets)
-                dataSize += 2 + packet.Buffer.Length;
+                dataSize += 2 + packet.Length;
 
             tmp += $"- Data: {dataSize:N0} bytes\r\n";
             tmp += string.Format("================================================\r\n");
@@ -483,7 +479,7 @@ namespace MapleShark2.UI {
                 tmp += string.Format("[{0:yyyy-MM-dd HH:mm:ss.fff}][{1}] [{2:X4}{4}] {3}\r\n", packet.Timestamp,
                     (packet.Outbound ? "OUT" : "IN "),
                     packet.Opcode,
-                    BitConverter.ToString(packet.Buffer).Replace('-', ' '),
+                    packet.ToHexString(),
                     includeNames ? " | " + (definition == null ? "N/A" : definition.Name) : "");
                 i++;
                 if (i % 1000 == 0) {
@@ -535,7 +531,7 @@ namespace MapleShark2.UI {
                 return;
             }
 
-            MainForm.DataForm.HexBox.ByteProvider = new DynamicByteProvider(ListView.Selected.Buffer);
+            MainForm.DataForm.HexBox.ByteProvider = new DynamicByteProvider(ListView.Selected.AsSpan().ToArray());
             MainForm.StructureForm.ParseMaplePacket(ListView.Selected);
         }
 

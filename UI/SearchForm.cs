@@ -101,10 +101,10 @@ namespace MapleShark2.UI {
                 MaplePacket packetItem = session.FilteredPackets[index];
                 long searchIndex = startIndex + 1;
                 bool found = false;
-                while (pattern != null && searchIndex <= packetItem.Buffer.Length - pattern.Length) {
+                while (pattern != null && searchIndex <= packetItem.Length - pattern.Length) {
                     found = true;
                     for (int patternIndex = 0; found && patternIndex < pattern.Length; ++patternIndex)
-                        found = packetItem.Buffer[searchIndex + patternIndex] == pattern[patternIndex];
+                        found = packetItem.AsSpan()[(int) (searchIndex + patternIndex)] == pattern[patternIndex];
                     if (found) break;
                     ++searchIndex;
                 }

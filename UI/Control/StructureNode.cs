@@ -1,15 +1,17 @@
-﻿using System.Windows.Forms;
+﻿using System;
+using System.Windows.Forms;
 
 namespace MapleShark2.UI.Control {
     public class StructureNode : TreeNode {
-        public readonly byte[] Buffer;
-        public readonly int Cursor;
-        public int Length;
+        public ArraySegment<byte> Data { get; private set; }
 
-        public StructureNode(string pDisplay, byte[] pBuffer, int pCursor, int pLength) : base(pDisplay) {
-            Buffer = pBuffer;
-            Cursor = pCursor;
-            Length = pLength;
+        public StructureNode(string name, ArraySegment<byte> data) : base(name) {
+            Data = data;
+        }
+
+        // Used to update the Array segment for node groups
+        public void UpdateData(ArraySegment<byte> data) {
+            Data = data;
         }
     }
 }

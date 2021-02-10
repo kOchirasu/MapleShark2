@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Maple2.PacketLib.Tools;
 using PacketDotNet;
 
