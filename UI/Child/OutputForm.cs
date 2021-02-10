@@ -1,7 +1,7 @@
 ﻿using WeifenLuo.WinFormsUI.Docking;
 
-namespace MapleShark2.UI {
-    public partial class OutputForm : DockContent {
+namespace MapleShark2.UI.Child {
+    public sealed partial class OutputForm : DockContent {
         public OutputForm(string pTitle) {
             InitializeComponent();
             Text = pTitle;

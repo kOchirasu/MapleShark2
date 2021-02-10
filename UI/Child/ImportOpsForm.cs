@@ -5,9 +5,9 @@ using System.Windows.Forms;
 using MapleShark2.Logging;
 using MapleShark2.Tools;
 
-namespace MapleShark2.UI {
-    public partial class frmImportProps : Form {
-        public frmImportProps() {
+namespace MapleShark2.UI.Child {
+    public sealed partial class ImportOpsForm : Form {
+        public ImportOpsForm() {
             InitializeComponent();
         }
 

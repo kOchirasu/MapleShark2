@@ -3,8 +3,8 @@ using System.Windows.Forms;
 using MapleShark2.Tools;
 using SharpPcap.LibPcap;
 
-namespace MapleShark2.UI {
-    public partial class SetupForm : Form {
+namespace MapleShark2.UI.Child {
+    public sealed partial class SetupForm : Form {
         private class DeviceEntry {
             public string Name;
             public PcapDevice Device;

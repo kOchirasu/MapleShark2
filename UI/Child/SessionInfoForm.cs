@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace MapleShark2.UI {
-    public partial class SessionInformation : Form {
-        public SessionInformation() {
+namespace MapleShark2.UI.Child {
+    public sealed partial class SessionInfoForm : Form {
+        public SessionInfoForm() {
             InitializeComponent();
         }
 
-        private void button1_Click(object sender, EventArgs e) {
+        private void closeButton_Click(object sender, EventArgs e) {
             this.Close();
         }
 

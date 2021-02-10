@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using MapleShark2.Logging;
 using MapleShark2.Tools;
+using MapleShark2.UI.Child;
 using MapleShark2.UI.Control;
 using Scripting.SSharp;
 using WeifenLuo.WinFormsUI.Docking;
@@ -138,15 +139,13 @@ namespace MapleShark2.UI {
         }
 
         private void mTree_AfterSelect(object pSender, TreeViewEventArgs pArgs) {
-            StructureNode node = pArgs.Node as StructureNode;
-            if (node == null) {
-                MainForm.DataForm.HexBox.SelectionLength = 0;
+            if (!(pArgs.Node is StructureNode node)) {
+                MainForm.DataForm.ClearHexBoxSelection();
                 MainForm.PropertyForm.Properties.SelectedObject = null;
                 return;
             }
 
-            MainForm.DataForm.HexBox.SelectionStart = node.Data.Offset;
-            MainForm.DataForm.HexBox.SelectionLength = node.Data.Count;
+            MainForm.DataForm.SelectHexBoxRange(node.Data.Offset, node.Data.Count);
             MainForm.PropertyForm.Properties.SelectedObject = new StructureSegment(node.Data, MainForm.Locale);
         }
 

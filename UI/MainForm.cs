@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using Be.Windows.Forms;
+using Maple2.PacketLib.Tools;
 using MapleShark2.Logging;
 using MapleShark2.Properties;
 using MapleShark2.Tools;
+using MapleShark2.UI.Child;
 using PacketDotNet;
 using SharpPcap;
 using SharpPcap.LibPcap;
@@ -19,8 +22,7 @@ namespace MapleShark2.UI {
         private const string LAYOUT_FILE = "Layout.xml";
 
         private bool mClosed;
-        private LibPcapLiveDevice mDevice;
-        private PcapDevice device;
+        private PcapDevice mDevice;
 
         // DockContent Controls
         private SearchForm mSearchForm;
@@ -82,21 +84,12 @@ namespace MapleShark2.UI {
         }
 
         public void CopyPacketHex(KeyEventArgs pArgs) {
-            if (mDataForm.HexBox.SelectionLength > 0 && pArgs.Modifiers == Keys.Control && pArgs.KeyCode == Keys.C) {
-                Clipboard.SetText(BitConverter
-                    .ToString((mDataForm.HexBox.ByteProvider as DynamicByteProvider).Bytes.ToArray(),
-                        (int) mDataForm.HexBox.SelectionStart, (int) mDataForm.HexBox.SelectionLength)
-                    .Replace("-", " "));
+            if (mDataForm.SelectionLength > 0 && pArgs.Modifiers == Keys.Control && pArgs.KeyCode == Keys.C) {
+                Clipboard.SetText(mDataForm.GetHexBoxSelectedBytes().ToHexString(' '));
                 pArgs.SuppressKeyPress = true;
-            } else if (mDataForm.HexBox.SelectionLength > 0
-                       && pArgs.Control
-                       && pArgs.Shift
-                       && pArgs.KeyCode == Keys.C) {
-                byte[] buffer = new byte[mDataForm.HexBox.SelectionLength];
-                Buffer.BlockCopy((mDataForm.HexBox.ByteProvider as DynamicByteProvider).Bytes.ToArray(),
-                    (int) mDataForm.HexBox.SelectionStart, buffer, 0, (int) mDataForm.HexBox.SelectionLength);
-                mSearchForm.HexBox.ByteProvider.DeleteBytes(0, mSearchForm.HexBox.ByteProvider.Length);
-                mSearchForm.HexBox.ByteProvider.InsertBytes(0, buffer);
+            } else if (mDataForm.SelectionLength > 0 && pArgs.Control && pArgs.Shift && pArgs.KeyCode == Keys.C) {
+                byte[] buffer = mDataForm.GetHexBoxSelectedBytes();
+                mSearchForm.SetHexBoxBytes(buffer);
                 pArgs.SuppressKeyPress = true;
             }
         }
@@ -207,13 +200,13 @@ namespace MapleShark2.UI {
 
         private void mDockPanel_ActiveDocumentChanged(object pSender, EventArgs pArgs) {
             if (!mClosed) {
-                mSearchForm.ComboBox.Items.Clear();
+                mSearchForm.ClearOpcodes();
                 if (mDockPanel.ActiveDocument is SessionForm session) {
                     //   session.RefreshPackets();
                     mSearchForm.RefreshOpcodes(false);
                     session.ReselectPacket();
                 } else {
-                    mDataForm.HexBox.ByteProvider?.DeleteBytes(0, mDataForm.HexBox.ByteProvider.Length);
+                    mDataForm.ClearHexBox();
                     mStructureForm.Tree.Nodes.Clear();
                     mPropertyForm.Properties.SelectedObject = null;
                 }
@@ -225,47 +218,40 @@ namespace MapleShark2.UI {
                 return;
             }
 
-            device = new CaptureFileReaderDevice(mImportDialog.FileName);
+            PcapDevice device = new CaptureFileReaderDevice(mImportDialog.FileName);
+            device.OnPacketArrival += mDevice_OnPacketArrival;
             device.Open();
-            new Thread(ParseImportedFile).Start();
+            device.Capture();
+            new Thread(() => ParseImportedFile(device)).Start();
         }
 
-        private void ParseImportedFile() {
-            RawCapture packet = null;
-            SessionForm session = null;
+        private static bool InPortRange(ushort port) {
+            return port >= Config.Instance.LowPort && port <= Config.Instance.HighPort;
+        }
 
+        private void ParseImportedFile(PcapDevice device) {
             this.Invoke((MethodInvoker) delegate {
-                while ((packet = device.GetNextPacket()) != null) {
-                    if (!started)
+                SessionForm session = null;
+                while (device.GetNextPacket(out RawCapture packet) != 0) {
+                    var tcpPacket = Packet.ParsePacket(packet.LinkLayerType, packet.Data).Extract<TcpPacket>();
+                    if (tcpPacket == null) continue;
+                    if (!InPortRange(tcpPacket.SourcePort) || !InPortRange(tcpPacket.DestinationPort))
                         continue;
 
-                    var tcpPacket = PacketDotNet.Packet.ParsePacket(packet.LinkLayerType, packet.Data)
-                        .Extract<TcpPacket>();
-                    if (tcpPacket == null)
-                        continue;
-
-                    if ((tcpPacket.SourcePort < Config.Instance.LowPort
-                         || tcpPacket.SourcePort > Config.Instance.HighPort)
-                        && (tcpPacket.DestinationPort < Config.Instance.LowPort
-                            || tcpPacket.DestinationPort > Config.Instance.HighPort))
-                        continue;
                     try {
                         if (tcpPacket.Synchronize && !tcpPacket.Acknowledgment) {
-                            session?.Show(mDockPanel, DockState.Document);
                             session = NewSession();
-                            SessionForm.Results res = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
-                            if (res == SessionForm.Results.Continue) {
-                                //    mDockPanel.Contents.Add(session);
-                                //session.Show(mDockPanel, DockState.Document);
-                            }
-                        } else if (session != null && session.MatchTcpPacket(tcpPacket)) {
-                            SessionForm.Results res = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
-                            if (res == SessionForm.Results.CloseMe) {
-                                session.Close();
-                            }
+                        } else if (session == null || !session.MatchTcpPacket(tcpPacket)) {
+                            continue;
+                        }
+
+                        SessionForm.Results result = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
+                        if (result == SessionForm.Results.CloseMe) {
+                            session.Close();
+                            session = null;
                         }
                     } catch (Exception ex) {
-                        Console.WriteLine("Exception while parsing logfile: {0}", ex);
+                        Console.WriteLine($"Exception while parsing logfile: {ex}");
                         session?.Close();
                         session = null;
                     }
@@ -339,53 +325,54 @@ namespace MapleShark2.UI {
                 closes.ForEach((a) => { a.Close(); });
                 closes.Clear();
 
-                List<RawCapture> curQueue;
-                lock (packetQueue) {
-                    curQueue = packetQueue;
-                    packetQueue = new List<RawCapture>();
-                }
-
-                foreach (RawCapture packet in curQueue) {
-                    if (!started) {
-                        continue;
-                    }
-
-                    var tcpPacket = Packet.ParsePacket(packet.LinkLayerType, packet.Data).Extract<TcpPacket>();
-                    SessionForm session = null;
-                    try {
-                        SessionForm.Results? result;
-                        if (tcpPacket.Synchronize
-                            && !tcpPacket.Acknowledgment
-                            && tcpPacket.DestinationPort >= Config.Instance.LowPort
-                            && tcpPacket.DestinationPort <= Config.Instance.HighPort) {
-                            session = NewSession();
-                            result = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
-                        } else {
-                            session =
-                                Array.Find(MdiChildren,
-                                    f => ((SessionForm) f).MatchTcpPacket(tcpPacket)) as SessionForm;
-                            result = session?.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
-                        }
-
-                        switch (result) {
-                           case SessionForm.Results.Show:
-                               session.Show(mDockPanel, DockState.Document);
-                               break;
-                           case SessionForm.Results.CloseMe:
-                               session.Close();
-                               break;
-                        }
-                    } catch (Exception ex) {
-                        Console.WriteLine(ex.ToString());
-                        File.AppendAllText("MapleShark Error.txt", ex + "\n" + ex.StackTrace);
-                        session?.Close();
-                    }
-                }
+                ProcessPacketQueue();
 
                 mTimer.Enabled = true;
             } catch (Exception) {
                 if (!mDevice.Opened) {
                     mDevice.Open(DeviceMode.Promiscuous, 1);
+                }
+            }
+        }
+
+        private void ProcessPacketQueue() {
+            List<RawCapture> curQueue;
+            lock (packetQueue) {
+                curQueue = packetQueue;
+                packetQueue = new List<RawCapture>();
+            }
+
+            foreach (RawCapture packet in curQueue) {
+                if (!started) {
+                    continue;
+                }
+
+                var tcpPacket = Packet.ParsePacket(packet.LinkLayerType, packet.Data).Extract<TcpPacket>();
+                SessionForm session = null;
+                try {
+                    SessionForm.Results? result;
+                    if (tcpPacket.Synchronize && !tcpPacket.Acknowledgment && InPortRange(tcpPacket.DestinationPort)) {
+                        session = NewSession();
+                        result = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
+                    } else {
+                        session =
+                            Array.Find(MdiChildren,
+                                f => ((SessionForm) f).MatchTcpPacket(tcpPacket)) as SessionForm;
+                        result = session?.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
+                    }
+
+                    switch (result) {
+                        case SessionForm.Results.Show:
+                            session.Show(mDockPanel, DockState.Document);
+                            break;
+                        case SessionForm.Results.CloseMe:
+                            session.Close();
+                            break;
+                    }
+                } catch (Exception ex) {
+                    Console.WriteLine(ex.ToString());
+                    File.AppendAllText("MapleShark Error.txt", ex + "\n" + ex.StackTrace);
+                    session?.Close();
                 }
             }
         }
@@ -417,7 +404,7 @@ namespace MapleShark2.UI {
         }
 
         private void importJavaPropertiesFileToolStripMenuItem_Click(object sender, EventArgs e) {
-            new frmImportProps().ShowDialog();
+            new ImportOpsForm().ShowDialog();
         }
 
         private void MainForm_DragEnter(object sender, DragEventArgs e) {
@@ -428,7 +415,6 @@ namespace MapleShark2.UI {
                     switch (Path.GetExtension(file)) {
                         case ".msb":
                         case ".pcap":
-                        case ".txt":
                             okay = true;
                             continue;
                     }
@@ -454,13 +440,9 @@ namespace MapleShark2.UI {
                         break;
                     }
                     case ".pcap": {
-                        device = new CaptureFileReaderDevice(file);
+                        PcapDevice device = new CaptureFileReaderDevice(file);
                         device.Open();
-                        ParseImportedFile();
-                        break;
-                    }
-                    case ".txt": {
-                        ReadMSnifferFile(file);
+                        ParseImportedFile(device);
                         break;
                     }
                 }
@@ -528,46 +510,6 @@ namespace MapleShark2.UI {
             if (lastTimerState) {
                 mTimer.Enabled = true;
             }
-        }
-
-        private void importMSnifferToolStripMenuItem_Click(object sender, EventArgs e) {
-            var ofd = new OpenFileDialog {
-                Title = "Select MSniffer logfile",
-                Filter = "All files|*.*",
-            };
-            if (ofd.ShowDialog() == DialogResult.OK) {
-                ReadMSnifferFile(ofd.FileName);
-            }
-        }
-
-        private void ReadMSnifferFile(string filename) {
-            SessionForm currentSession = null;
-            var captureRegex =
-                new Regex(@"Capturing MapleStory version (\d+) on ([0-9\.]+):(\d+) with unknown ""(.*)"".*");
-            using (var sr = new StreamReader(filename)) {
-                while (!sr.EndOfStream) {
-                    string line = sr.ReadLine();
-                    if (string.IsNullOrEmpty(line) || (line[0] != '[' && line[0] != 'C')) continue;
-
-                    if (line[0] == 'C') {
-                        // Most likely capturing text
-                        Match matches = captureRegex.Match(line);
-                        if (matches.Captures.Count == 0) continue;
-
-                        Console.WriteLine("Version: {0}.{1} IP {2} Port {3}", matches.Groups[1].Value,
-                            matches.Groups[4].Value, matches.Groups[2].Value, matches.Groups[3].Value);
-
-                        currentSession?.Show(mDockPanel, DockState.Document);
-                        currentSession = NewSession();
-                        currentSession.SetMapleInfo(ushort.Parse(matches.Groups[1].Value), MapleLocale.GLOBAL,
-                            matches.Groups[2].Value, ushort.Parse(matches.Groups[3].Value));
-                    } else if (line[0] == '[') {
-                        currentSession?.ParseMSnifferLine(line);
-                    }
-                }
-            }
-
-            currentSession?.Show(mDockPanel, DockState.Document);
         }
     }
 }

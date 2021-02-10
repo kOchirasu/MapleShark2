@@ -26,96 +26,96 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.mOpcodeCombo = new System.Windows.Forms.ComboBox();
-            this.mNextOpcodeButton = new System.Windows.Forms.Button();
-            this.mPrevOpcodeButton = new System.Windows.Forms.Button();
-            this.mSequenceHex = new Be.Windows.Forms.HexBox();
-            this.mPrevSequenceButton = new System.Windows.Forms.Button();
-            this.mNextSequenceButton = new System.Windows.Forms.Button();
+            this.dropdownOpcode = new System.Windows.Forms.ComboBox();
+            this.btnNextOpcode = new System.Windows.Forms.Button();
+            this.btnPrevOpcode = new System.Windows.Forms.Button();
+            this.hexInput = new Be.Windows.Forms.HexBox();
+            this.btnPrevSequence = new System.Windows.Forms.Button();
+            this.btnNextSequence = new System.Windows.Forms.Button();
             this.SuspendLayout();
             //
-            // mOpcodeCombo
+            // dropdownOpcode
             //
-            this.mOpcodeCombo.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.mOpcodeCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.mOpcodeCombo.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
-            this.mOpcodeCombo.FormattingEnabled = true;
-            this.mOpcodeCombo.Location = new System.Drawing.Point(3, 3);
-            this.mOpcodeCombo.Name = "mOpcodeCombo";
-            this.mOpcodeCombo.Size = new System.Drawing.Size(152, 23);
-            this.mOpcodeCombo.TabIndex = 4;
-            this.mOpcodeCombo.SelectedIndexChanged += new System.EventHandler(this.mOpcodeCombo_SelectedIndexChanged);
+            this.dropdownOpcode.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.dropdownOpcode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.dropdownOpcode.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
+            this.dropdownOpcode.FormattingEnabled = true;
+            this.dropdownOpcode.Location = new System.Drawing.Point(3, 3);
+            this.dropdownOpcode.Name = "dropdownOpcode";
+            this.dropdownOpcode.Size = new System.Drawing.Size(152, 23);
+            this.dropdownOpcode.TabIndex = 4;
+            this.dropdownOpcode.SelectedIndexChanged += new System.EventHandler(this.dropdownOpcode_SelectedIndexChanged);
             //
-            // mNextOpcodeButton
+            // btnNextOpcode
             //
-            this.mNextOpcodeButton.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.mNextOpcodeButton.Enabled = false;
-            this.mNextOpcodeButton.Location = new System.Drawing.Point(232, 3);
-            this.mNextOpcodeButton.Name = "mNextOpcodeButton";
-            this.mNextOpcodeButton.Size = new System.Drawing.Size(65, 25);
-            this.mNextOpcodeButton.TabIndex = 5;
-            this.mNextOpcodeButton.Text = "Next";
-            this.mNextOpcodeButton.UseVisualStyleBackColor = true;
-            this.mNextOpcodeButton.Click += new System.EventHandler(this.mNextOpcodeButton_Click);
+            this.btnNextOpcode.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.btnNextOpcode.Enabled = false;
+            this.btnNextOpcode.Location = new System.Drawing.Point(232, 3);
+            this.btnNextOpcode.Name = "btnNextOpcode";
+            this.btnNextOpcode.Size = new System.Drawing.Size(65, 25);
+            this.btnNextOpcode.TabIndex = 5;
+            this.btnNextOpcode.Text = "Next";
+            this.btnNextOpcode.UseVisualStyleBackColor = true;
+            this.btnNextOpcode.Click += new System.EventHandler(this.btnNextOpcode_Click);
             //
-            // mPrevOpcodeButton
+            // btnPrevOpcode
             //
-            this.mPrevOpcodeButton.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.mPrevOpcodeButton.Enabled = false;
-            this.mPrevOpcodeButton.Location = new System.Drawing.Point(161, 3);
-            this.mPrevOpcodeButton.Name = "mPrevOpcodeButton";
-            this.mPrevOpcodeButton.Size = new System.Drawing.Size(65, 25);
-            this.mPrevOpcodeButton.TabIndex = 9;
-            this.mPrevOpcodeButton.Text = "Prev";
-            this.mPrevOpcodeButton.UseVisualStyleBackColor = true;
-            this.mPrevOpcodeButton.Click += new System.EventHandler(this.mPrevOpcodeButton_Click);
+            this.btnPrevOpcode.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.btnPrevOpcode.Enabled = false;
+            this.btnPrevOpcode.Location = new System.Drawing.Point(161, 3);
+            this.btnPrevOpcode.Name = "btnPrevOpcode";
+            this.btnPrevOpcode.Size = new System.Drawing.Size(65, 25);
+            this.btnPrevOpcode.TabIndex = 9;
+            this.btnPrevOpcode.Text = "Prev";
+            this.btnPrevOpcode.UseVisualStyleBackColor = true;
+            this.btnPrevOpcode.Click += new System.EventHandler(this.btnPrevOpcode_Click);
             //
-            // mSequenceHex
+            // hexInput
             //
-            this.mSequenceHex.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.mSequenceHex.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
-            this.mSequenceHex.InfoForeColor = System.Drawing.Color.Empty;
-            this.mSequenceHex.Location = new System.Drawing.Point(3, 32);
-            this.mSequenceHex.Name = "mSequenceHex";
-            this.mSequenceHex.ShadowSelectionColor = System.Drawing.Color.FromArgb(((int) (((byte) (100)))), ((int) (((byte) (60)))), ((int) (((byte) (188)))), ((int) (((byte) (255)))));
-            this.mSequenceHex.Size = new System.Drawing.Size(152, 25);
-            this.mSequenceHex.TabIndex = 6;
-            this.mSequenceHex.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.mSequenceHex_KeyPress);
+            this.hexInput.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.hexInput.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
+            this.hexInput.InfoForeColor = System.Drawing.Color.Empty;
+            this.hexInput.Location = new System.Drawing.Point(3, 32);
+            this.hexInput.Name = "hexInput";
+            this.hexInput.ShadowSelectionColor = System.Drawing.Color.FromArgb(((int) (((byte) (100)))), ((int) (((byte) (60)))), ((int) (((byte) (188)))), ((int) (((byte) (255)))));
+            this.hexInput.Size = new System.Drawing.Size(152, 25);
+            this.hexInput.TabIndex = 6;
+            this.hexInput.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.hexInput_KeyPress);
             //
-            // mPrevSequenceButton
+            // btnPrevSequence
             //
-            this.mPrevSequenceButton.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.mPrevSequenceButton.Enabled = false;
-            this.mPrevSequenceButton.Location = new System.Drawing.Point(161, 32);
-            this.mPrevSequenceButton.Name = "mPrevSequenceButton";
-            this.mPrevSequenceButton.Size = new System.Drawing.Size(65, 25);
-            this.mPrevSequenceButton.TabIndex = 8;
-            this.mPrevSequenceButton.Text = "Prev";
-            this.mPrevSequenceButton.UseVisualStyleBackColor = true;
+            this.btnPrevSequence.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.btnPrevSequence.Enabled = false;
+            this.btnPrevSequence.Location = new System.Drawing.Point(161, 32);
+            this.btnPrevSequence.Name = "btnPrevSequence";
+            this.btnPrevSequence.Size = new System.Drawing.Size(65, 25);
+            this.btnPrevSequence.TabIndex = 8;
+            this.btnPrevSequence.Text = "Prev";
+            this.btnPrevSequence.UseVisualStyleBackColor = true;
             //
-            // mNextSequenceButton
+            // btnNextSequence
             //
-            this.mNextSequenceButton.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.mNextSequenceButton.Enabled = false;
-            this.mNextSequenceButton.Location = new System.Drawing.Point(232, 32);
-            this.mNextSequenceButton.Name = "mNextSequenceButton";
-            this.mNextSequenceButton.Size = new System.Drawing.Size(65, 25);
-            this.mNextSequenceButton.TabIndex = 7;
-            this.mNextSequenceButton.Text = "Next";
-            this.mNextSequenceButton.UseVisualStyleBackColor = true;
-            this.mNextSequenceButton.Click += new System.EventHandler(this.mNextSequenceButton_Click);
+            this.btnNextSequence.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.btnNextSequence.Enabled = false;
+            this.btnNextSequence.Location = new System.Drawing.Point(232, 32);
+            this.btnNextSequence.Name = "btnNextSequence";
+            this.btnNextSequence.Size = new System.Drawing.Size(65, 25);
+            this.btnNextSequence.TabIndex = 7;
+            this.btnNextSequence.Text = "Next";
+            this.btnNextSequence.UseVisualStyleBackColor = true;
+            this.btnNextSequence.Click += new System.EventHandler(this.btnNextSequence_Click);
             //
             // SearchForm
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(300, 60);
-            this.Controls.Add(this.mNextSequenceButton);
-            this.Controls.Add(this.mNextOpcodeButton);
-            this.Controls.Add(this.mPrevSequenceButton);
-            this.Controls.Add(this.mPrevOpcodeButton);
-            this.Controls.Add(this.mSequenceHex);
-            this.Controls.Add(this.mOpcodeCombo);
+            this.Controls.Add(this.btnNextSequence);
+            this.Controls.Add(this.btnNextOpcode);
+            this.Controls.Add(this.btnPrevSequence);
+            this.Controls.Add(this.btnPrevOpcode);
+            this.Controls.Add(this.hexInput);
+            this.Controls.Add(this.dropdownOpcode);
             this.DockAreas = ((WeifenLuo.WinFormsUI.Docking.DockAreas) (((((WeifenLuo.WinFormsUI.Docking.DockAreas.Float | WeifenLuo.WinFormsUI.Docking.DockAreas.DockLeft)
                                                                            | WeifenLuo.WinFormsUI.Docking.DockAreas.DockRight)
                                                                           | WeifenLuo.WinFormsUI.Docking.DockAreas.DockTop)
@@ -131,12 +131,12 @@
             this.ResumeLayout(false);
         }
 
-        private System.Windows.Forms.Button mNextOpcodeButton;
-        private System.Windows.Forms.Button mNextSequenceButton;
-        private System.Windows.Forms.ComboBox mOpcodeCombo;
-        private System.Windows.Forms.Button mPrevOpcodeButton;
-        private System.Windows.Forms.Button mPrevSequenceButton;
-        private Be.Windows.Forms.HexBox mSequenceHex;
+        private System.Windows.Forms.Button btnNextOpcode;
+        private System.Windows.Forms.Button btnNextSequence;
+        private System.Windows.Forms.ComboBox dropdownOpcode;
+        private System.Windows.Forms.Button btnPrevOpcode;
+        private System.Windows.Forms.Button btnPrevSequence;
+        private Be.Windows.Forms.HexBox hexInput;
         #endregion
     }
 }

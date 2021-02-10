@@ -1,6 +1,6 @@
-﻿namespace MapleShark2.UI
+﻿namespace MapleShark2.UI.Child
 {
-    partial class frmImportProps
+    partial class ImportOpsForm
     {
         /// <summary>
         /// Required designer variable.
@@ -185,7 +185,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.txtPropFile);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
-            this.Name = "frmImportProps";
+            this.Name = "ImportOpsForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Import Properties File";
             ((System.ComponentModel.ISupportInitialize)(this.nudLocale)).EndInit();

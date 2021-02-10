@@ -59,7 +59,6 @@ namespace MapleShark2.UI
             this.mFileOpenMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.mFileImportMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.importJavapropertiesFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.importMSnifferToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.setupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mFileSeparatorMenu = new System.Windows.Forms.ToolStripSeparator();
@@ -97,8 +96,7 @@ namespace MapleShark2.UI
             //
             this.mFileMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
                 this.mFileOpenMenu, this.mFileImportMenu, this.importJavapropertiesFileToolStripMenuItem,
-                this.importMSnifferToolStripMenuItem, this.toolStripSeparator4, this.setupToolStripMenuItem,
-                this.mFileSeparatorMenu, this.mFileQuit
+                this.toolStripSeparator4, this.setupToolStripMenuItem, this.mFileSeparatorMenu, this.mFileQuit
             });
             this.mFileMenu.Name = "mFileMenu";
             this.mFileMenu.Size = new System.Drawing.Size(37, 20);
@@ -127,14 +125,6 @@ namespace MapleShark2.UI
             this.importJavapropertiesFileToolStripMenuItem.Text = "Import Java *.properties file";
             this.importJavapropertiesFileToolStripMenuItem.Click +=
                 new System.EventHandler(this.importJavaPropertiesFileToolStripMenuItem_Click);
-            //
-            // importMSnifferToolStripMenuItem
-            //
-            this.importMSnifferToolStripMenuItem.Name = "importMSnifferToolStripMenuItem";
-            this.importMSnifferToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
-            this.importMSnifferToolStripMenuItem.Text = "Import MSniffer logfile";
-            this.importMSnifferToolStripMenuItem.Click +=
-                new System.EventHandler(this.importMSnifferToolStripMenuItem_Click);
             //
             // toolStripSeparator4
             //
@@ -307,7 +297,7 @@ namespace MapleShark2.UI
             this.mDockPanel.DockBottomPortion = 0.3D;
             this.mDockPanel.DockLeftPortion = 0.3D;
             this.mDockPanel.DockRightPortion = 0.3D;
-            this.mDockPanel.DockTopPortion = 75D;
+            this.mDockPanel.DockTopPortion = 70D * CreateGraphics().DpiX / 96;
             this.mDockPanel.Location = new System.Drawing.Point(0, 49);
             this.mDockPanel.Name = "mDockPanel";
             this.mDockPanel.Size = new System.Drawing.Size(1101, 715);
@@ -413,7 +403,6 @@ namespace MapleShark2.UI
         private System.Windows.Forms.ToolStripMenuItem importJavapropertiesFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem setupToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
-        private System.Windows.Forms.ToolStripMenuItem importMSnifferToolStripMenuItem;
     }
 }
 

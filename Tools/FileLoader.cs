@@ -57,12 +57,7 @@ namespace MapleShark2.Tools {
                 if (version < 0x2000) {
                     metadata.Build = version;
                     metadata.LocalPort = reader.ReadUInt16();
-                    // Old version
-                    frmLocale loc = new frmLocale();
-                    var res = loc.ShowDialog();
-                    if (res == DialogResult.OK) {
-                        metadata.Locale = loc.ChosenLocale;
-                    }
+                    metadata.Locale = MapleLocale.GLOBAL;
                 } else {
                     byte v1 = (byte) ((version >> 12) & 0xF),
                         v2 = (byte) ((version >> 8) & 0xF),
@@ -127,7 +122,7 @@ namespace MapleShark2.Tools {
         }
 
         public static void ReadPcapFile() {
-            
+
         }
     }
 }

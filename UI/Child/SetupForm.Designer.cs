@@ -1,4 +1,4 @@
-﻿namespace MapleShark2.UI
+﻿namespace MapleShark2.UI.Child
 {
     partial class SetupForm
     {

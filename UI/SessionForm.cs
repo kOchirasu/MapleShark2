@@ -13,6 +13,7 @@ using Maple2.PacketLib.Crypto;
 using Maple2.PacketLib.Tools;
 using MapleShark2.Logging;
 using MapleShark2.Tools;
+using MapleShark2.UI.Child;
 using MapleShark2.UI.Control;
 using PacketDotNet;
 using WeifenLuo.WinFormsUI.Docking;
@@ -275,7 +276,7 @@ namespace MapleShark2.UI {
             Opcodes.Clear();
             ListView.Clear();
 
-            MainForm.DataForm.HexBox.ByteProvider = null;
+            MainForm.DataForm.ClearHexBox();
             MainForm.StructureForm.Tree.Nodes.Clear();
             MainForm.PropertyForm.Properties.SelectedObject = null;
 
@@ -453,13 +454,13 @@ namespace MapleShark2.UI {
 
         private void mPacketList_SelectedIndexChanged(object pSender, EventArgs pArgs) {
             if (ListView.SelectedIndices.Count == 0) {
-                MainForm.DataForm.HexBox.ByteProvider = null;
+                MainForm.DataForm.ClearHexBox();
                 MainForm.StructureForm.Tree.Nodes.Clear();
                 MainForm.PropertyForm.Properties.SelectedObject = null;
                 return;
             }
 
-            MainForm.DataForm.HexBox.ByteProvider = new DynamicByteProvider(ListView.Selected.AsSpan().ToArray());
+            MainForm.DataForm.SetHexBoxBytes(ListView.Selected.AsSpan().ToArray());
             MainForm.StructureForm.ParseMaplePacket(ListView.Selected);
         }
 
@@ -577,7 +578,7 @@ namespace MapleShark2.UI {
         private void mMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e) { }
 
         private void sessionInformationToolStripMenuItem_Click(object sender, EventArgs e) {
-            var info = new SessionInformation {
+            var info = new SessionInfoForm {
                 txtVersion = {Text = Build.ToString()},
                 txtLocale = {Text = Locale.ToString()},
                 txtAdditionalInfo = {
