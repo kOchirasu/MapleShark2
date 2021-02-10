@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
 using MapleShark2.Theme;
+using MapleShark2.Tools;
 using MapleShark2.UI;
 using MapleShark2.UI.Child;
 using SharpPcap.LibPcap;
@@ -42,7 +43,7 @@ namespace MapleShark2 {
 
             using (var frm = new SplashForm()) {
                 if (frm.ShowDialog() == DialogResult.OK)
-                    Application.Run(new MainForm(new DarkTheme(), pArgs));
+                    Application.Run(new MainForm(Config.Instance.Theme, pArgs));
             }
         }
 

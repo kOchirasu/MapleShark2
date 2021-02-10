@@ -76,6 +76,7 @@ namespace MapleShark2.UI {
             btnNextOpcode.Enabled = btnPrevOpcode.Enabled = dropdownOpcode.SelectedIndex >= 0;
         }
 
+        // Custom rendering for combobox
         private void dropdownOpcode_DrawItem(object sender, DrawItemEventArgs e) {
             Brush backBrush, foreBrush;
             if ((e.State & DrawItemState.Selected) > 0) {

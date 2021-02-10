@@ -30,9 +30,9 @@
 			this.lblAdditionalInfo = new System.Windows.Forms.Label();
 			this.closeButton = new System.Windows.Forms.Button();
 			this.SuspendLayout();
-			// 
+			//
 			// lblVersion
-			// 
+			//
 			this.lblVersion.AutoSize = true;
 			this.lblVersion.Location = new System.Drawing.Point(16, 21);
 			this.lblVersion.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
@@ -40,27 +40,27 @@
 			this.lblVersion.Size = new System.Drawing.Size(128, 16);
 			this.lblVersion.TabIndex = 0;
 			this.lblVersion.Text = "MapleStory Version:";
-			// 
+			//
 			// txtVersion
-			// 
+			//
 			this.txtVersion.Location = new System.Drawing.Point(225, 15);
 			this.txtVersion.Margin = new System.Windows.Forms.Padding(4);
 			this.txtVersion.Name = "txtVersion";
 			this.txtVersion.ReadOnly = true;
 			this.txtVersion.Size = new System.Drawing.Size(132, 22);
 			this.txtVersion.TabIndex = 2;
-			// 
+			//
 			// txtLocale
-			// 
+			//
 			this.txtLocale.Location = new System.Drawing.Point(225, 48);
 			this.txtLocale.Margin = new System.Windows.Forms.Padding(4);
 			this.txtLocale.Name = "txtLocale";
 			this.txtLocale.ReadOnly = true;
 			this.txtLocale.Size = new System.Drawing.Size(132, 22);
 			this.txtLocale.TabIndex = 5;
-			// 
+			//
 			// lblLocale
-			// 
+			//
 			this.lblLocale.AutoSize = true;
 			this.lblLocale.Location = new System.Drawing.Point(16, 54);
 			this.lblLocale.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
@@ -68,9 +68,9 @@
 			this.lblLocale.Size = new System.Drawing.Size(123, 16);
 			this.lblLocale.TabIndex = 4;
 			this.lblLocale.Text = "MapleStory Locale:";
-			// 
+			//
 			// txtAdditionalInfo
-			// 
+			//
 			this.txtAdditionalInfo.Location = new System.Drawing.Point(20, 106);
 			this.txtAdditionalInfo.Margin = new System.Windows.Forms.Padding(4);
 			this.txtAdditionalInfo.Multiline = true;
@@ -79,9 +79,9 @@
 			this.txtAdditionalInfo.ScrollBars = System.Windows.Forms.ScrollBars.Both;
 			this.txtAdditionalInfo.Size = new System.Drawing.Size(337, 158);
 			this.txtAdditionalInfo.TabIndex = 7;
-			// 
+			//
 			// lblAdditionalInfo
-			// 
+			//
 			this.lblAdditionalInfo.AutoSize = true;
 			this.lblAdditionalInfo.Location = new System.Drawing.Point(16, 86);
 			this.lblAdditionalInfo.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
@@ -89,20 +89,21 @@
 			this.lblAdditionalInfo.Size = new System.Drawing.Size(138, 16);
 			this.lblAdditionalInfo.TabIndex = 6;
 			this.lblAdditionalInfo.Text = "Additional Information:";
-			// 
+			//
 			// closeButton
-			// 
+			//
 			this.closeButton.Location = new System.Drawing.Point(20, 272);
 			this.closeButton.Margin = new System.Windows.Forms.Padding(4);
 			this.closeButton.Name = "closeButton";
 			this.closeButton.Size = new System.Drawing.Size(339, 37);
 			this.closeButton.TabIndex = 8;
 			this.closeButton.Text = "Close";
+			this.closeButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 			this.closeButton.UseVisualStyleBackColor = true;
 			this.closeButton.Click += new System.EventHandler(this.closeButton_Click);
-			// 
+			//
 			// SessionInformation
-			// 
+			//
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(368, 324);

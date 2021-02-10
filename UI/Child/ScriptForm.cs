@@ -3,6 +3,8 @@ using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
 using MapleShark2.Logging;
+using MapleShark2.Theme;
+using MapleShark2.Tools;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace MapleShark2.UI.Child {
@@ -15,6 +17,8 @@ namespace MapleShark2.UI.Child {
             mPacket = pPacket;
 
             InitializeComponent();
+            ThemeApplier.ApplyTheme(Config.Instance.Theme, this);
+
             if (pPacket != null) {
                 Text = "Script 0x" + pPacket.Opcode.ToString("X4") + ", " + (pPacket.Outbound ? "Outbound" : "Inbound");
             } else {

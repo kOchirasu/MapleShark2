@@ -615,13 +615,21 @@ namespace MapleShark2.UI {
         private void sendPropertiesToolStripMenuItem_Click(object sender, EventArgs e) {
             DefinitionsContainer.Instance.SaveProperties();
             string tmp = Config.GetPropertiesFile(true, (byte) Locale, Build);
-            Process.Start(tmp);
+            try {
+                Process.Start(tmp);
+            } catch {
+                Process.Start("notepad.exe", tmp);
+            }
         }
 
         private void recvPropertiesToolStripMenuItem_Click(object sender, EventArgs e) {
             DefinitionsContainer.Instance.SaveProperties();
             string tmp = Config.GetPropertiesFile(false, (byte) Locale, Build);
-            Process.Start(tmp);
+            try {
+                Process.Start(tmp);
+            } catch {
+                Process.Start("notepad.exe", tmp);
+            }
         }
 
         private void removeLoggedPacketsToolStripMenuItem_Click(object sender, EventArgs e) {

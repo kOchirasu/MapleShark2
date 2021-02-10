@@ -47,8 +47,8 @@ namespace MapleShark2.UI
             this.dropdownOpcode.Size = new System.Drawing.Size(152, 23);
             this.dropdownOpcode.TabIndex = 4;
             this.dropdownOpcode.SelectedIndexChanged += new System.EventHandler(this.dropdownOpcode_SelectedIndexChanged);
-            this.dropdownOpcode.DrawMode = DrawMode.OwnerDrawFixed;
-            this.dropdownOpcode.DrawItem += this.dropdownOpcode_DrawItem;
+            //this.dropdownOpcode.DrawMode = DrawMode.OwnerDrawFixed;
+            //this.dropdownOpcode.DrawItem += this.dropdownOpcode_DrawItem;
             //
             // btnNextOpcode
             //

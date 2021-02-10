@@ -1,9 +1,16 @@
-﻿using System.Windows.Forms;
+﻿using System;
+using System.Windows.Forms;
 using Be.Windows.Forms;
 using MapleShark2.UI.Control;
 
 namespace MapleShark2.Theme {
     public static class ThemeApplier {
+        public static void ApplyTheme(IMapleSharkTheme theme, Form form) {
+            form.BackColor = theme.BackColor;
+            form.ForeColor = theme.ForeColor;
+            ApplyTheme(theme, form.Controls);
+        }
+
         public static void ApplyTheme(IMapleSharkTheme theme, Control.ControlCollection container) {
             foreach (Control component in container) {
                 if (component.Controls.Count > 0) {
@@ -20,6 +27,9 @@ namespace MapleShark2.Theme {
                 } else if (component is ComboBox comboBox) {
                     comboBox.BackColor = theme.ControlBackColor;
                     comboBox.ForeColor = theme.ForeColor;
+                } else if (component is NumericUpDown numericBox) {
+                    numericBox.BackColor = theme.ControlBackColor;
+                    numericBox.ForeColor = theme.ForeColor;
                 } else if (component is PropertyGrid propertyGrid) {
                     propertyGrid.BackColor = theme.BackColor;
                     propertyGrid.ForeColor = theme.ForeColor;

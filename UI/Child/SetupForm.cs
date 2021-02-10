@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using MapleShark2.Theme;
 using MapleShark2.Tools;
 using SharpPcap.LibPcap;
 
@@ -14,7 +15,10 @@ namespace MapleShark2.UI.Child {
 
         public SetupForm() {
             InitializeComponent();
+            ThemeApplier.ApplyTheme(Config.Instance.Theme, this);
+
             Text = "MapleShark " + Program.AssemblyVersion;
+            chkDarkMode.Checked = Config.Instance.WindowTheme == Config.ThemeType.Dark;
 
             bool configured = false;
             int activeConnection = 0;
@@ -78,6 +82,10 @@ namespace MapleShark2.UI.Child {
             Config.Instance.Save();
 
             DialogResult = DialogResult.OK;
+        }
+
+        private void chkDarkMode_CheckChanged(object sender, EventArgs e) {
+            Config.Instance.WindowTheme = chkDarkMode.Checked ? Config.ThemeType.Dark : Config.ThemeType.Light;
         }
 
         private void SetupForm_Load(object sender, EventArgs e) { }

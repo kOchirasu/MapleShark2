@@ -5,6 +5,7 @@ using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
 using MapleShark2.Logging;
+using MapleShark2.Theme;
 using MapleShark2.Tools;
 using Microsoft.Win32;
 using Scripting.SSharp.Runtime;
@@ -18,6 +19,7 @@ namespace MapleShark2.UI.Child {
 
         public SplashForm() {
             InitializeComponent();
+            ThemeApplier.ApplyTheme(Config.Instance.Theme, this);
 
             centerX = this.Size.Width / 2;
             centerY = this.Size.Height / 2;

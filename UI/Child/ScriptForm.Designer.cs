@@ -50,6 +50,7 @@
             this.mSaveButton.Size = new System.Drawing.Size(392, 25);
             this.mSaveButton.TabIndex = 5;
             this.mSaveButton.Text = "&Save script";
+            this.mSaveButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.mSaveButton.UseVisualStyleBackColor = true;
             this.mSaveButton.Click += new System.EventHandler(this.mSaveButton_Click);
             //
@@ -59,12 +60,12 @@
             this.mScriptEditor.AutoListPosition = null;
             this.mScriptEditor.AutoListSelectedText = "a123";
             this.mScriptEditor.AutoListVisible = false;
-            this.mScriptEditor.BackColor = System.Drawing.Color.White;
             this.mScriptEditor.BorderStyle = Alsing.Windows.Forms.BorderStyle.None;
             this.mScriptEditor.CopyAsRTF = false;
             this.mScriptEditor.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mScriptEditor.Document = this.mScriptSyntax;
             this.mScriptEditor.FontName = "Consolas";
+            this.mScriptEditor.FontSize = 11f;
             this.mScriptEditor.HighLightActiveLine = true;
             this.mScriptEditor.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.mScriptEditor.Indent = Alsing.Windows.Forms.SyntaxBox.IndentStyle.Scope;
@@ -81,11 +82,8 @@
             this.mScriptEditor.SmoothScroll = false;
             this.mScriptEditor.SplitviewH = -4;
             this.mScriptEditor.SplitviewV = -4;
-            this.mScriptEditor.TabGuideColor = System.Drawing.Color.FromArgb(((int) (((byte) (222)))),
-                ((int) (((byte) (219)))), ((int) (((byte) (214)))));
             this.mScriptEditor.TabIndex = 0;
             this.mScriptEditor.TabsToSpaces = true;
-            this.mScriptEditor.WhitespaceColor = System.Drawing.SystemColors.ControlDark;
             this.mScriptEditor.TextChanged += new System.EventHandler(this.mScriptEditor_TextChanged);
             //
             // mScriptSyntax
@@ -121,6 +119,7 @@
             this.mImportButton.Size = new System.Drawing.Size(202, 25);
             this.mImportButton.TabIndex = 0;
             this.mImportButton.Text = "Import script...";
+            this.mImportButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.mImportButton.UseVisualStyleBackColor = true;
             this.mImportButton.Click += new System.EventHandler(this.mImportButton_Click);
             //

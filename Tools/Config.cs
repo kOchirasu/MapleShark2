@@ -4,13 +4,24 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Serialization;
 using MapleShark2.Logging;
+using MapleShark2.Theme;
 
 namespace MapleShark2.Tools {
     public sealed class Config {
+        public enum ThemeType {
+            Light,
+            Dark
+        }
+
+        private static readonly IMapleSharkTheme lightTheme = new LightTheme();
+        private static readonly IMapleSharkTheme darkTheme = new DarkTheme();
+
         public string Interface = "";
         public ushort LowPort = 30000; //MS2 Gateway
         public ushort HighPort = 33001; //MS2 Channel Ranges
+        public ThemeType WindowTheme = ThemeType.Light;
 
+        [XmlIgnore] public IMapleSharkTheme Theme = lightTheme;
         [XmlIgnore] public bool LoadedFromFile = false;
 
         private static Config sInstance = null;
@@ -26,6 +37,7 @@ namespace MapleShark2.Tools {
                             using (XmlReader xr = XmlReader.Create("Config.xml")) {
                                 XmlSerializer xs = new XmlSerializer(typeof(Config));
                                 sInstance = xs.Deserialize(xr) as Config;
+                                sInstance.Theme = sInstance.WindowTheme == ThemeType.Dark ? darkTheme : lightTheme;
                                 sInstance.LoadedFromFile = true;
                             }
                         } catch (Exception ex) {
@@ -51,16 +63,11 @@ namespace MapleShark2.Tools {
         }
 
         internal static string GetPropertiesFile(bool pOutbound, byte pLocale, uint pVersion) {
-            return Environment.CurrentDirectory
-                   + Path.DirectorySeparatorChar
-                   + "Scripts"
-                   + Path.DirectorySeparatorChar
-                   + pLocale.ToString()
-                   + Path.DirectorySeparatorChar
-                   + pVersion.ToString()
-                   + Path.DirectorySeparatorChar
-                   + (pOutbound ? "send" : "recv")
-                   + ".properties";
+            string[] parts = new[] {
+                Environment.CurrentDirectory, "Scripts", pLocale.ToString(), pVersion.ToString(),
+                (pOutbound ? "send" : "recv") + ".properties"
+            };
+            return Path.Combine(parts);
         }
 
         internal void Save() {
