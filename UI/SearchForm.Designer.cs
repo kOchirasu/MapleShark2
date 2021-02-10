@@ -1,4 +1,6 @@
-﻿namespace MapleShark2.UI
+﻿using System.Windows.Forms;
+
+namespace MapleShark2.UI
 {
     partial class SearchForm
     {
@@ -38,13 +40,15 @@
             //
             this.dropdownOpcode.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.dropdownOpcode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.dropdownOpcode.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
+            this.dropdownOpcode.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.dropdownOpcode.FormattingEnabled = true;
             this.dropdownOpcode.Location = new System.Drawing.Point(3, 3);
             this.dropdownOpcode.Name = "dropdownOpcode";
             this.dropdownOpcode.Size = new System.Drawing.Size(152, 23);
             this.dropdownOpcode.TabIndex = 4;
             this.dropdownOpcode.SelectedIndexChanged += new System.EventHandler(this.dropdownOpcode_SelectedIndexChanged);
+            this.dropdownOpcode.DrawMode = DrawMode.OwnerDrawFixed;
+            this.dropdownOpcode.DrawItem += this.dropdownOpcode_DrawItem;
             //
             // btnNextOpcode
             //
@@ -56,6 +60,7 @@
             this.btnNextOpcode.TabIndex = 5;
             this.btnNextOpcode.Text = "Next";
             this.btnNextOpcode.UseVisualStyleBackColor = true;
+            this.btnNextOpcode.FlatStyle = FlatStyle.Flat;
             this.btnNextOpcode.Click += new System.EventHandler(this.btnNextOpcode_Click);
             //
             // btnPrevOpcode
@@ -68,12 +73,13 @@
             this.btnPrevOpcode.TabIndex = 9;
             this.btnPrevOpcode.Text = "Prev";
             this.btnPrevOpcode.UseVisualStyleBackColor = true;
+            this.btnPrevOpcode.FlatStyle = FlatStyle.Flat;
             this.btnPrevOpcode.Click += new System.EventHandler(this.btnPrevOpcode_Click);
             //
             // hexInput
             //
             this.hexInput.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.hexInput.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
+            this.hexInput.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.hexInput.InfoForeColor = System.Drawing.Color.Empty;
             this.hexInput.Location = new System.Drawing.Point(3, 32);
             this.hexInput.Name = "hexInput";
@@ -91,6 +97,7 @@
             this.btnPrevSequence.Size = new System.Drawing.Size(65, 25);
             this.btnPrevSequence.TabIndex = 8;
             this.btnPrevSequence.Text = "Prev";
+            this.btnPrevSequence.FlatStyle = FlatStyle.Flat;
             this.btnPrevSequence.UseVisualStyleBackColor = true;
             //
             // btnNextSequence
@@ -103,6 +110,7 @@
             this.btnNextSequence.TabIndex = 7;
             this.btnNextSequence.Text = "Next";
             this.btnNextSequence.UseVisualStyleBackColor = true;
+            this.btnNextSequence.FlatStyle = FlatStyle.Flat;
             this.btnNextSequence.Click += new System.EventHandler(this.btnNextSequence_Click);
             //
             // SearchForm
@@ -120,7 +128,7 @@
                                                                            | WeifenLuo.WinFormsUI.Docking.DockAreas.DockRight)
                                                                           | WeifenLuo.WinFormsUI.Docking.DockAreas.DockTop)
                                                                          | WeifenLuo.WinFormsUI.Docking.DockAreas.DockBottom)));
-            this.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
+            this.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.HideOnClose = true;
             this.MinimumSize = new System.Drawing.Size(300, 60);

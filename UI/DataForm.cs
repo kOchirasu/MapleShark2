@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using Be.Windows.Forms;
 using MapleShark2.Logging;
+using MapleShark2.Theme;
 using MapleShark2.UI.Control;
 using WeifenLuo.WinFormsUI.Docking;
 
@@ -15,6 +16,12 @@ namespace MapleShark2.UI {
 
         public DataForm() {
             InitializeComponent();
+        }
+
+        public new void Show(DockPanel panel) {
+            base.Show(panel);
+            BackColor = MainForm.Theme.DockSuiteTheme.ColorPalette.MainWindowActive.Background;
+            ThemeApplier.ApplyTheme(MainForm.Theme, Controls);
         }
 
         public byte[] GetHexBoxBytes() {

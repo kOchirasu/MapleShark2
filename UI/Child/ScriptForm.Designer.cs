@@ -40,9 +40,9 @@
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             this.SuspendLayout();
-            // 
+            //
             // mSaveButton
-            // 
+            //
             this.mSaveButton.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mSaveButton.Enabled = false;
             this.mSaveButton.Location = new System.Drawing.Point(0, 0);
@@ -52,9 +52,9 @@
             this.mSaveButton.Text = "&Save script";
             this.mSaveButton.UseVisualStyleBackColor = true;
             this.mSaveButton.Click += new System.EventHandler(this.mSaveButton_Click);
-            // 
+            //
             // mScriptEditor
-            // 
+            //
             this.mScriptEditor.ActiveView = Alsing.Windows.Forms.ActiveView.BottomRight;
             this.mScriptEditor.AutoListPosition = null;
             this.mScriptEditor.AutoListSelectedText = "a123";
@@ -64,7 +64,7 @@
             this.mScriptEditor.CopyAsRTF = false;
             this.mScriptEditor.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mScriptEditor.Document = this.mScriptSyntax;
-            this.mScriptEditor.FontName = "Courier new";
+            this.mScriptEditor.FontName = "Consolas";
             this.mScriptEditor.HighLightActiveLine = true;
             this.mScriptEditor.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.mScriptEditor.Indent = Alsing.Windows.Forms.SyntaxBox.IndentStyle.Scope;
@@ -87,34 +87,34 @@
             this.mScriptEditor.TabsToSpaces = true;
             this.mScriptEditor.WhitespaceColor = System.Drawing.SystemColors.ControlDark;
             this.mScriptEditor.TextChanged += new System.EventHandler(this.mScriptEditor_TextChanged);
-            // 
+            //
             // mScriptSyntax
-            // 
+            //
             this.mScriptSyntax.Lines = new string[] {""};
             this.mScriptSyntax.MaxUndoBufferSize = 1000;
             this.mScriptSyntax.Modified = false;
             this.mScriptSyntax.UndoStep = 0;
-            // 
+            //
             // splitContainer1
-            // 
+            //
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.splitContainer1.IsSplitterFixed = true;
             this.splitContainer1.Location = new System.Drawing.Point(0, 370);
             this.splitContainer1.Name = "splitContainer1";
-            // 
+            //
             // splitContainer1.Panel1
-            // 
+            //
             this.splitContainer1.Panel1.Controls.Add(this.mSaveButton);
-            // 
+            //
             // splitContainer1.Panel2
-            // 
+            //
             this.splitContainer1.Panel2.Controls.Add(this.mImportButton);
             this.splitContainer1.Size = new System.Drawing.Size(598, 25);
             this.splitContainer1.SplitterDistance = 392;
             this.splitContainer1.TabIndex = 6;
-            // 
+            //
             // mImportButton
-            // 
+            //
             this.mImportButton.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mImportButton.Location = new System.Drawing.Point(0, 0);
             this.mImportButton.Name = "mImportButton";
@@ -123,13 +123,13 @@
             this.mImportButton.Text = "Import script...";
             this.mImportButton.UseVisualStyleBackColor = true;
             this.mImportButton.Click += new System.EventHandler(this.mImportButton_Click);
-            // 
+            //
             // FileImporter
-            // 
+            //
             this.FileImporter.FileName = "*.*";
-            // 
+            //
             // ScriptForm
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(598, 395);
@@ -141,7 +141,7 @@
                       WeifenLuo.WinFormsUI.Docking.DockAreas.DockRight) |
                      WeifenLuo.WinFormsUI.Docking.DockAreas.DockTop) |
                     WeifenLuo.WinFormsUI.Docking.DockAreas.DockBottom)));
-            this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular,
+            this.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Regular,
                 System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.Icon = ((System.Drawing.Icon) (resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;

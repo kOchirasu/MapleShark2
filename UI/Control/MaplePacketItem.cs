@@ -8,7 +8,7 @@ namespace MapleShark2.UI.Control
 
         internal MaplePacketItem(MaplePacket packet, string name) : base(new[] {
             packet.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff"),
-            packet.Outbound ? "OUT" : "IN",
+            packet.Outbound ? "Outbound" : "Inbound",
             packet.Length.ToString(),
             $"0x{packet.Opcode:X4}",
             name

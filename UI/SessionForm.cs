@@ -12,6 +12,7 @@ using Be.Windows.Forms;
 using Maple2.PacketLib.Crypto;
 using Maple2.PacketLib.Tools;
 using MapleShark2.Logging;
+using MapleShark2.Theme;
 using MapleShark2.Tools;
 using MapleShark2.UI.Child;
 using MapleShark2.UI.Control;
@@ -63,6 +64,19 @@ namespace MapleShark2.UI {
             InitializeComponent();
             ScaleColumns();
             Saved = false;
+        }
+
+        public new void Show(DockPanel panel, DockState state) {
+            base.Show(panel, state);
+
+            toolStripExtender.DefaultRenderer = new ToolStripProfessionalRenderer();
+            toolStripExtender.SetStyle(mMenu, VisualStudioToolStripExtender.VsVersion.Vs2015,
+                MainForm.Theme.DockSuiteTheme);
+            toolStripExtender.SetStyle(mPacketContextMenu, VisualStudioToolStripExtender.VsVersion.Vs2015,
+                MainForm.Theme.DockSuiteTheme);
+
+            ThemeApplier.ApplyTheme(MainForm.Theme, Controls);
+            ThemeApplier.ApplyTheme(MainForm.Theme, mPacketContextMenu.Controls);
         }
 
         // Fix column widths when using screen scaling.
@@ -150,6 +164,7 @@ namespace MapleShark2.UI {
                         return result;
                     }
                 }
+
                 ListView.EndUpdate();
 
                 // This should be called after EndUpdate so VirtualListSize is set properly
@@ -182,7 +197,8 @@ namespace MapleShark2.UI {
                 }
 
                 ushort opcode = packet.Read<ushort>();
-                if (opcode != 0x01) { // RequestVersion
+                if (opcode != 0x01) {
+                    // RequestVersion
                     Console.WriteLine("Connection on port {0} did not have a valid MapleStory2 Connection Header",
                         mLocalEndpoint);
                     return Results.CloseMe;
@@ -218,9 +234,11 @@ namespace MapleShark2.UI {
                 ArraySegment<byte> segment = new ArraySegment<byte>(packet.Buffer, 2, packet.Length - 2);
                 var maplePacket = new MaplePacket(timestamp, isOutbound, Build, opcode, segment);
                 // Add to list of not exist (TODO: SortedSet?)
-                if (!Opcodes.Exists(op => op.Outbound == maplePacket.Outbound && op.Header == maplePacket.Opcode)) { // Should be false, but w/e
+                if (!Opcodes.Exists(op => op.Outbound == maplePacket.Outbound && op.Header == maplePacket.Opcode)) {
+                    // Should be false, but w/e
                     Opcodes.Add(new Opcode(maplePacket.Outbound, maplePacket.Opcode));
                 }
+
                 AddPacket(maplePacket, true);
 
                 Console.WriteLine("[CONNECTION] MapleStory2 V{0}", Build);
@@ -260,6 +278,7 @@ namespace MapleShark2.UI {
             foreach (MaplePacket packet in packets) {
                 AddPacket(packet);
             }
+
             ListView.EndUpdate();
             if (ListView.VirtualListSize > 0) ListView.EnsureVisible(0);
 

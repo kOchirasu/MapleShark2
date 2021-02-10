@@ -11,6 +11,8 @@ namespace MapleShark2.UI.Control {
         public MaplePacket Selected =>
             this.SelectedIndices.Count > 0 ? mFilteredPackets[this.SelectedIndices[0]] : default;
 
+        public Color DividerColor = DefaultBackColor;
+        public Color HighlightColor = DefaultBackColor;
         private readonly List<MaplePacket> mFilteredPackets;
         private bool updating;
 
@@ -18,8 +20,12 @@ namespace MapleShark2.UI.Control {
             DoubleBuffered = true;
             mFilteredPackets = new List<MaplePacket>();
             VirtualMode = true;
+            OwnerDraw = true;
             RetrieveVirtualItem += this.mPacketList_RetrieveVirtualItem;
             SearchForVirtualItem += this.mPacketList_SearchForVirtualItem;
+            DrawColumnHeader += this.mPacketList_DrawColumnHeader;
+            DrawItem += this.mPacketList_DrawItem;
+            DrawSubItem += this.mPacketList_DrawSubItem;
         }
 
         public new int VirtualListSize {
@@ -90,13 +96,31 @@ namespace MapleShark2.UI.Control {
 
             var packetItem = new MaplePacketItem(packet, name);
             if (packetItem.Packet.Outbound) {
-                packetItem.BackColor = Color.AliceBlue;
+                packetItem.BackColor = HighlightColor;
             }
             e.Item = packetItem;
         }
 
         private void mPacketList_SearchForVirtualItem(object sender, SearchForVirtualItemEventArgs e) {
             e.Index = e.StartIndex;
+        }
+
+        private void mPacketList_DrawColumnHeader(object sender, DrawListViewColumnHeaderEventArgs e) {
+            e.Graphics.FillRectangle(new SolidBrush(BackColor), e.Bounds);
+            var top = new Point(e.Bounds.Right - 1, e.Bounds.Top);
+            var bottom = new Point(e.Bounds.Right - 1, e.Bounds.Bottom);
+            e.Graphics.DrawLine(new Pen(DividerColor), top, bottom);
+            /*e.Graphics.DrawString(e.Header.Text, e.Font, new SolidBrush(ForeColor), e.Header.,
+                StringFormat.GenericDefault);*/
+            TextRenderer.DrawText(e.Graphics, e.Header.Text, e.Font, Rectangle.Inflate(e.Bounds, -5, -2), ForeColor, TextFormatFlags.WordEllipsis);
+        }
+
+        private void mPacketList_DrawItem(object sender, DrawListViewItemEventArgs e) {
+            e.DrawDefault = true;
+        }
+
+        private void mPacketList_DrawSubItem(object sender, DrawListViewSubItemEventArgs e) {
+            e.DrawDefault = true;
         }
     }
 }

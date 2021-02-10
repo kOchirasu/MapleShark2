@@ -87,7 +87,7 @@ namespace MapleShark2.UI
             this.mNameColumn});
             this.ListView.ContextMenuStrip = this.mPacketContextMenu;
             this.ListView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ListView.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ListView.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.ListView.FullRowSelect = true;
             this.ListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.ListView.HideSelection = false;
@@ -451,19 +451,23 @@ namespace MapleShark2.UI
             this.Controls.Add(this.mMenu);
             this.DockAreas = WeifenLuo.WinFormsUI.Docking.DockAreas.Document;
             this.DoubleBuffered = true;
-            this.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "SessionForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.Text = "SessionForm";
             this.Load += new System.EventHandler(this.SessionForm_Load);
+            //
+            // toolStripExtender
+            //
+            this.toolStripExtender = new WeifenLuo.WinFormsUI.Docking.VisualStudioToolStripExtender(this.components);
+
             this.mPacketContextMenu.ResumeLayout(false);
             this.mPacketContextMenu.PerformLayout();
             this.mMenu.ResumeLayout(false);
             this.mMenu.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion
@@ -509,5 +513,6 @@ namespace MapleShark2.UI
         private System.Windows.Forms.ToolStripMenuItem allToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem onlyVisibleToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem allToolStripMenuItem1;
+        private WeifenLuo.WinFormsUI.Docking.VisualStudioToolStripExtender toolStripExtender;
     }
 }

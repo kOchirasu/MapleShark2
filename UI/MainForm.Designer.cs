@@ -348,6 +348,10 @@ namespace MapleShark2.UI
             this.mDockPanel.TabIndex = 4;
             this.mDockPanel.ActiveDocumentChanged += new System.EventHandler(this.mDockPanel_ActiveDocumentChanged);
             //
+            // toolStripExtender
+            //
+            this.toolStripExtender = new WeifenLuo.WinFormsUI.Docking.VisualStudioToolStripExtender(this.components);
+            //
             // MainForm
             //
             this.AllowDrop = true;
@@ -369,6 +373,7 @@ namespace MapleShark2.UI
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.MainForm_DragDrop);
             this.DragEnter += new System.Windows.Forms.DragEventHandler(this.MainForm_DragEnter);
+
             this.mMenu.ResumeLayout(false);
             this.mMenu.PerformLayout();
             this.toolStrip.ResumeLayout(false);
@@ -403,6 +408,7 @@ namespace MapleShark2.UI
         private System.Windows.Forms.ToolStripMenuItem importJavapropertiesFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem setupToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private WeifenLuo.WinFormsUI.Docking.VisualStudioToolStripExtender toolStripExtender;
     }
 }
 

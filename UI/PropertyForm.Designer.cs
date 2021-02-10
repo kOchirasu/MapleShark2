@@ -1,4 +1,6 @@
-﻿namespace MapleShark2.UI
+﻿using System.Windows.Forms;
+
+namespace MapleShark2.UI
 {
     partial class PropertyForm
     {
@@ -30,9 +32,9 @@
         {
             this.mProperties = new System.Windows.Forms.PropertyGrid();
             this.SuspendLayout();
-            // 
+            //
             // mProperties
-            // 
+            //
             this.mProperties.CommandsVisibleIfAvailable = false;
             this.mProperties.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mProperties.HelpVisible = false;
@@ -40,11 +42,12 @@
             this.mProperties.Name = "mProperties";
             this.mProperties.PropertySort = System.Windows.Forms.PropertySort.NoSort;
             this.mProperties.Size = new System.Drawing.Size(292, 273);
+            this.mProperties.Padding = Padding.Empty;
             this.mProperties.TabIndex = 4;
             this.mProperties.ToolbarVisible = false;
-            // 
+            //
             // PropertyForm
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(292, 273);
@@ -53,7 +56,7 @@
                         | WeifenLuo.WinFormsUI.Docking.DockAreas.DockRight)
                         | WeifenLuo.WinFormsUI.Docking.DockAreas.DockTop)
                         | WeifenLuo.WinFormsUI.Docking.DockAreas.DockBottom)));
-            this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.HideOnClose = true;
             this.Name = "PropertyForm";
             this.ShowHint = WeifenLuo.WinFormsUI.Docking.DockState.DockBottom;

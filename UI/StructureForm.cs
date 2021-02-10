@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows.Forms;
 using MapleShark2.Logging;
+using MapleShark2.Theme;
 using MapleShark2.Tools;
 using MapleShark2.UI.Child;
 using MapleShark2.UI.Control;
@@ -19,6 +20,12 @@ namespace MapleShark2.UI {
 
         public StructureForm() {
             InitializeComponent();
+        }
+
+        public new void Show(DockPanel panel) {
+            base.Show(panel);
+            BackColor = MainForm.Theme.DockSuiteTheme.ColorPalette.MainWindowActive.Background;
+            ThemeApplier.ApplyTheme(MainForm.Theme, Controls);
         }
 
         public MainForm MainForm => ParentForm as MainForm;

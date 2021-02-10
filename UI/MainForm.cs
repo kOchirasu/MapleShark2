@@ -10,6 +10,7 @@ using Be.Windows.Forms;
 using Maple2.PacketLib.Tools;
 using MapleShark2.Logging;
 using MapleShark2.Properties;
+using MapleShark2.Theme;
 using MapleShark2.Tools;
 using MapleShark2.UI.Child;
 using PacketDotNet;
@@ -35,9 +36,17 @@ namespace MapleShark2.UI {
 
         private List<RawCapture> packetQueue = new List<RawCapture>();
 
-        public MainForm(string[] startupArguments) {
+        public readonly IMapleSharkTheme Theme;
+
+        public MainForm(IMapleSharkTheme theme, string[] startupArguments) {
             InitializeComponent();
             CreateStandardControls();
+
+            Theme = theme;
+            mDockPanel.Theme = theme.DockSuiteTheme;
+            toolStripExtender.DefaultRenderer = new ToolStripProfessionalRenderer();
+            toolStripExtender.SetStyle(mMenu, VisualStudioToolStripExtender.VsVersion.Vs2015, mDockPanel.Theme);
+            toolStripExtender.SetStyle(toolStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, mDockPanel.Theme);
 
             Text = "MapleShark2 (Build: " + Program.AssemblyVersion + ")";
 

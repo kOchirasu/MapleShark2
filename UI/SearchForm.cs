@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using Be.Windows.Forms;
 using MapleShark2.Logging;
+using MapleShark2.Theme;
 using MapleShark2.Tools;
 using WeifenLuo.WinFormsUI.Docking;
 
@@ -27,6 +28,12 @@ namespace MapleShark2.UI {
                 btnPrevSequence.Height = (int) (btnPrevSequence.Height * scale);
                 btnNextSequence.Height = (int) (btnNextSequence.Height * scale);
             }
+        }
+
+        public new void Show(DockPanel panel) {
+            base.Show(panel);
+            BackColor = MainForm.Theme.DockSuiteTheme.ColorPalette.MainWindowActive.Background;
+            ThemeApplier.ApplyTheme(MainForm.Theme, Controls);
         }
 
         public void RefreshOpcodes(bool pReselect) {
@@ -67,6 +74,28 @@ namespace MapleShark2.UI {
 
         private void dropdownOpcode_SelectedIndexChanged(object pSender, EventArgs pArgs) {
             btnNextOpcode.Enabled = btnPrevOpcode.Enabled = dropdownOpcode.SelectedIndex >= 0;
+        }
+
+        private void dropdownOpcode_DrawItem(object sender, DrawItemEventArgs e) {
+            Brush backBrush, foreBrush;
+            if ((e.State & DrawItemState.Selected) > 0) {
+                backBrush = SystemBrushes.Highlight;
+                foreBrush = SystemBrushes.HighlightText;
+            } else {
+                backBrush = new SolidBrush(dropdownOpcode.BackColor);
+                foreBrush = new SolidBrush(dropdownOpcode.ForeColor);
+            }
+
+            e.DrawBackground();
+            e.Graphics.FillRectangle(backBrush, e.Bounds);
+
+            int index = e.Index >= 0 ? e.Index : -1;
+            if (index != -1) {
+                e.Graphics.DrawString(dropdownOpcode.Items[index].ToString(), e.Font, foreBrush, e.Bounds,
+                    StringFormat.GenericDefault);
+            }
+
+            e.DrawFocusRectangle();
         }
 
         private void btnNextOpcode_Click(object pSender, EventArgs pArgs) {
