@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
@@ -94,10 +95,10 @@ namespace MapleShark2.UI {
 
         public void CopyPacketHex(KeyEventArgs pArgs) {
             if (mDataForm.SelectionLength > 0 && pArgs.Modifiers == Keys.Control && pArgs.KeyCode == Keys.C) {
-                Clipboard.SetText(mDataForm.GetHexBoxSelectedBytes().ToHexString(' '));
+                Clipboard.SetText(mDataForm.GetHexBoxSelectedBytes().ToArray().ToHexString(' '));
                 pArgs.SuppressKeyPress = true;
             } else if (mDataForm.SelectionLength > 0 && pArgs.Control && pArgs.Shift && pArgs.KeyCode == Keys.C) {
-                byte[] buffer = mDataForm.GetHexBoxSelectedBytes();
+                byte[] buffer = mDataForm.GetHexBoxSelectedBytes().ToArray();
                 mSearchForm.SetHexBoxBytes(buffer);
                 pArgs.SuppressKeyPress = true;
             }

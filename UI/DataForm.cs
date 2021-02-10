@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Windows.Forms;
 using Be.Windows.Forms;
 using MapleShark2.Logging;
@@ -10,6 +9,8 @@ using WeifenLuo.WinFormsUI.Docking;
 namespace MapleShark2.UI {
     public partial class DataForm : DockContent {
         private MainForm MainForm => ParentForm as MainForm;
+
+        private byte[] hexBoxBytes;
 
         public long SelectionStart => mHex.SelectionStart;
         public long SelectionLength => mHex.SelectionLength;
@@ -24,14 +25,10 @@ namespace MapleShark2.UI {
             ThemeApplier.ApplyTheme(MainForm.Theme, Controls);
         }
 
-        public byte[] GetHexBoxBytes() {
-            var provider = (DynamicByteProvider) mHex.ByteProvider;
-            return provider.Bytes.ToArray();
-        }
-
-        public byte[] GetHexBoxSelectedBytes() {
-            var provider = (DynamicByteProvider) mHex.ByteProvider;
-            return provider.Bytes.GetRange((int) mHex.SelectionStart, (int) mHex.SelectionLength).ToArray();
+        public ArraySegment<byte> GetHexBoxSelectedBytes() {
+            return hexBoxBytes == null
+                ? new ArraySegment<byte>()
+                : new ArraySegment<byte>(hexBoxBytes, (int) mHex.SelectionStart, (int) mHex.SelectionLength);
         }
 
         public void SelectHexBoxRange(long start, long length) {
@@ -41,10 +38,12 @@ namespace MapleShark2.UI {
         }
 
         public void SetHexBoxBytes(byte[] bytes) {
-            mHex.ByteProvider = new DynamicByteProvider(bytes);
+            hexBoxBytes = bytes;
+            mHex.ByteProvider = new DynamicByteProvider(hexBoxBytes);
         }
 
         public void ClearHexBox() {
+            hexBoxBytes = null;
             mHex.ByteProvider = null;
         }
 
@@ -53,13 +52,12 @@ namespace MapleShark2.UI {
         }
 
         private void mHex_SelectionLengthChanged(object pSender, EventArgs pArgs) {
-            if (mHex.SelectionLength == 0) MainForm.PropertyForm.Properties.SelectedObject = null;
-            else {
-                ArraySegment<byte> buffer = default;
+            if (mHex.SelectionLength == 0) {
+                MainForm.PropertyForm.Properties.SelectedObject = null;
+            } else {
                 StructureNode match = null;
                 foreach (TreeNode node in MainForm.StructureForm.Tree.Nodes) {
                     var realNode = (StructureNode) node;
-                    buffer = realNode.Data;
                     if (mHex.SelectionStart == realNode.Data.Offset && mHex.SelectionLength == realNode.Data.Count) {
                         match = realNode;
                         break;
@@ -67,9 +65,8 @@ namespace MapleShark2.UI {
                 }
 
                 MainForm.StructureForm.Tree.SelectedNode = match;
-                if (buffer.Count > 0)
-                    MainForm.PropertyForm.Properties.SelectedObject = new StructureSegment(buffer, MainForm.Locale);
-                else MainForm.PropertyForm.Properties.SelectedObject = null;
+                MainForm.PropertyForm.Properties.SelectedObject =
+                    new StructureSegment(GetHexBoxSelectedBytes(), MainForm.Locale);
             }
         }
 
