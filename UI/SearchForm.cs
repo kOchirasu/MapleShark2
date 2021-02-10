@@ -32,8 +32,8 @@ namespace MapleShark2.UI {
 
         public new void Show(DockPanel panel) {
             base.Show(panel);
-            BackColor = MainForm.Theme.DockSuiteTheme.ColorPalette.MainWindowActive.Background;
-            ThemeApplier.ApplyTheme(MainForm.Theme, Controls);
+            BackColor = Config.Instance.Theme.DockSuiteTheme.ColorPalette.MainWindowActive.Background;
+            ThemeApplier.ApplyTheme(Config.Instance.Theme, Controls);
         }
 
         public void RefreshOpcodes(bool pReselect) {

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
 using MapleShark2.Logging;
-using MapleShark2.UI;
 
 namespace MapleShark2.Tools {
     public class MsbMetadata {

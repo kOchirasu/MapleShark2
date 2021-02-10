@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
-using Be.Windows.Forms;
 using Maple2.PacketLib.Tools;
 using MapleShark2.Logging;
 using MapleShark2.Properties;
-using MapleShark2.Theme;
 using MapleShark2.Tools;
 using MapleShark2.UI.Child;
 using PacketDotNet;
@@ -20,86 +16,68 @@ using SharpPcap.LibPcap;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace MapleShark2.UI {
-    public partial class MainForm : Form {
+    public sealed partial class MainForm : Form {
         private const string LAYOUT_FILE = "Layout.xml";
 
-        private bool mClosed;
-        private PcapDevice mDevice;
+        private bool closed;
+        private bool sniffEnabled = true;
+        private PcapDevice device;
 
         // DockContent Controls
-        private SearchForm mSearchForm;
-        private DataForm mDataForm;
-        private StructureForm mStructureForm;
-        private PropertyForm mPropertyForm;
+        public SearchForm SearchForm { get; private set; }
+        public DataForm DataForm { get; private set; }
+        public StructureForm StructureForm { get; private set; }
+        public PropertyForm PropertyForm { get; private set; }
 
-        private DeserializeDockContent mDeserializeDockContent;
         private readonly string[] startupArguments;
 
         private List<RawCapture> packetQueue = new List<RawCapture>();
 
-        public readonly IMapleSharkTheme Theme;
+        public byte Locale => ((SessionForm) mDockPanel.ActiveDocument).Locale;
 
-        public MainForm(IMapleSharkTheme theme, string[] startupArguments) {
+        public MainForm(string[] startupArguments) {
             InitializeComponent();
             CreateStandardControls();
 
-            Theme = theme;
-            mDockPanel.Theme = theme.DockSuiteTheme;
-            toolStripExtender.DefaultRenderer = new ToolStripProfessionalRenderer();
-            toolStripExtender.SetStyle(mMenu, VisualStudioToolStripExtender.VsVersion.Vs2015, mDockPanel.Theme);
-            toolStripExtender.SetStyle(toolStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, mDockPanel.Theme);
-
             Text = "MapleShark2 (Build: " + Program.AssemblyVersion + ")";
 
-            mDeserializeDockContent = GetContentFromPersistString;
             this.startupArguments = startupArguments;
         }
 
         private void CreateStandardControls() {
-            mSearchForm = new SearchForm();
-            mDataForm = new DataForm();
-            mStructureForm = new StructureForm();
-            mPropertyForm = new PropertyForm();
+            SearchForm = new SearchForm();
+            DataForm = new DataForm();
+            StructureForm = new StructureForm();
+            PropertyForm = new PropertyForm();
         }
 
         private IDockContent GetContentFromPersistString(string persistString) {
             if (persistString == typeof(SearchForm).ToString()) {
-                return mSearchForm;
+                return SearchForm;
             }
 
             if (persistString == typeof(DataForm).ToString()) {
-                return mDataForm;
+                return DataForm;
             }
 
             if (persistString == typeof(StructureForm).ToString()) {
-                return mStructureForm;
+                return StructureForm;
             }
 
             if (persistString == typeof(PropertyForm).ToString()) {
-                return mPropertyForm;
+                return PropertyForm;
             }
 
             throw new ArgumentException("Invalid layout found from config.");
         }
 
-        public SearchForm SearchForm => mSearchForm;
-        public DataForm DataForm => mDataForm;
-        public StructureForm StructureForm => mStructureForm;
-        public PropertyForm PropertyForm => mPropertyForm;
-        public byte Locale => ((SessionForm) mDockPanel.ActiveDocument).Locale;
-
-        private SessionForm NewSession() {
-            var session = new SessionForm();
-            return session;
-        }
-
         public void CopyPacketHex(KeyEventArgs pArgs) {
-            if (mDataForm.SelectionLength > 0 && pArgs.Modifiers == Keys.Control && pArgs.KeyCode == Keys.C) {
-                Clipboard.SetText(mDataForm.GetHexBoxSelectedBytes().ToArray().ToHexString(' '));
+            if (DataForm.SelectionLength > 0 && pArgs.Modifiers == Keys.Control && pArgs.KeyCode == Keys.C) {
+                Clipboard.SetText(DataForm.GetHexBoxSelectedBytes().ToArray().ToHexString(' '));
                 pArgs.SuppressKeyPress = true;
-            } else if (mDataForm.SelectionLength > 0 && pArgs.Control && pArgs.Shift && pArgs.KeyCode == Keys.C) {
-                byte[] buffer = mDataForm.GetHexBoxSelectedBytes().ToArray();
-                mSearchForm.SetHexBoxBytes(buffer);
+            } else if (DataForm.SelectionLength > 0 && pArgs.Control && pArgs.Shift && pArgs.KeyCode == Keys.C) {
+                byte[] buffer = DataForm.GetHexBoxSelectedBytes().ToArray();
+                SearchForm.SetHexBoxBytes(buffer);
                 pArgs.SuppressKeyPress = true;
             }
         }
@@ -109,19 +87,19 @@ namespace MapleShark2.UI {
         }
 
         private void SetupAdapter() {
-            if (mDevice != null) {
-                mDevice.StopCapture();
-                mDevice.Close();
+            if (device != null) {
+                device.StopCapture();
+                device.Close();
             }
 
             foreach (LibPcapLiveDevice pcapDevice in LibPcapLiveDeviceList.Instance) {
                 if (pcapDevice.Interface.Name == Config.Instance.Interface) {
-                    mDevice = pcapDevice;
+                    device = pcapDevice;
                     break;
                 }
             }
 
-            if (mDevice == null) {
+            if (device == null) {
                 // Well shit...
 
                 MessageBox.Show("Invalid configuration. Please re-setup your MapleShark configuration.", "MapleShark",
@@ -135,22 +113,18 @@ namespace MapleShark2.UI {
             }
 
             try {
-                mDevice.OnPacketArrival += mDevice_OnPacketArrival;
-                mDevice.Open(DeviceMode.Promiscuous, 10);
-                UpdatePortRange();
-                mDevice.StartCapture();
+                device.OnPacketArrival += device_OnPacketArrival;
+                device.Open(DeviceMode.Promiscuous, 10);
+                device.Filter = $"tcp portrange {Config.Instance.LowPort}-{Config.Instance.HighPort}";
+                device.StartCapture();
             } catch {
                 MessageBox.Show("Failed to set the device in Promiscuous mode! But that doesn't really matter lol.");
-                mDevice.Open();
+                device.Open();
             }
         }
 
-        public void UpdatePortRange() {
-            mDevice.Filter = $"tcp portrange {Config.Instance.LowPort}-{Config.Instance.HighPort}";
-        }
-
-        private void mDevice_OnPacketArrival(object sender, CaptureEventArgs e) {
-            if (!started) return;
+        private void device_OnPacketArrival(object sender, CaptureEventArgs e) {
+            if (!sniffEnabled) return;
 
             lock (packetQueue) {
                 packetQueue.Add(e.Packet);
@@ -163,35 +137,42 @@ namespace MapleShark2.UI {
                     Close();
                     return;
                 }
+
+                // If this is the first-time setup we can apply theme right away
+                Config.Instance.LoadTheme();
             }
 
+            mDockPanel.Theme = Config.Instance.Theme.DockSuiteTheme;
+            toolStripExtender.DefaultRenderer = new ToolStripProfessionalRenderer();
+            toolStripExtender.SetStyle(mMenu, VisualStudioToolStripExtender.VsVersion.Vs2015, mDockPanel.Theme);
+            toolStripExtender.SetStyle(toolStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, mDockPanel.Theme);
+
             bool useDefaults = true;
-            // TODO: Loading from XML, currently this bugs because SessionForm gets serialized
-            /*try {
-                mDockPanel.LoadFromXml(LAYOUT_FILE, mDeserializeDockContent);
+            try {
+                mDockPanel.LoadFromXml(LAYOUT_FILE, GetContentFromPersistString);
                 useDefaults = false;
             } catch (Exception e) {
                 // If we fail to load, it will just use the default layout.
                 Console.WriteLine(e);
-            }*/
+            }
 
             SetupAdapter();
 
             mTimer.Enabled = true;
 
-            mSearchForm.Show(mDockPanel);
-            mDataForm.Show(mDockPanel);
-            mStructureForm.Show(mDockPanel);
-            mPropertyForm.Show(mDockPanel);
+            SearchForm.Show(mDockPanel);
+            DataForm.Show(mDockPanel);
+            StructureForm.Show(mDockPanel);
+            PropertyForm.Show(mDockPanel);
 
             if (useDefaults) {
                 // Docking can only be done after adding to panel.
-                mStructureForm.DockState = DockState.DockRight;
-                mPropertyForm.DockState = DockState.DockRight;
+                StructureForm.DockState = DockState.DockRight;
+                PropertyForm.DockState = DockState.DockRight;
             }
 
             foreach (string arg in startupArguments) {
-                SessionForm session = NewSession();
+                var session = new SessionForm();
                 session.OpenReadOnly(arg);
                 session.Show(mDockPanel, DockState.Document);
             }
@@ -199,26 +180,25 @@ namespace MapleShark2.UI {
 
         private void Shutdown() {
             mTimer.Enabled = false;
-            mDevice?.StopCapture();
-            mDevice?.Close();
+            device?.StopCapture();
+            device?.Close();
         }
 
         private void MainForm_FormClosed(object pSender, FormClosedEventArgs pArgs) {
             Shutdown();
-            mClosed = true;
+            closed = true;
         }
 
         private void mDockPanel_ActiveDocumentChanged(object pSender, EventArgs pArgs) {
-            if (!mClosed) {
-                mSearchForm.ClearOpcodes();
+            if (!closed) {
+                SearchForm.ClearOpcodes();
                 if (mDockPanel.ActiveDocument is SessionForm session) {
-                    //   session.RefreshPackets();
-                    mSearchForm.RefreshOpcodes(false);
+                    SearchForm.RefreshOpcodes(false);
                     session.ReselectPacket();
                 } else {
-                    mDataForm.ClearHexBox();
-                    mStructureForm.Tree.Nodes.Clear();
-                    mPropertyForm.Properties.SelectedObject = null;
+                    DataForm.ClearHexBox();
+                    StructureForm.Tree.Nodes.Clear();
+                    PropertyForm.Properties.SelectedObject = null;
                 }
             }
         }
@@ -228,29 +208,27 @@ namespace MapleShark2.UI {
                 return;
             }
 
-            PcapDevice device = new CaptureFileReaderDevice(mImportDialog.FileName);
-            device.OnPacketArrival += mDevice_OnPacketArrival;
-            device.Open();
-            device.Capture();
-            new Thread(() => ParseImportedFile(device)).Start();
+            LoadPcapFile(mImportDialog.FileName);
         }
 
         private static bool InPortRange(ushort port) {
             return port >= Config.Instance.LowPort && port <= Config.Instance.HighPort;
         }
 
-        private void ParseImportedFile(PcapDevice device) {
-            this.Invoke((MethodInvoker) delegate {
+        private void LoadPcapFile(string fileName) {
+            PcapDevice fileDevice = new CaptureFileReaderDevice(fileName);
+            fileDevice.Open();
+
+            this.Invoke((MethodInvoker) (() => {
                 SessionForm session = null;
-                while (device.GetNextPacket(out RawCapture packet) != 0) {
+                while (fileDevice.GetNextPacket(out RawCapture packet) != 0) {
                     var tcpPacket = Packet.ParsePacket(packet.LinkLayerType, packet.Data).Extract<TcpPacket>();
                     if (tcpPacket == null) continue;
-                    if (!InPortRange(tcpPacket.SourcePort) || !InPortRange(tcpPacket.DestinationPort))
-                        continue;
+                    if (!InPortRange(tcpPacket.SourcePort) && !InPortRange(tcpPacket.DestinationPort)) continue;
 
                     try {
                         if (tcpPacket.Synchronize && !tcpPacket.Acknowledgment) {
-                            session = NewSession();
+                            session = new SessionForm();
                         } else if (session == null || !session.MatchTcpPacket(tcpPacket)) {
                             continue;
                         }
@@ -267,11 +245,8 @@ namespace MapleShark2.UI {
                     }
                 }
 
-                if (session != null) {
-                    session.Show(mDockPanel, DockState.Document);
-                    mSearchForm.RefreshOpcodes(false);
-                }
-            });
+                session?.Show(mDockPanel, DockState.Document);
+            }));
         }
 
         private void mFileOpenMenu_Click(object pSender, EventArgs pArgs) {
@@ -280,12 +255,10 @@ namespace MapleShark2.UI {
             }
 
             foreach (string path in mOpenDialog.FileNames) {
-                SessionForm session = NewSession();
+                var session = new SessionForm();
                 session.OpenReadOnly(path);
                 session.Show(mDockPanel, DockState.Document);
             }
-
-            mSearchForm.RefreshOpcodes(false);
         }
 
         private void mFileQuit_Click(object pSender, EventArgs pArgs) {
@@ -293,30 +266,30 @@ namespace MapleShark2.UI {
         }
 
         private void mViewMenu_DropDownOpening(object pSender, EventArgs pArgs) {
-            mViewSearchMenu.Checked = mSearchForm.Visible;
-            mViewDataMenu.Checked = mDataForm.Visible;
-            mViewStructureMenu.Checked = mStructureForm.Visible;
-            mViewPropertiesMenu.Checked = mPropertyForm.Visible;
+            mViewSearchMenu.Checked = SearchForm.Visible;
+            mViewDataMenu.Checked = DataForm.Visible;
+            mViewStructureMenu.Checked = StructureForm.Visible;
+            mViewPropertiesMenu.Checked = PropertyForm.Visible;
         }
 
         private void mViewSearchMenu_CheckedChanged(object pSender, EventArgs pArgs) {
-            if (mViewSearchMenu.Checked) mSearchForm.Show();
-            else mSearchForm.Hide();
+            if (mViewSearchMenu.Checked) SearchForm.Show();
+            else SearchForm.Hide();
         }
 
         private void mViewDataMenu_CheckedChanged(object pSender, EventArgs pArgs) {
-            if (mViewDataMenu.Checked) mDataForm.Show();
-            else mDataForm.Hide();
+            if (mViewDataMenu.Checked) DataForm.Show();
+            else DataForm.Hide();
         }
 
         private void mViewStructureMenu_CheckedChanged(object pSender, EventArgs pArgs) {
-            if (mViewStructureMenu.Checked) mStructureForm.Show();
-            else mStructureForm.Hide();
+            if (mViewStructureMenu.Checked) StructureForm.Show();
+            else StructureForm.Hide();
         }
 
         private void mViewPropertiesMenu_CheckedChanged(object pSender, EventArgs pArgs) {
-            if (mViewPropertiesMenu.Checked) mPropertyForm.Show();
-            else mPropertyForm.Hide();
+            if (mViewPropertiesMenu.Checked) PropertyForm.Show();
+            else PropertyForm.Hide();
         }
 
         private readonly List<SessionForm> closes = new List<SessionForm>();
@@ -339,8 +312,8 @@ namespace MapleShark2.UI {
 
                 mTimer.Enabled = true;
             } catch (Exception) {
-                if (!mDevice.Opened) {
-                    mDevice.Open(DeviceMode.Promiscuous, 1);
+                if (!device.Opened) {
+                    device.Open(DeviceMode.Promiscuous, 1);
                 }
             }
         }
@@ -353,7 +326,7 @@ namespace MapleShark2.UI {
             }
 
             foreach (RawCapture packet in curQueue) {
-                if (!started) {
+                if (!sniffEnabled) {
                     continue;
                 }
 
@@ -362,7 +335,7 @@ namespace MapleShark2.UI {
                 try {
                     SessionForm.Results? result;
                     if (tcpPacket.Synchronize && !tcpPacket.Acknowledgment && InPortRange(tcpPacket.DestinationPort)) {
-                        session = NewSession();
+                        session = new SessionForm();
                         result = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
                     } else {
                         session =
@@ -387,15 +360,13 @@ namespace MapleShark2.UI {
             }
         }
 
-        private bool started = true;
-
         private void toolStripButton1_Click(object sender, EventArgs e) {
-            if (started) {
-                started = false;
+            if (sniffEnabled) {
+                sniffEnabled = false;
                 mStopStartButton.Image = Resources.Button_Blank_Green_icon;
                 mStopStartButton.Text = "Start sniffing";
             } else {
-                started = true;
+                sniffEnabled = true;
                 mStopStartButton.Image = Resources.Button_Blank_Red_icon;
                 mStopStartButton.Text = "Stop sniffing";
             }
@@ -443,16 +414,13 @@ namespace MapleShark2.UI {
 
                 switch (Path.GetExtension(file)) {
                     case ".msb": {
-                        SessionForm session = NewSession();
+                        var session = new SessionForm();
                         session.OpenReadOnly(file);
                         session.Show(mDockPanel, DockState.Document);
-                        mSearchForm.RefreshOpcodes(false);
                         break;
                     }
                     case ".pcap": {
-                        PcapDevice device = new CaptureFileReaderDevice(file);
-                        device.Open();
-                        ParseImportedFile(device);
+                        LoadPcapFile(file);
                         break;
                     }
                 }
@@ -478,17 +446,16 @@ namespace MapleShark2.UI {
                     == DialogResult.Yes;
             }
 
-            while (doSaveQuestioning && sessionForms.Count > 0) {
-                SessionForm ses = sessionForms[0];
-                if (!ses.Saved) {
-                    ses.Focus();
+            foreach (SessionForm session in sessionForms) {
+                if (!session.Saved && doSaveQuestioning) {
+                    session.Focus();
                     DialogResult result =
-                        MessageBox.Show($"Do you want to save the session '{ses.Text}'?", "MapleShark",
+                        MessageBox.Show($"Do you want to save the session '{session.Text}'?", "MapleShark",
                             MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
 
                     switch (result) {
                         case DialogResult.Yes:
-                            ses.RunSaveCMD();
+                            session.RunSaveCMD();
                             break;
                         case DialogResult.Cancel:
                             e.Cancel = true;
@@ -496,12 +463,11 @@ namespace MapleShark2.UI {
                     }
                 }
 
-                //mDockPanel.Contents.Remove(ses);
-                sessionForms.Remove(ses);
+                session.Close();
             }
 
             DefinitionsContainer.Instance.Save();
-            //mDockPanel.SaveAsXml(LAYOUT_FILE);
+            mDockPanel.SaveAsXml(LAYOUT_FILE);
         }
 
         private void setupToolStripMenuItem_Click(object sender, EventArgs e) {

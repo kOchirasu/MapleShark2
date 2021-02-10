@@ -37,7 +37,7 @@ namespace MapleShark2.Tools {
                             using (XmlReader xr = XmlReader.Create("Config.xml")) {
                                 XmlSerializer xs = new XmlSerializer(typeof(Config));
                                 sInstance = xs.Deserialize(xr) as Config;
-                                sInstance.Theme = sInstance.WindowTheme == ThemeType.Dark ? darkTheme : lightTheme;
+                                sInstance.LoadTheme();
                                 sInstance.LoadedFromFile = true;
                             }
                         } catch (Exception ex) {
@@ -51,6 +51,10 @@ namespace MapleShark2.Tools {
 
                 return sInstance;
             }
+        }
+
+        internal void LoadTheme() {
+            Theme = sInstance.WindowTheme == ThemeType.Dark ? darkTheme : lightTheme;
         }
 
         internal Definition GetDefinition(MaplePacket packet) {

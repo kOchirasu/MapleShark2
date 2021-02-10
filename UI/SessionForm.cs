@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using Be.Windows.Forms;
 using Maple2.PacketLib.Crypto;
 using Maple2.PacketLib.Tools;
 using MapleShark2.Logging;
@@ -71,12 +70,12 @@ namespace MapleShark2.UI {
 
             toolStripExtender.DefaultRenderer = new ToolStripProfessionalRenderer();
             toolStripExtender.SetStyle(mMenu, VisualStudioToolStripExtender.VsVersion.Vs2015,
-                MainForm.Theme.DockSuiteTheme);
+                Config.Instance.Theme.DockSuiteTheme);
             toolStripExtender.SetStyle(mPacketContextMenu, VisualStudioToolStripExtender.VsVersion.Vs2015,
-                MainForm.Theme.DockSuiteTheme);
+                Config.Instance.Theme.DockSuiteTheme);
 
-            ThemeApplier.ApplyTheme(MainForm.Theme, Controls);
-            ThemeApplier.ApplyTheme(MainForm.Theme, mPacketContextMenu.Controls);
+            ThemeApplier.ApplyTheme(Config.Instance.Theme, Controls);
+            ThemeApplier.ApplyTheme(Config.Instance.Theme, mPacketContextMenu.Controls);
         }
 
         // Fix column widths when using screen scaling.
@@ -593,6 +592,11 @@ namespace MapleShark2.UI {
         }
 
         private void SessionForm_Load(object sender, EventArgs e) { }
+
+        protected override void OnFormClosed(FormClosedEventArgs e) {
+            base.OnFormClosed(e);
+
+        }
 
         private void mMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e) { }
 
