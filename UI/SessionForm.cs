@@ -245,82 +245,22 @@ namespace MapleShark2.UI {
         public void OpenReadOnly(string pFilename) {
             // mFileSaveMenu.Enabled = false;
             Saved = true;
-
             mTerminated = true;
-            using (FileStream stream = new FileStream(pFilename, FileMode.Open, FileAccess.Read)) {
-                BinaryReader reader = new BinaryReader(stream);
-                ushort MapleSharkVersion = reader.ReadUInt16();
-                Build = MapleSharkVersion;
-                if (MapleSharkVersion < 0x2000) {
-                    mLocalPort = reader.ReadUInt16();
-                    // Old version
-                    frmLocale loc = new frmLocale();
-                    var res = loc.ShowDialog();
-                    if (res == DialogResult.OK) {
-                        Locale = loc.ChosenLocale;
-                    }
-                } else {
-                    byte v1 = (byte) ((MapleSharkVersion >> 12) & 0xF),
-                        v2 = (byte) ((MapleSharkVersion >> 8) & 0xF),
-                        v3 = (byte) ((MapleSharkVersion >> 4) & 0xF),
-                        v4 = (byte) ((MapleSharkVersion >> 0) & 0xF);
-                    Console.WriteLine("Loading MSB file, saved by MapleShark V{0}.{1}.{2}.{3}", v1, v2, v3, v4);
 
-                    if (MapleSharkVersion == 0x2012) {
-                        Locale = (byte) reader.ReadUInt16();
-                        Build = reader.ReadUInt16();
-                        mLocalPort = reader.ReadUInt16();
-                    } else if (MapleSharkVersion == 0x2014) {
-                        mLocalEndpoint = reader.ReadString();
-                        mLocalPort = reader.ReadUInt16();
-                        mRemoteEndpoint = reader.ReadString();
-                        mRemotePort = reader.ReadUInt16();
+            (MsbMetadata metadata, IEnumerable<MaplePacket> packets) = FileLoader.ReadMsbFile(pFilename);
+            mLocalEndpoint = metadata.LocalEndpoint;
+            mLocalPort = metadata.LocalPort;
+            mRemoteEndpoint = metadata.RemoteEndpoint;
+            mRemotePort = metadata.RemotePort;
+            Locale = metadata.Locale;
+            Build = metadata.Build;
 
-                        Locale = (byte) reader.ReadUInt16();
-                        Build = reader.ReadUInt16();
-                    } else if (MapleSharkVersion == 0x2015 || MapleSharkVersion >= 0x2020) {
-                        mLocalEndpoint = reader.ReadString();
-                        mLocalPort = reader.ReadUInt16();
-                        mRemoteEndpoint = reader.ReadString();
-                        mRemotePort = reader.ReadUInt16();
-
-                        Locale = reader.ReadByte();
-                        Build = reader.ReadUInt32();
-                    } else {
-                        MessageBox.Show("I have no idea how to open this MSB file. It looks to me as a version "
-                                        + $"{v1}.{v2}.{v3}.{v4}"
-                                        + " MapleShark MSB file... O.o?!");
-                        return;
-                    }
-                }
-
-                ListView.BeginUpdate();
-                while (stream.Position < stream.Length) {
-                    long timestamp = reader.ReadInt64();
-                    int size = MapleSharkVersion < 0x2027 ? reader.ReadUInt16() : reader.ReadInt32();
-                    ushort opcode = reader.ReadUInt16();
-                    bool outbound;
-
-                    if (MapleSharkVersion >= 0x2020) {
-                        outbound = reader.ReadBoolean();
-                    } else {
-                        outbound = (size & 0x8000) != 0;
-                        size = (ushort) (size & 0x7FFF);
-                    }
-
-                    byte[] buffer = reader.ReadBytes(size);
-                    if (MapleSharkVersion >= 0x2025 && MapleSharkVersion < 0x2030) {
-                        reader.ReadUInt32(); // preDecodeIV
-                        reader.ReadUInt32(); // postDecodeIV
-                    }
-
-                    var packet = new MaplePacket(new DateTime(timestamp), outbound, Build, opcode, new ArraySegment<byte>(buffer));
-                    AddPacket(packet);
-                }
-
-                ListView.EndUpdate();
-                if (ListView.VirtualListSize > 0) ListView.EnsureVisible(0);
+            ListView.BeginUpdate();
+            foreach (MaplePacket packet in packets) {
+                AddPacket(packet);
             }
+            ListView.EndUpdate();
+            if (ListView.VirtualListSize > 0) ListView.EnsureVisible(0);
 
             Text = $"{Path.GetFileName(pFilename)} (ReadOnly)";
             Console.WriteLine("Loaded file: {0}", pFilename);
@@ -412,28 +352,16 @@ namespace MapleShark2.UI {
                 else return;
             }
 
-            using (FileStream stream = new FileStream(mFilename, FileMode.Create, FileAccess.Write)) {
-                var version = (ushort) 0x2030;
+            var metadata = new MsbMetadata {
+                LocalEndpoint = mLocalEndpoint,
+                LocalPort = mLocalPort,
+                RemoteEndpoint = mRemoteEndpoint,
+                RemotePort = mRemotePort,
+                Locale = Locale,
+                Build = Build,
+            };
 
-                BinaryWriter writer = new BinaryWriter(stream);
-                writer.Write(version);
-                writer.Write(mLocalEndpoint);
-                writer.Write(mLocalPort);
-                writer.Write(mRemoteEndpoint);
-                writer.Write(mRemotePort);
-                writer.Write(Locale);
-                writer.Write(Build);
-
-                mPackets.ForEach(p => {
-                    writer.Write((ulong) p.Timestamp.Ticks);
-                    writer.Write(p.Length);
-                    writer.Write(p.Opcode);
-                    writer.Write((byte) (p.Outbound ? 1 : 0));
-                    writer.Write(p.AsSpan().ToArray());
-                });
-
-                stream.Flush();
-            }
+            FileLoader.WriteMsbFile(mFilename, metadata, mPackets);
 
             if (mTerminated) {
                 mFileSaveMenu.Enabled = false;

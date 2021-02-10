@@ -42,7 +42,7 @@ namespace MapleShark2.Logging {
         public string ReadRawUnicodeString(int size) => reader.ReadRawUnicodeString(size);
         public void Skip(int count) => reader.Skip(count);
 
-        public ReadOnlySpan<byte> AsSpan() {
+        public Span<byte> AsSpan() {
             return buffer.AsSpan();
         }
 
