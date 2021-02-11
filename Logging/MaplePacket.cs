@@ -13,6 +13,7 @@ namespace MapleShark2.Logging {
         private readonly ByteReader reader;
 
         public int Position => reader.Position - buffer.Offset;
+        public int Offset => buffer.Offset;
         public int Length => buffer.Count;
         public int Available => reader.Available;
 
@@ -29,7 +30,27 @@ namespace MapleShark2.Logging {
             reader.Skip(-reader.Position + buffer.Offset);
         }
 
-        public ArraySegment<byte> GetSegment(int length) {
+        public long Search(byte[] pattern, long start = 0) {
+            if (pattern == null || buffer.Array == null || start < 0) {
+                return -1;
+            }
+
+            long startIndex = buffer.Offset + start;
+            for (long i = startIndex; i <= buffer.Array.Length - pattern.Length; i++) {
+                bool match = true;
+                for (int j = 0; match && j < pattern.Length; j++) {
+                    match = buffer.Array[i + j] == pattern[j];
+                }
+
+                if (match) {
+                    return i - buffer.Offset;
+                }
+            }
+
+            return -1;
+        }
+
+        public ArraySegment<byte> GetReadSegment(int length) {
             return new ArraySegment<byte>(reader.Buffer, reader.Position, length);
         }
 

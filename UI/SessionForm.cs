@@ -230,7 +230,7 @@ namespace MapleShark2.UI {
                     SaveDefinition(definition);
                 }
 
-                ArraySegment<byte> segment = new ArraySegment<byte>(packet.Buffer, 2, packet.Length - 2);
+                ArraySegment<byte> segment = new ArraySegment<byte>(packet.Buffer);
                 var maplePacket = new MaplePacket(timestamp, isOutbound, Build, opcode, segment);
                 // Add to list of not exist (TODO: SortedSet?)
                 if (!Opcodes.Exists(op => op.Outbound == maplePacket.Outbound && op.Header == maplePacket.Opcode)) {
@@ -248,6 +248,12 @@ namespace MapleShark2.UI {
             try {
                 MapleCipher.Decryptor decryptor = isOutbound ? outDecryptor : inDecryptor;
                 ByteReader packet = decryptor.Decrypt(bytes);
+                // It's possible to get an empty packet, just ignore it.
+                // Decryption is still necessary to advance sequence number.
+                if (packet.Available == 0) {
+                    return Results.Continue;
+                }
+
                 ushort opcode = packet.Peek<ushort>();
                 ArraySegment<byte> segment = new ArraySegment<byte>(packet.Buffer, 2, packet.Length - 2);
                 var maplePacket = new MaplePacket(timestamp, isOutbound, Build, opcode, segment);
@@ -478,7 +484,7 @@ namespace MapleShark2.UI {
                 return;
             }
 
-            MainForm.DataForm.SetHexBoxBytes(ListView.Selected.AsSpan().ToArray());
+            MainForm.DataForm.SelectMaplePacket(ListView.Selected);
             MainForm.StructureForm.ParseMaplePacket(ListView.Selected);
         }
 

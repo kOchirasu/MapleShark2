@@ -70,6 +70,7 @@ namespace MapleShark2.UI {
         public void SetHexBoxBytes(byte[] bytes) {
             hexInput.ByteProvider = new DynamicByteProvider(bytes);
             hexInput.ByteProvider.Changed += hexInput_ByteProviderChanged;
+            hexInput_ByteProviderChanged(this, null); // Enable buttons
         }
 
         private void dropdownOpcode_SelectedIndexChanged(object pSender, EventArgs pArgs) {
@@ -143,23 +144,15 @@ namespace MapleShark2.UI {
             }
 
             int initialIndex = session.ListView.SelectedIndices.Count == 0 ? 0 : session.ListView.SelectedIndices[0];
-            byte[] pattern = (hexInput.ByteProvider as DynamicByteProvider)?.Bytes.ToArray();
+            byte[] pattern = ((DynamicByteProvider) hexInput.ByteProvider).Bytes.ToArray();
             long startIndex = MainForm.DataForm.SelectionLength > 0 ? MainForm.DataForm.SelectionStart : -1;
             for (int index = initialIndex; index < session.ListView.VirtualListSize; ++index) {
                 MaplePacket packetItem = session.FilteredPackets[index];
-                long searchIndex = startIndex + 1;
-                bool found = false;
-                while (pattern != null && searchIndex <= packetItem.Length - pattern.Length) {
-                    found = true;
-                    for (int patternIndex = 0; found && patternIndex < pattern.Length; ++patternIndex)
-                        found = packetItem.AsSpan()[(int) (searchIndex + patternIndex)] == pattern[patternIndex];
-                    if (found) break;
-                    ++searchIndex;
-                }
+                long matchIndex = packetItem.Search(pattern, startIndex + 1);
 
-                if (found) {
+                if (matchIndex >= 0) {
                     session.ListView.Select(index);
-                    MainForm.DataForm.SelectHexBoxRange(searchIndex, pattern.Length);
+                    MainForm.DataForm.SelectHexBoxRange(matchIndex, pattern.Length);
                     session.ListView.Focus();
                     return;
                 }

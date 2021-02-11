@@ -219,34 +219,32 @@ namespace MapleShark2.UI {
             PcapDevice fileDevice = new CaptureFileReaderDevice(fileName);
             fileDevice.Open();
 
-            this.Invoke((MethodInvoker) (() => {
-                SessionForm session = null;
-                while (fileDevice.GetNextPacket(out RawCapture packet) != 0) {
-                    var tcpPacket = Packet.ParsePacket(packet.LinkLayerType, packet.Data).Extract<TcpPacket>();
-                    if (tcpPacket == null) continue;
-                    if (!InPortRange(tcpPacket.SourcePort) && !InPortRange(tcpPacket.DestinationPort)) continue;
+            SessionForm session = null;
+            while (fileDevice.GetNextPacket(out RawCapture packet) != 0 && packet != null) {
+                var tcpPacket = Packet.ParsePacket(packet.LinkLayerType, packet.Data).Extract<TcpPacket>();
+                if (tcpPacket == null) continue;
+                if (!InPortRange(tcpPacket.SourcePort) && !InPortRange(tcpPacket.DestinationPort)) continue;
 
-                    try {
-                        if (tcpPacket.Synchronize && !tcpPacket.Acknowledgment) {
-                            session = new SessionForm();
-                        } else if (session == null || !session.MatchTcpPacket(tcpPacket)) {
-                            continue;
-                        }
+                try {
+                    if (tcpPacket.Synchronize && !tcpPacket.Acknowledgment) {
+                        session = new SessionForm();
+                    } else if (session == null || !session.MatchTcpPacket(tcpPacket)) {
+                        continue;
+                    }
 
-                        SessionForm.Results result = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
-                        if (result == SessionForm.Results.CloseMe) {
-                            session.Close();
-                            session = null;
-                        }
-                    } catch (Exception ex) {
-                        Console.WriteLine($"Exception while parsing logfile: {ex}");
-                        session?.Close();
+                    SessionForm.Results result = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
+                    if (result == SessionForm.Results.CloseMe) {
+                        session.Close();
                         session = null;
                     }
+                } catch (Exception ex) {
+                    Console.WriteLine($"Exception while parsing logfile: {ex}");
+                    session?.Close();
+                    session = null;
                 }
+            }
 
-                session?.Show(mDockPanel, DockState.Document);
-            }));
+            session?.Show(mDockPanel, DockState.Document);
         }
 
         private void mFileOpenMenu_Click(object pSender, EventArgs pArgs) {

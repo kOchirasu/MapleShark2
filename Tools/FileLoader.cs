@@ -29,7 +29,7 @@ namespace MapleShark2.Tools {
                 writer.Write(metadata.Build);
 
                 foreach (MaplePacket packet in packets) {
-                    ArraySegment<byte> segment = packet.GetSegment(packet.Length);
+                    ArraySegment<byte> segment = packet.GetSegment(packet.Offset, packet.Length);
                     if (segment.Array == null) {
                         Console.WriteLine("Failed to save packet: " + packet);
                         continue;

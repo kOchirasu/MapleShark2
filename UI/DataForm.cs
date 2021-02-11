@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Windows.Forms;
 using Be.Windows.Forms;
 using MapleShark2.Logging;
@@ -11,7 +12,7 @@ namespace MapleShark2.UI {
     public partial class DataForm : DockContent {
         private MainForm MainForm => ParentForm as MainForm;
 
-        private byte[] hexBoxBytes;
+        private ArraySegment<byte> hexBoxBytes;
 
         public long SelectionStart => mHex.SelectionStart;
         public long SelectionLength => mHex.SelectionLength;
@@ -27,9 +28,13 @@ namespace MapleShark2.UI {
         }
 
         public ArraySegment<byte> GetHexBoxSelectedBytes() {
-            return hexBoxBytes == null
+            return hexBoxBytes.Array == null
                 ? new ArraySegment<byte>()
-                : new ArraySegment<byte>(hexBoxBytes, (int) mHex.SelectionStart, (int) mHex.SelectionLength);
+                : new ArraySegment<byte>(hexBoxBytes.Array, (int) (SelectionStart + hexBoxBytes.Offset), (int) SelectionLength);
+        }
+
+        public void SelectHexBoxRange(ArraySegment<byte> segment) {
+            SelectHexBoxRange(segment.Offset - hexBoxBytes.Offset, segment.Count);
         }
 
         public void SelectHexBoxRange(long start, long length) {
@@ -38,13 +43,13 @@ namespace MapleShark2.UI {
             mHex.ScrollByteIntoView();
         }
 
-        public void SetHexBoxBytes(byte[] bytes) {
-            hexBoxBytes = bytes;
-            mHex.ByteProvider = new DynamicByteProvider(hexBoxBytes);
+        public void SelectMaplePacket(MaplePacket packet) {
+            hexBoxBytes = packet.GetSegment(packet.Offset, packet.Length);
+            mHex.ByteProvider = new DynamicByteProvider(hexBoxBytes.ToList());
         }
 
         public void ClearHexBox() {
-            hexBoxBytes = null;
+            hexBoxBytes = default;
             mHex.ByteProvider = null;
         }
 
@@ -59,7 +64,8 @@ namespace MapleShark2.UI {
                 StructureNode match = null;
                 foreach (TreeNode node in MainForm.StructureForm.Tree.Nodes) {
                     var realNode = (StructureNode) node;
-                    if (mHex.SelectionStart == realNode.Data.Offset && mHex.SelectionLength == realNode.Data.Count) {
+                    long start = SelectionStart + hexBoxBytes.Offset;
+                    if (start == realNode.Data.Offset && SelectionLength == realNode.Data.Count) {
                         match = realNode;
                         break;
                     }

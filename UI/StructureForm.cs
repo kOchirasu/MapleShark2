@@ -99,28 +99,28 @@ namespace MapleShark2.UI {
         internal string APIAddUnicodeString(string pName) {
             APIStartNode(pName);
             short size = APIAddShort("Size");
-            CurrentNodes.Add(new StructureNode(pName, packet.GetSegment(size * 2))); // Unicode is 2-width
+            CurrentNodes.Add(new StructureNode(pName, packet.GetReadSegment(size * 2))); // Unicode is 2-width
             string value = packet.ReadRawUnicodeString(size);
             APIEndNode(false);
             return value;
         }
 
         internal string APIAddPaddedString(string pName, int pLength) {
-            CurrentNodes.Add(new StructureNode(pName, packet.GetSegment(pLength)));
+            CurrentNodes.Add(new StructureNode(pName, packet.GetReadSegment(pLength)));
             return packet.ReadRawString(pLength);
         }
 
         internal void APIAddField(string pName, int pLength) {
-            CurrentNodes.Add(new StructureNode(pName, packet.GetSegment(pLength)));
+            CurrentNodes.Add(new StructureNode(pName, packet.GetReadSegment(pLength)));
             packet.Skip(pLength);
         }
 
         internal void APIAddComment(string pComment) {
-            CurrentNodes.Add(new StructureNode(pComment, packet.GetSegment(0)));
+            CurrentNodes.Add(new StructureNode(pComment, packet.GetReadSegment(0)));
         }
 
         internal void APIStartNode(string pName) {
-            var node = new StructureNode(pName, packet.GetSegment(0));
+            var node = new StructureNode(pName, packet.GetReadSegment(0));
             if (mSubNodes.Count > 0) mSubNodes.Peek().Nodes.Add(node);
             else mTree.Nodes.Add(node);
             mSubNodes.Push(node);
@@ -141,7 +141,7 @@ namespace MapleShark2.UI {
 
         private T ReadToNode<T>(string name) where T : struct {
             int size = Unsafe.SizeOf<T>();
-            CurrentNodes.Add(new StructureNode(name, packet.GetSegment(size)));
+            CurrentNodes.Add(new StructureNode(name, packet.GetReadSegment(size)));
             return packet.Read<T>();
         }
 
@@ -152,7 +152,7 @@ namespace MapleShark2.UI {
                 return;
             }
 
-            MainForm.DataForm.SelectHexBoxRange(node.Data.Offset, node.Data.Count);
+            MainForm.DataForm.SelectHexBoxRange(node.Data);
             MainForm.PropertyForm.Properties.SelectedObject = new StructureSegment(node.Data, MainForm.Locale);
         }
 
