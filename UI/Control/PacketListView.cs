@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -8,6 +9,7 @@ using MapleShark2.Tools;
 namespace MapleShark2.UI.Control {
     public sealed class PacketListView : ListView {
         public IReadOnlyList<MaplePacket> FilteredPackets => mFilteredPackets;
+
         public MaplePacket Selected =>
             this.SelectedIndices.Count > 0 ? mFilteredPackets[this.SelectedIndices[0]] : default;
 
@@ -21,11 +23,19 @@ namespace MapleShark2.UI.Control {
             mFilteredPackets = new List<MaplePacket>();
             VirtualMode = true;
             OwnerDraw = true;
+
             RetrieveVirtualItem += this.mPacketList_RetrieveVirtualItem;
             SearchForVirtualItem += this.mPacketList_SearchForVirtualItem;
             DrawColumnHeader += this.mPacketList_DrawColumnHeader;
             DrawItem += this.mPacketList_DrawItem;
             DrawSubItem += this.mPacketList_DrawSubItem;
+
+            // Clear the selected item, this allows auto-scroll to resume
+            KeyDown += (sender, e) => {
+                if (e.KeyCode == Keys.Escape) {
+                    SelectedIndices.Clear();
+                }
+            };
         }
 
         public new int VirtualListSize {
@@ -53,7 +63,9 @@ namespace MapleShark2.UI.Control {
         public void UpdateCount() {
             try {
                 VirtualListSize = mFilteredPackets.Count;
-            } catch { /* ignored */ }
+            } catch {
+                /* ignored */
+            }
         }
 
         public int AddPacket(MaplePacket packetItem) {
@@ -98,6 +110,7 @@ namespace MapleShark2.UI.Control {
             if (packetItem.Packet.Outbound) {
                 packetItem.BackColor = HighlightColor;
             }
+
             e.Item = packetItem;
         }
 
@@ -106,13 +119,18 @@ namespace MapleShark2.UI.Control {
         }
 
         private void mPacketList_DrawColumnHeader(object sender, DrawListViewColumnHeaderEventArgs e) {
-            e.Graphics.FillRectangle(new SolidBrush(BackColor), e.Bounds);
+            using (var backBrush = new SolidBrush(BackColor)) {
+                e.Graphics.FillRectangle(backBrush, e.Bounds);
+            }
+
             var top = new Point(e.Bounds.Right - 1, e.Bounds.Top);
             var bottom = new Point(e.Bounds.Right - 1, e.Bounds.Bottom);
-            e.Graphics.DrawLine(new Pen(DividerColor), top, bottom);
-            /*e.Graphics.DrawString(e.Header.Text, e.Font, new SolidBrush(ForeColor), e.Header.,
-                StringFormat.GenericDefault);*/
-            TextRenderer.DrawText(e.Graphics, e.Header.Text, e.Font, Rectangle.Inflate(e.Bounds, -5, -2), ForeColor, TextFormatFlags.WordEllipsis);
+            using (var dividerPen = new Pen(DividerColor)) {
+                e.Graphics.DrawLine(dividerPen, top, bottom);
+            }
+
+            TextRenderer.DrawText(e.Graphics, e.Header.Text, e.Font, Rectangle.Inflate(e.Bounds, -5, -2), ForeColor,
+                TextFormatFlags.WordEllipsis);
         }
 
         private void mPacketList_DrawItem(object sender, DrawListViewItemEventArgs e) {

@@ -63,6 +63,15 @@ namespace MapleShark2.UI {
             InitializeComponent();
             ScaleColumns();
             Saved = false;
+
+            ListView.Resize += (sender, e) => {
+                ListView.ColumnHeaderCollection columns = ((PacketListView) sender).Columns;
+                columns[columns.Count - 1].Width = -2;
+            };
+            ListView.ColumnWidthChanged += (sender, e) => {
+                ListView.ColumnHeaderCollection columns = ((PacketListView) sender).Columns;
+                columns[columns.Count - 1].Width = -2;
+            };
         }
 
         public new void Show(DockPanel panel, DockState state) {
