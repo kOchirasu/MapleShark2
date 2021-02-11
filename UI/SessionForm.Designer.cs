@@ -55,6 +55,7 @@ namespace MapleShark2.UI
             this.mMainFileMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.mFileSeparatorMenu = new System.Windows.Forms.ToolStripSeparator();
             this.mFileSaveMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.mFileSaveLegacyMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.mFileExportMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.mViewMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.mViewCommonScriptMenu = new System.Windows.Forms.ToolStripMenuItem();
@@ -253,6 +254,7 @@ namespace MapleShark2.UI
             this.mMainFileMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mFileSeparatorMenu,
             this.mFileSaveMenu,
+            this.mFileSaveLegacyMenu,
             this.mFileExportMenu});
             this.mMainFileMenu.MergeAction = System.Windows.Forms.MergeAction.MatchOnly;
             this.mMainFileMenu.Name = "mMainFileMenu";
@@ -277,10 +279,19 @@ namespace MapleShark2.UI
             this.mFileSaveMenu.Text = "&Save";
             this.mFileSaveMenu.Click += new System.EventHandler(this.mFileSaveMenu_Click);
             //
+            // mFileSaveLegacyMenu
+            //
+            this.mFileSaveLegacyMenu.MergeAction = System.Windows.Forms.MergeAction.Insert;
+            this.mFileSaveLegacyMenu.MergeIndex = 4;
+            this.mFileSaveLegacyMenu.Name = "mFileSaveLegacyMenu";
+            this.mFileSaveLegacyMenu.Size = new System.Drawing.Size(147, 22);
+            this.mFileSaveLegacyMenu.Text = "Save &Legacy";
+            this.mFileSaveLegacyMenu.Click += new System.EventHandler(this.mFileSaveLegacyMenu_Click);
+            //
             // mFileExportMenu
             //
             this.mFileExportMenu.MergeAction = System.Windows.Forms.MergeAction.Insert;
-            this.mFileExportMenu.MergeIndex = 4;
+            this.mFileExportMenu.MergeIndex = 5;
             this.mFileExportMenu.Name = "mFileExportMenu";
             this.mFileExportMenu.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
             this.mFileExportMenu.Size = new System.Drawing.Size(147, 22);
@@ -480,6 +491,7 @@ namespace MapleShark2.UI
         private System.Windows.Forms.MenuStrip mMenu;
         private System.Windows.Forms.ToolStripMenuItem mMainFileMenu;
         private System.Windows.Forms.ToolStripMenuItem mFileSaveMenu;
+        private System.Windows.Forms.ToolStripMenuItem mFileSaveLegacyMenu;
         private System.Windows.Forms.ToolStripMenuItem mViewMenu;
         private System.Windows.Forms.ToolStripMenuItem mViewOutboundMenu;
         private System.Windows.Forms.ToolStripMenuItem mViewInboundMenu;

@@ -1,5 +1,6 @@
 ﻿namespace MapleShark2.Logging {
     public static class MapleLocale {
+        public const byte UNKNOWN = 0;
         public const byte KOREA = 1;
         public const byte KOREA_TEST = 2;
         public const byte JAPAN = 3;

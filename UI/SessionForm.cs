@@ -223,7 +223,7 @@ namespace MapleShark2.UI {
                 byte type = packet.ReadByte();
 
                 Build = version;
-                Locale = MapleLocale.GLOBAL;
+                Locale = MapleLocale.UNKNOWN;
 
                 outDecryptor = new MapleCipher.Decryptor(Build, siv, blockIV);
                 inDecryptor = new MapleCipher.Decryptor(Build, riv, blockIV);
@@ -379,11 +379,7 @@ namespace MapleShark2.UI {
             AddPacket(packet);
         }
 
-        public void RunSaveCMD() {
-            mFileSaveMenu.PerformClick();
-        }
-
-        private void mFileSaveMenu_Click(object pSender, EventArgs pArgs) {
+        public void SavePacketLog(bool legacy = false) {
             if (mFilename == null) {
                 mSaveDialog.FileName = $"Port {mLocalPort}";
                 if (mSaveDialog.ShowDialog(this) == DialogResult.OK) mFilename = mSaveDialog.FileName;
@@ -399,7 +395,11 @@ namespace MapleShark2.UI {
                 Build = Build,
             };
 
-            FileLoader.WriteMsbFile(mFilename, metadata, mPackets);
+            if (legacy) {
+                FileLoader.WriteLegacyMsbFile(mFilename, metadata, mPackets);
+            } else {
+                FileLoader.WriteMsbFile(mFilename, metadata, mPackets);
+            }
 
             if (mTerminated) {
                 mFileSaveMenu.Enabled = false;
@@ -407,6 +407,14 @@ namespace MapleShark2.UI {
             }
 
             Saved = true;
+        }
+
+        private void mFileSaveMenu_Click(object pSender, EventArgs pArgs) {
+            SavePacketLog();
+        }
+
+        private void mFileSaveLegacyMenu_Click(object pSender, EventArgs pArgs) {
+            SavePacketLog(true);
         }
 
         private void mFileExportMenu_Click(object pSender, EventArgs pArgs) {

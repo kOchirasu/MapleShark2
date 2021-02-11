@@ -13,7 +13,7 @@ namespace MapleShark2.Logging {
         private readonly ByteReader reader;
         private readonly int length;
 
-        public StructureSegment(in ArraySegment<byte> data, byte locale = MapleLocale.GLOBAL) {
+        public StructureSegment(in ArraySegment<byte> data, byte locale = MapleLocale.UNKNOWN) {
             this.reader = new ByteReader(data.Array, data.Offset);
             this.length = data.Count;
         }

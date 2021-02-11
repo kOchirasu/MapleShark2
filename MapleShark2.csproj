@@ -5,7 +5,7 @@
         <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
         <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
         <ProjectGuid>{0B4122D3-378B-41A7-B8E1-FF05D5785ABD}</ProjectGuid>
-        <OutputType>Exe</OutputType>
+        <OutputType>WinExe</OutputType>
         <AppDesignerFolder>Properties</AppDesignerFolder>
         <RootNamespace>MapleShark2</RootNamespace>
         <AssemblyName>MapleShark2</AssemblyName>

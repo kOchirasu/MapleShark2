@@ -378,7 +378,13 @@ namespace MapleShark2.UI {
 
         private void saveToolStripButton_Click(object sender, EventArgs e) {
             if (mDockPanel.ActiveDocument is SessionForm session) {
-                session.RunSaveCMD();
+                session.SavePacketLog();
+            }
+        }
+
+        private void saveLegacyToolStripButton_Click(object sender, EventArgs e) {
+            if (mDockPanel.ActiveDocument is SessionForm session) {
+                session.SavePacketLog(true);
             }
         }
 
@@ -453,7 +459,7 @@ namespace MapleShark2.UI {
 
                     switch (result) {
                         case DialogResult.Yes:
-                            session.RunSaveCMD();
+                            session.SavePacketLog();
                             break;
                         case DialogResult.Cancel:
                             e.Cancel = true;

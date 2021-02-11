@@ -297,7 +297,7 @@ namespace MapleShark2.UI
             this.mDockPanel.DockBottomPortion = 0.3D;
             this.mDockPanel.DockLeftPortion = 0.3D;
             this.mDockPanel.DockRightPortion = 0.3D;
-            this.mDockPanel.DockTopPortion = 70D * CreateGraphics().DpiX / 96;
+            this.mDockPanel.DockTopPortion = 75D;
             this.mDockPanel.Location = new System.Drawing.Point(0, 49);
             this.mDockPanel.Name = "mDockPanel";
             this.mDockPanel.Size = new System.Drawing.Size(1101, 715);

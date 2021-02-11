@@ -15,6 +15,7 @@ namespace MapleShark2.Tools {
     }
 
     public static class FileLoader {
+        private const ushort LEGACY_VERSION = 0x2027;
         private const ushort VERSION = 0x2030;
 
         public static void WriteMsbFile(string fileName, MsbMetadata metadata, IEnumerable<MaplePacket> packets) {
@@ -46,6 +47,37 @@ namespace MapleShark2.Tools {
             }
         }
 
+        public static void WriteLegacyMsbFile(string fileName, MsbMetadata metadata, IEnumerable<MaplePacket> packets) {
+            using (var stream = new FileStream(fileName, FileMode.Create, FileAccess.Write)) {
+                var writer = new BinaryWriter(stream);
+                writer.Write(LEGACY_VERSION);
+                writer.Write(metadata.LocalEndpoint);
+                writer.Write(metadata.LocalPort);
+                writer.Write(metadata.RemoteEndpoint);
+                writer.Write(metadata.RemotePort);
+                writer.Write(metadata.Locale);
+                writer.Write(metadata.Build);
+
+                foreach (MaplePacket packet in packets) {
+                    ArraySegment<byte> segment = packet.GetSegment(packet.Offset, packet.Length);
+                    if (segment.Array == null) {
+                        Console.WriteLine("Failed to save packet: " + packet);
+                        continue;
+                    }
+
+                    writer.Write((ulong) packet.Timestamp.Ticks);
+                    writer.Write(segment.Count);
+                    writer.Write(packet.Opcode);
+                    writer.Write((byte) (packet.Outbound ? 1 : 0));
+                    writer.Write(segment.Array, segment.Offset, segment.Count);
+                    writer.Write(0); // PreDecodeIV
+                    writer.Write(0); // PostDecodeIV
+                }
+
+                stream.Flush();
+            }
+        }
+
         public static (MsbMetadata, IEnumerable<MaplePacket>) ReadMsbFile(string fileName) {
             var metadata = new MsbMetadata();
             List<MaplePacket> packets = new List<MaplePacket>();
@@ -56,7 +88,7 @@ namespace MapleShark2.Tools {
                 if (version < 0x2000) {
                     metadata.Build = version;
                     metadata.LocalPort = reader.ReadUInt16();
-                    metadata.Locale = MapleLocale.GLOBAL;
+                    metadata.Locale = MapleLocale.UNKNOWN;
                 } else {
                     byte v1 = (byte) ((version >> 12) & 0xF),
                         v2 = (byte) ((version >> 8) & 0xF),
