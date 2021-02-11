@@ -153,9 +153,6 @@ namespace MapleShark2.UI {
                         return Results.CloseMe;
                     }
                 }
-
-                tcpReassembler.ReassembleStream(pTcpPacket);
-                return Results.Continue;
             }
 
             bool isOutbound = pTcpPacket.SourcePort == mLocalPort;
@@ -163,13 +160,20 @@ namespace MapleShark2.UI {
 
             MapleStream packetStream = isOutbound ? tcpReassembler.OutStream : tcpReassembler.InStream;
             int opcodeCount = Opcodes.Count;
+            bool show = false;
             try {
                 ListView.BeginUpdate();
                 while (packetStream.TryRead(out byte[] packet)) {
                     Results result = ProcessPacket(packet, isOutbound, pArrivalTime);
-                    if (result != Results.Continue) {
-                        ListView.EndUpdate();
-                        return result;
+                    switch (result) {
+                        case Results.Continue:
+                            continue;
+                        case Results.Show:
+                            show = true;
+                            break;
+                        default:
+                            ListView.EndUpdate();
+                            return result;
                     }
                 }
 
@@ -189,7 +193,7 @@ namespace MapleShark2.UI {
                 MainForm.SearchForm.RefreshOpcodes(true);
             }
 
-            return Results.Continue;
+            return show ? Results.Show : Results.Continue;
         }
 
         private Results ProcessPacket(byte[] bytes, bool isOutbound, DateTime timestamp) {

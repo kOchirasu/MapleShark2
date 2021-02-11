@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using Maple2.PacketLib.Tools;
 using PacketDotNet;
+using PacketDotNet.Utils;
 
 namespace MapleShark2.Tools {
     public class TcpReassembler {
@@ -24,7 +26,6 @@ namespace MapleShark2.Tools {
         private readonly long[] srcIp = new long[2];
         private readonly uint[] srcPort = new uint[2];
 
-
         public readonly MapleStream InStream = new MapleStream();
         public readonly MapleStream OutStream = new MapleStream();
 
@@ -33,7 +34,8 @@ namespace MapleShark2.Tools {
         /// </summary>
         /// <param name="tcpPacket"></param>
         public void ReassembleStream(TcpPacket tcpPacket) {
-            if (tcpPacket.PayloadData == null || tcpPacket.PayloadData.Length == 0) {
+            ByteArraySegment tcpData = tcpPacket.PayloadDataSegment;
+            if (tcpData == null || tcpData.Length == 0) {
                 return;
             }
 
@@ -42,9 +44,14 @@ namespace MapleShark2.Tools {
                 return;
             }
 
-            ReassembleTcp(tcpPacket.SequenceNumber, (ulong) tcpPacket.PayloadData.Length, tcpPacket.PayloadData,
-                (ulong) tcpPacket.PayloadData.Length, tcpPacket.Synchronize, ipPacket.SourceAddress.Address,
-                tcpPacket.SourcePort);
+            int maxLength = tcpData.BytesLength - tcpData.Offset;
+            int length = Math.Min(tcpData.Length, maxLength);
+
+            byte[] payloadBytes = new byte[length];
+            Array.Copy(tcpData.Bytes, tcpData.Offset, payloadBytes, 0, length);
+
+            ReassembleTcp(tcpPacket.SequenceNumber, (ulong) length, payloadBytes, (ulong) length, tcpPacket.Synchronize,
+                ipPacket.SourceAddress.Address, tcpPacket.SourcePort);
         }
 
         /// <summary>
@@ -124,6 +131,7 @@ namespace MapleShark2.Tools {
                 if (synFlag) {
                     this.sequence[srcIndex]++;
                 }
+
                 if (data != null) {
                     WritePacketData(srcIndex, data);
                 }
@@ -175,6 +183,7 @@ namespace MapleShark2.Tools {
                     } else {
                         fragments[index] = current.Next;
                     }
+
                     return true;
                 }
 
@@ -190,6 +199,7 @@ namespace MapleShark2.Tools {
                     } else {
                         fragments[index] = current.Next;
                     }
+
                     return true;
                 }
 
