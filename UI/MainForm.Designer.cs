@@ -271,7 +271,7 @@ namespace MapleShark2.UI
             this.mStopStartButton.Size = new System.Drawing.Size(78, 22);
             this.mStopStartButton.Image = Resources.Button_Blank_Red_icon;
             this.mStopStartButton.Text = "Stop sniffing";
-            this.mStopStartButton.Click += new System.EventHandler(this.toolStripButton1_Click);
+            this.mStopStartButton.Click += new System.EventHandler(this.mStopStartButton_Click);
             //
             // toolStripSeparator2
             //

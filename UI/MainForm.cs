@@ -132,16 +132,6 @@ namespace MapleShark2.UI {
         }
 
         private void MainForm_Load(object pSender, EventArgs pArgs) {
-            if (!Config.Instance.LoadedFromFile) {
-                if (ShowSetupForm() != DialogResult.OK) {
-                    Close();
-                    return;
-                }
-
-                // If this is the first-time setup we can apply theme right away
-                Config.Instance.LoadTheme();
-            }
-
             mDockPanel.Theme = Config.Instance.Theme.DockSuiteTheme;
             toolStripExtender.DefaultRenderer = new ToolStripProfessionalRenderer();
             toolStripExtender.SetStyle(mMenu, VisualStudioToolStripExtender.VsVersion.Vs2015, mDockPanel.Theme);
@@ -157,7 +147,6 @@ namespace MapleShark2.UI {
             }
 
             SetupAdapter();
-
             mTimer.Enabled = true;
 
             SearchForm.Show(mDockPanel);
@@ -358,7 +347,7 @@ namespace MapleShark2.UI {
             }
         }
 
-        private void toolStripButton1_Click(object sender, EventArgs e) {
+        private void mStopStartButton_Click(object sender, EventArgs e) {
             if (sniffEnabled) {
                 sniffEnabled = false;
                 mStopStartButton.Image = Resources.Button_Blank_Green_icon;
@@ -379,12 +368,6 @@ namespace MapleShark2.UI {
         private void saveToolStripButton_Click(object sender, EventArgs e) {
             if (mDockPanel.ActiveDocument is SessionForm session) {
                 session.SavePacketLog();
-            }
-        }
-
-        private void saveLegacyToolStripButton_Click(object sender, EventArgs e) {
-            if (mDockPanel.ActiveDocument is SessionForm session) {
-                session.SavePacketLog(true);
             }
         }
 

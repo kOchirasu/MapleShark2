@@ -21,20 +21,9 @@ namespace MapleShark2.UI.Child {
             chkDarkMode.Checked = Config.Instance.WindowTheme == Config.ThemeType.Dark;
 
             bool configured = false;
-            int activeConnection = 0;
+            int activeConnection = -1;
             foreach (LibPcapLiveDevice device in LibPcapLiveDeviceList.Instance) {
-                // Active devices must be up and running
-                if (!device.IsUp() || !device.IsRunning()) {
-                    continue;
-                }
-
-                // Loopback devices do not require "connection"
-                if (!device.IsLoopback()) {
-                    // Skip any device that is not connected or not used for networking (NdisWan).
-                    if (!device.IsConnected() || device.Addresses.Count == 0) {
-                        continue;
-                    }
-                }
+                if (!device.IsActive()) continue;
 
                 string description = device.Interface.Description;
                 string friendlyName = device.Interface.FriendlyName ?? description;

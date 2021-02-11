@@ -38,5 +38,22 @@ namespace MapleShark2.Tools {
         public static PcapConnectionStatus GetConnectionStatus(this LibPcapLiveDevice device) {
             return (PcapConnectionStatus) (device.Flags & PCAP_IF_CONNECTION_STATUS);
         }
+
+        public static bool IsActive(this LibPcapLiveDevice device) {
+            // Active devices must be up and running
+            if (!device.IsUp() || !device.IsRunning()) {
+                return false;
+            }
+
+            // Loopback devices do not require "connection"
+            if (!device.IsLoopback()) {
+                // Skip any device that is not connected or not used for networking (NdisWan).
+                if (!device.IsConnected() || device.Addresses.Count == 0) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }
