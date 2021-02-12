@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 using MapleShark2.Logging;
@@ -7,6 +8,7 @@ using MapleShark2.Theme;
 using MapleShark2.Tools;
 using Microsoft.Win32;
 using Scripting.SSharp.Runtime;
+using SharpPcap.LibPcap;
 
 namespace MapleShark2.UI.Child {
     public sealed partial class SplashForm : Form {
@@ -63,6 +65,9 @@ namespace MapleShark2.UI.Child {
         private void initialisator_DoWork(object sender, DoWorkEventArgs e) {
             Environment.CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
+            initialisator.ReportProgress(0, "Initializing network devices");
+            InitializeNetworkDevices();
+
             initialisator.ReportProgress(0, "Loading Script.NET context");
             RuntimeHost.Initialize();
 
@@ -75,6 +80,35 @@ namespace MapleShark2.UI.Child {
             // Disable this for now.
             //initialisator.ReportProgress(0, "Registering .msb extension");
             //RegisterFileAssociation(".msb", "MapleShark", "MapleShark Binary File", filepath, string.Empty, 0);
+        }
+
+        private void InitializeNetworkDevices() {
+            try {
+                bool zeroFlags = true;
+                bool foundDevice = false;
+                foreach (LibPcapLiveDevice device in LibPcapLiveDeviceList.Instance) {
+                    zeroFlags &= device.Flags == 0;
+                    if (!device.IsActive()) continue;
+
+                    // Just need 1 active device
+                    foundDevice = true;
+                    break;
+                }
+
+                if (zeroFlags) throw new ApplicationException("Failed to read Flags from devices.");
+                if (!foundDevice) throw new ApplicationException("Unable to find any active devices.");
+            } catch (Exception ex) {
+                const string message = "Did you install Npcap first? "
+                                       + "If you did, then try to run MapleShark in Administrator Mode."
+                                       + "\n\nPress 'No' to go to the install page of Npcap.";
+                DialogResult result = MessageBox.Show(this, message, ex.Message, MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Error);
+                if (result == DialogResult.No) {
+                    Process.Start("https://nmap.org/npcap/#download");
+                }
+
+                Environment.Exit(2);
+            }
         }
 
         private static void RegisterFileAssociation(string pExtension, string pProgramId, string pDescription,
@@ -94,11 +128,10 @@ namespace MapleShark2.UI.Child {
                             using (RegistryKey progIdKey = Registry.ClassesRoot.CreateSubKey(pProgramId)) {
                                 progIdKey.SetValue(string.Empty, pDescription);
                                 using (RegistryKey defaultIcon = progIdKey.CreateSubKey("DefaultIcon"))
-                                    defaultIcon.SetValue(string.Empty,
-                                        String.Format("\"{0}\",{1}", pIconPath, pIconIndex));
+                                    defaultIcon.SetValue(string.Empty, $"\"{pIconPath}\",{pIconIndex}");
 
                                 using (RegistryKey command = progIdKey.CreateSubKey("shell\\open\\command"))
-                                    command.SetValue(string.Empty, String.Format("\"{0}\" \"%1\"", pEXE));
+                                    command.SetValue(string.Empty, $"\"{pEXE}\" \"%1\"");
                             }
                         }
                     }

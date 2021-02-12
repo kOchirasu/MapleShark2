@@ -9,29 +9,28 @@ using WeifenLuo.WinFormsUI.Docking;
 
 namespace MapleShark2.UI.Child {
     public sealed partial class ScriptForm : DockContent {
-        private readonly string mPath;
-        private readonly MaplePacket mPacket;
+        private const string SYNTAX_DEF = "MapleShark2.Resources.ScriptSyntax.txt";
 
-        public ScriptForm(string pPath, MaplePacket pPacket) {
-            mPath = pPath;
-            mPacket = pPacket;
+        private readonly string path;
+        internal MaplePacket Packet { get; }
+
+        public ScriptForm(string pPath, MaplePacket packet) {
+            path = pPath;
+            Packet = packet;
 
             InitializeComponent();
             ThemeApplier.ApplyTheme(Config.Instance.Theme, this);
 
-            if (pPacket != null) {
-                Text = "Script 0x" + pPacket.Opcode.ToString("X4") + ", " + (pPacket.Outbound ? "Outbound" : "Inbound");
-            } else {
-                Text = "Common Script";
-            }
+            Text = packet != null
+                ? $"Script 0x{packet.Opcode:X4}, {(packet.Outbound ? "Outbound" : "Inbound")}"
+                : "Common Script";
         }
 
-        internal MaplePacket Packet => mPacket;
-
         private void ScriptForm_Load(object pSender, EventArgs pArgs) {
-            mScriptEditor.Document.SetSyntaxFromEmbeddedResource(Assembly.GetExecutingAssembly(),
-                "MapleShark2.Resources.ScriptSyntax.txt");
-            if (File.Exists(mPath)) mScriptEditor.Open(mPath);
+            mScriptEditor.Document.SetSyntaxFromEmbeddedResource(Assembly.GetExecutingAssembly(), SYNTAX_DEF);
+            if (File.Exists(path)) {
+                mScriptEditor.Open(path);
+            }
         }
 
         private void mScriptEditor_TextChanged(object pSender, EventArgs pArgs) {
@@ -39,23 +38,28 @@ namespace MapleShark2.UI.Child {
         }
 
         private void mSaveButton_Click(object pSender, EventArgs pArgs) {
-            if (mScriptEditor.Document.Text.Length == 0) File.Delete(mPath);
-            else mScriptEditor.Save(mPath);
+            if (mScriptEditor.Document.Text.Length == 0) {
+                File.Delete(path);
+            } else {
+                mScriptEditor.Save(path);
+            }
+
             Close();
         }
 
         private void mImportButton_Click(object sender, EventArgs e) {
-            if (FileImporter.ShowDialog() == DialogResult.OK) {
-                if (File.Exists(FileImporter.FileName)) {
-                    if (mScriptEditor.Document.Text.Length > 0
-                        && MessageBox.Show(
-                            "Are you sure you want to open this file? The current script will be replaced with the one from the file you selected.",
-                            "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
-                        == DialogResult.No)
-                        return;
-                    mScriptEditor.Open(FileImporter.FileName);
-                }
+            if (FileImporter.ShowDialog() != DialogResult.OK) return;
+            if (!File.Exists(FileImporter.FileName)) return;
+
+            if (mScriptEditor.Document.Text.Length > 0) {
+                const string message = "Are you sure you want to open this file? "
+                                       + "The current script will be replaced with the file you selected.";
+                DialogResult result =
+                    MessageBox.Show(message, "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (result == DialogResult.No) return;
             }
+
+            mScriptEditor.Open(FileImporter.FileName);
         }
     }
 }

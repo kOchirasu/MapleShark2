@@ -101,8 +101,8 @@ namespace MapleShark2.UI {
             if (device == null) {
                 // Well shit...
 
-                MessageBox.Show("Invalid configuration. Please re-setup your MapleShark configuration.", "MapleShark",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                const string message = "Invalid configuration. Please re-setup your MapleShark configuration.";
+                MessageBox.Show(message, "MapleShark2", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 if (ShowSetupForm() != DialogResult.OK) {
                     Close();
                     return;
@@ -112,14 +112,15 @@ namespace MapleShark2.UI {
             }
 
             try {
-                device.OnPacketArrival += device_OnPacketArrival;
                 device.Open(DeviceMode.Promiscuous, 10);
-                device.Filter = $"tcp portrange {Config.Instance.LowPort}-{Config.Instance.HighPort}";
-                device.StartCapture();
             } catch {
                 MessageBox.Show("Failed to set the device in Promiscuous mode! But that doesn't really matter lol.");
                 device.Open();
             }
+
+            device.OnPacketArrival += device_OnPacketArrival;
+            device.Filter = $"tcp portrange {Config.Instance.LowPort}-{Config.Instance.HighPort}";
+            device.StartCapture();
         }
 
         private void device_OnPacketArrival(object sender, CaptureEventArgs e) {
@@ -424,20 +425,19 @@ namespace MapleShark2.UI {
             int sessions = sessionForms.Count;
             bool doSaveQuestioning = true;
             if (sessions > 5) {
-                doSaveQuestioning =
-                    MessageBox.Show(
-                        $"You've got {sessions} sessions open. Say 'Yes' if you want to get a question for each session, 'No' if you want to quit MapleShark.",
-                        "MapleShark", MessageBoxButtons.YesNo)
-                    == DialogResult.Yes;
+                string message = $"You've got {sessions} sessions open. "
+                                 + "Say 'Yes' if you want to get a question for each session, "
+                                 + "'No' if you want to quit MapleShark.";
+                DialogResult result = MessageBox.Show(message, "MapleShark2", MessageBoxButtons.YesNo);
+                doSaveQuestioning = result == DialogResult.Yes;
             }
 
             foreach (SessionForm session in sessionForms) {
                 if (!session.Saved && doSaveQuestioning) {
                     session.Focus();
-                    DialogResult result =
-                        MessageBox.Show($"Do you want to save the session '{session.Text}'?", "MapleShark",
-                            MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
 
+                    string message = $"Do you want to save the session '{session.Text}'?";
+                    DialogResult result = MessageBox.Show(message, "MapleShark2", MessageBoxButtons.YesNoCancel);
                     switch (result) {
                         case DialogResult.Yes:
                             session.SavePacketLog();

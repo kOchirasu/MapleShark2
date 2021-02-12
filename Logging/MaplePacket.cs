@@ -6,7 +6,7 @@ namespace MapleShark2.Logging {
         public DateTime Timestamp { get; }
         public bool Outbound { get; }
         public uint Build { get; }
-        public byte Locale { get; private set; }
+        public byte Locale { get; }
         public ushort Opcode { get; }
 
         private readonly ArraySegment<byte> buffer;
@@ -21,6 +21,7 @@ namespace MapleShark2.Logging {
             Timestamp = pTimestamp;
             Outbound = pOutbound;
             Build = pBuild;
+            Locale = MapleLocale.UNKNOWN;
             Opcode = pOpcode;
             buffer = pBuffer;
             reader = new ByteReader(buffer.Array, buffer.Offset);
@@ -63,14 +64,14 @@ namespace MapleShark2.Logging {
         public string ReadRawUnicodeString(int size) => reader.ReadRawUnicodeString(size);
         public void Skip(int count) => reader.Skip(count);
 
-        public Span<byte> AsSpan() {
-            return buffer.AsSpan();
+        private unsafe string ToHexString() {
+            fixed (byte* bytesPtr = buffer.AsSpan()) {
+                return HexEncoding.ToHexString(bytesPtr, buffer.Count, ' ');
+            }
         }
 
-        public unsafe string ToHexString() {
-            fixed (byte* bytesPtr = buffer.AsSpan()) {
-                return HexEncoding.ToHexString(bytesPtr, buffer.Count);
-            }
+        public override string ToString() {
+            return $"[{Timestamp:yyyy-MM-dd HH:mm:ss.fff}][{(Outbound ? "OUT" : "IN ")}][{Opcode:X4}] {ToHexString()}";
         }
     }
 }

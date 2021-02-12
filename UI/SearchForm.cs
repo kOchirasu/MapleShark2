@@ -117,8 +117,8 @@ namespace MapleShark2.UI {
                 }
             }
 
-            MessageBox.Show("No further packets found with the selected opcode.", "End Of Search", MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
+            const string message = "No further packets found with the selected opcode.";
+            MessageBox.Show(message, "End Of Search", MessageBoxButtons.OK, MessageBoxIcon.Information);
             session.ListView.Focus();
         }
 
@@ -159,8 +159,8 @@ namespace MapleShark2.UI {
                 startIndex = -1;
             }
 
-            MessageBox.Show("No further sequences found.", "End Of Search", MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
+            const string message = "No further sequences found.";
+            MessageBox.Show(message, "End Of Search", MessageBoxButtons.OK, MessageBoxIcon.Information);
             session.ListView.Focus();
         }
 
@@ -180,8 +180,8 @@ namespace MapleShark2.UI {
                 }
             }
 
-            MessageBox.Show("No further packets found with the selected opcode.", "End Of Search", MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
+            const string message = "No further packets found with the selected opcode.";
+            MessageBox.Show(message, "End Of Search", MessageBoxButtons.OK, MessageBoxIcon.Information);
             session.ListView.Focus();
         }
 

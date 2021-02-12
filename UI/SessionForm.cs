@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Maple2.PacketLib.Crypto;
 using Maple2.PacketLib.Tools;
@@ -33,14 +31,14 @@ namespace MapleShark2.UI {
         private ushort mRemotePort = 0;
         private ushort mProxyPort = 0;
 
+        private DateTime startTime;
         private MapleCipher.Decryptor outDecryptor;
         private MapleCipher.Decryptor inDecryptor;
         private readonly TcpReassembler tcpReassembler = new TcpReassembler();
-        private List<MaplePacket> mPackets = new List<MaplePacket>();
+        private readonly List<MaplePacket> mPackets = new List<MaplePacket>();
 
         private string mRemoteEndpoint = "???";
         private string mLocalEndpoint = "???";
-        private string mProxyEndpoint = "???";
 
         public MainForm MainForm => ParentForm as MainForm;
 
@@ -53,10 +51,17 @@ namespace MapleShark2.UI {
 
         public bool Saved { get; private set; }
 
-        private DateTime startTime;
-
         // Used for determining if the session did receive a packet at all, or if it just emptied its buffers
         public bool ClearedPackets { get; private set; }
+
+        private MsbMetadata MsbMetadata => new MsbMetadata {
+            LocalEndpoint = mLocalEndpoint,
+            LocalPort = mLocalPort,
+            RemoteEndpoint = mRemoteEndpoint,
+            RemotePort = mRemotePort,
+            Locale = Locale,
+            Build = Build,
+        };
 
         internal SessionForm() {
             ClearedPackets = false;
@@ -64,6 +69,7 @@ namespace MapleShark2.UI {
             ScaleColumns();
             Saved = false;
 
+            // Last column fills to ListView width
             ListView.Resize += (sender, e) => {
                 ListView.ColumnHeaderCollection columns = ((PacketListView) sender).Columns;
                 columns[columns.Count - 1].Width = -2;
@@ -350,35 +356,6 @@ namespace MapleShark2.UI {
             mPacketList_SelectedIndexChanged(null, null);
         }
 
-        private static Regex _packetRegex = new Regex(@"\[(.{1,2}):(.{1,2}):(.{1,2})\]\[(\d+)\] (Recv|Send):  (.+)");
-
-        internal void ParseMSnifferLine(string packetLine) {
-            var match = _packetRegex.Match(packetLine);
-            if (match.Captures.Count == 0) return;
-            DateTime date = new DateTime(
-                2012,
-                10,
-                10,
-                int.Parse(match.Groups[1].Value),
-                int.Parse(match.Groups[2].Value),
-                int.Parse(match.Groups[3].Value)
-            );
-            int packetLength = int.Parse(match.Groups[4].Value);
-            byte[] buffer = new byte[packetLength - 2];
-            bool outbound = match.Groups[5].Value == "Send";
-            string[] bytesText = match.Groups[6].Value.Split(new char[] {' '}, StringSplitOptions.RemoveEmptyEntries);
-
-            ushort opcode = (ushort) (byte.Parse(bytesText[0], NumberStyles.HexNumber)
-                                      | byte.Parse(bytesText[1], NumberStyles.HexNumber) << 8);
-
-            for (var i = 2; i < packetLength; i++) {
-                buffer[i - 2] = byte.Parse(bytesText[i], NumberStyles.HexNumber);
-            }
-
-            var packet = new MaplePacket(date, outbound, Build, opcode, new ArraySegment<byte>(buffer));
-            AddPacket(packet);
-        }
-
         public void SavePacketLog(bool legacy = false) {
             if (mFilename == null) {
                 mSaveDialog.FileName = $"Port {mLocalPort}";
@@ -386,19 +363,10 @@ namespace MapleShark2.UI {
                 else return;
             }
 
-            var metadata = new MsbMetadata {
-                LocalEndpoint = mLocalEndpoint,
-                LocalPort = mLocalPort,
-                RemoteEndpoint = mRemoteEndpoint,
-                RemotePort = mRemotePort,
-                Locale = Locale,
-                Build = Build,
-            };
-
             if (legacy) {
-                FileLoader.WriteLegacyMsbFile(mFilename, metadata, mPackets);
+                FileLoader.WriteLegacyMsbFile(mFilename, MsbMetadata, mPackets);
             } else {
-                FileLoader.WriteMsbFile(mFilename, metadata, mPackets);
+                FileLoader.WriteMsbFile(mFilename, MsbMetadata, mPackets);
             }
 
             if (mTerminated) {
@@ -421,48 +389,7 @@ namespace MapleShark2.UI {
             mExportDialog.FileName = $"Port {mLocalPort}";
             if (mExportDialog.ShowDialog(this) != DialogResult.OK) return;
 
-            bool includeNames =
-                MessageBox.Show("Export opcode names? (slow + generates big files!!!)", "-", MessageBoxButtons.YesNo)
-                == DialogResult.Yes;
-
-            string tmp = "";
-            tmp += $"=== MapleStory2 Version: {Build}; Region: {Locale} ===\r\n";
-            tmp += $"Endpoint From: {mLocalEndpoint}\r\n";
-            tmp += $"Endpoint To: {mRemoteEndpoint}\r\n";
-            tmp += $"- Packets: {mPackets.Count}\r\n";
-
-            long dataSize = 0;
-            foreach (var packet in mPackets)
-                dataSize += 2 + packet.Length;
-
-            tmp += $"- Data: {dataSize:N0} bytes\r\n";
-            tmp += string.Format("================================================\r\n");
-            File.WriteAllText(mExportDialog.FileName, tmp);
-
-            tmp = "";
-
-            int outboundCount = 0;
-            int inboundCount = 0;
-            int i = 0;
-            foreach (var packet in mPackets) {
-                if (packet.Outbound) ++outboundCount;
-                else ++inboundCount;
-
-                Definition definition = Config.Instance.GetDefinition(packet);
-
-                tmp += string.Format("[{0:yyyy-MM-dd HH:mm:ss.fff}][{1}] [{2:X4}{4}] {3}\r\n", packet.Timestamp,
-                    (packet.Outbound ? "OUT" : "IN "),
-                    packet.Opcode,
-                    packet.ToHexString(),
-                    includeNames ? " | " + (definition == null ? "N/A" : definition.Name) : "");
-                i++;
-                if (i % 1000 == 0) {
-                    File.AppendAllText(mExportDialog.FileName, tmp);
-                    tmp = "";
-                }
-            }
-
-            File.AppendAllText(mExportDialog.FileName, tmp);
+            FileLoader.ExportTxtFile(mExportDialog.FileName, MsbMetadata, mPackets);
         }
 
         private void mViewCommonScriptMenu_Click(object pSender, EventArgs pArgs) {
@@ -620,11 +547,6 @@ namespace MapleShark2.UI {
 
         private void SessionForm_Load(object sender, EventArgs e) { }
 
-        protected override void OnFormClosed(FormClosedEventArgs e) {
-            base.OnFormClosed(e);
-
-        }
-
         private void mMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e) { }
 
         private void sessionInformationToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -632,11 +554,7 @@ namespace MapleShark2.UI {
                 txtVersion = {Text = Build.ToString()},
                 txtLocale = {Text = Locale.ToString()},
                 txtAdditionalInfo = {
-                    Text = "Connection info:\r\n"
-                           + mLocalEndpoint
-                           + " <-> "
-                           + mRemoteEndpoint
-                           + (mProxyEndpoint != "???" ? "\r\nProxy:" + mProxyEndpoint : "")
+                    Text = $"Connection info:\n {mLocalEndpoint} <-> {mRemoteEndpoint}"
                 }
             };
 
@@ -649,7 +567,7 @@ namespace MapleShark2.UI {
             try {
                 Process.Start(tmp);
             } catch {
-                Process.Start("notepad.exe", tmp);
+                Process.Start("notepad", tmp);
             }
         }
 
@@ -659,13 +577,13 @@ namespace MapleShark2.UI {
             try {
                 Process.Start(tmp);
             } catch {
-                Process.Start("notepad.exe", tmp);
+                Process.Start("notepad", tmp);
             }
         }
 
         private void removeLoggedPacketsToolStripMenuItem_Click(object sender, EventArgs e) {
-            DialogResult result = MessageBox.Show("Are you sure you want to delete all logged packets?", "!!",
-                MessageBoxButtons.YesNo);
+            const string message = "Are you sure you want to delete all logged packets?";
+            DialogResult result = MessageBox.Show(message, "Warning!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (result == DialogResult.No) {
                 return;
             }

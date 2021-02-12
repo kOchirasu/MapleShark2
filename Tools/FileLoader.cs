@@ -117,9 +117,8 @@ namespace MapleShark2.Tools {
                         metadata.Locale = reader.ReadByte();
                         metadata.Build = reader.ReadUInt32();
                     } else {
-                        MessageBox.Show("I have no idea how to open this MSB file. It looks to me as a version "
-                                        + $"{v1}.{v2}.{v3}.{v4}"
-                                        + " MapleShark MSB file... O.o?!");
+                        string message = $"Invalid msb file, version: {v1}.{v2}.{v3}.{v4}";
+                        MessageBox.Show(message, "MapleShark2", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                         return (metadata, new List<MaplePacket>());
                     }
                 }
@@ -152,8 +151,24 @@ namespace MapleShark2.Tools {
             }
         }
 
-        public static void ReadPcapFile() {
+        public static void ExportTxtFile(string fileName, MsbMetadata metadata, IList<MaplePacket> packets) {
+            using (StreamWriter writer = File.AppendText(fileName)) {
+                long dataSize = 0;
+                foreach (MaplePacket packet in packets) {
+                    dataSize += 2 + packet.Length;
+                }
 
+                writer.WriteLine($"=== MapleStory2 Version: {metadata.Build}; Region: {metadata.Locale} ===");
+                writer.WriteLine($"Endpoint From: {metadata.LocalEndpoint}:{metadata.LocalPort}");
+                writer.WriteLine($"Endpoint To: {metadata.RemoteEndpoint}:{metadata.RemotePort}");
+                writer.WriteLine($"- Packets: {packets.Count}");
+                writer.WriteLine($"- Data: {dataSize:N0} bytes");
+                writer.WriteLine("================================================");
+
+                foreach (MaplePacket packet in packets) {
+                    writer.WriteLine(packet);
+                }
+            }
         }
     }
 }

@@ -21,7 +21,8 @@ namespace MapleShark2.UI.Child {
 
         private void btnImport_Click(object sender, EventArgs e) {
             if (!File.Exists(txtPropFile.Text)) {
-                MessageBox.Show("The file you selected doesn't exist!");
+                string message = $"File {txtPropFile.Text} does not exist!";
+                MessageBox.Show(message, "MapleShark2", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -61,9 +62,9 @@ namespace MapleShark2.UI.Child {
             Definition def = Config.Instance.GetDefinition(pBuild, pLocale, pOutbound, pOpcode);
             if (def == null) {
                 def = new Definition();
-                txtLog.AppendText(string.Format("Adding opcode {1}: 0x{0:X4}\r\n", pOpcode, pName));
+                txtLog.AppendText($"Adding opcode {pName}: 0x{pOpcode:X4}\n");
             } else {
-                txtLog.AppendText(string.Format("Replacing opcode {1} 0x{0:X4} for {2}\r\n", pOpcode, def.Name, pName));
+                txtLog.AppendText($"Replacing opcode {def.Name} 0x{pOpcode:X4} for {pName}\n");
             }
 
             def.Build = pBuild;

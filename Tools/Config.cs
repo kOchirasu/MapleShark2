@@ -29,7 +29,7 @@ namespace MapleShark2.Tools {
         internal static Config Instance {
             get {
                 if (sInstance == null) {
-                    string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config.Xml");
+                    string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config.xml");
                     if (!File.Exists(configPath)) {
                         sInstance = new Config();
                         sInstance.Save();
@@ -42,9 +42,11 @@ namespace MapleShark2.Tools {
                                 sInstance.LoadedFromFile = true;
                             }
                         } catch (Exception ex) {
-                            MessageBox.Show(
-                                "The configuration file is broken and could not be read. You'll have to reconfigure MapleShark... Sorry!\r\nAdditional exception info:\r\n"
-                                + ex, "MapleShark", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            const string message = "The configuration file is broken and could not be read. "
+                                                   + "You'll have to reconfigure MapleShark."
+                                                   + "\n\nAdditional exception info:\n{0}";
+                            string formatted = string.Format(message, ex);
+                            MessageBox.Show(formatted, "MapleShark2", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             sInstance = new Config();
                         }
                     }
@@ -67,7 +69,8 @@ namespace MapleShark2.Tools {
         }
 
         internal static string GetPropertiesFile(bool pOutbound, byte pLocale, uint pVersion) {
-            return Path.Combine(Helpers.GetScriptFolder(pLocale, pVersion), $"{(pOutbound ? "send" : "recv")}.properties");
+            return Path.Combine(Helpers.GetScriptFolder(pLocale, pVersion),
+                $"{(pOutbound ? "send" : "recv")}.properties");
         }
 
         internal void Save() {
@@ -78,7 +81,7 @@ namespace MapleShark2.Tools {
                 OmitXmlDeclaration = true
             };
 
-            string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config.Xml");
+            string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config.xml");
             using (var xw = XmlWriter.Create(configPath, xws)) {
                 var xs = new XmlSerializer(typeof(Config));
                 xs.Serialize(xw, this);
