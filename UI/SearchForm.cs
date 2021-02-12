@@ -30,8 +30,7 @@ namespace MapleShark2.UI {
             }
         }
 
-        public new void Show(DockPanel panel) {
-            base.Show(panel);
+        public void ApplyTheme() {
             BackColor = Config.Instance.Theme.DockSuiteTheme.ColorPalette.MainWindowActive.Background;
             ThemeApplier.ApplyTheme(Config.Instance.Theme, Controls);
         }

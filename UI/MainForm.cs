@@ -136,28 +136,28 @@ namespace MapleShark2.UI {
             toolStripExtender.SetStyle(mMenu, VisualStudioToolStripExtender.VsVersion.Vs2015, mDockPanel.Theme);
             toolStripExtender.SetStyle(toolStrip, VisualStudioToolStripExtender.VsVersion.Vs2015, mDockPanel.Theme);
 
-            bool useDefaults = true;
             try {
                 mDockPanel.LoadFromXml(LAYOUT_FILE, GetContentFromPersistString);
-                useDefaults = false;
-            } catch (Exception e) {
+            } catch {
                 // If we fail to load, it will just use the default layout.
-                Console.WriteLine(e);
-            }
+                Console.WriteLine("Using default layout");
+                SearchForm.Show(mDockPanel);
+                DataForm.Show(mDockPanel);
+                StructureForm.Show(mDockPanel);
+                PropertyForm.Show(mDockPanel);
 
-            SetupAdapter();
-            mTimer.Enabled = true;
-
-            SearchForm.Show(mDockPanel);
-            DataForm.Show(mDockPanel);
-            StructureForm.Show(mDockPanel);
-            PropertyForm.Show(mDockPanel);
-
-            if (useDefaults) {
                 // Docking can only be done after adding to panel.
                 StructureForm.DockState = DockState.DockRight;
                 PropertyForm.DockState = DockState.DockRight;
             }
+
+            SearchForm.ApplyTheme();
+            DataForm.ApplyTheme();
+            StructureForm.ApplyTheme();
+            PropertyForm.ApplyTheme();
+
+            SetupAdapter();
+            mTimer.Enabled = true;
 
             foreach (string arg in startupArguments) {
                 var session = new SessionForm();
