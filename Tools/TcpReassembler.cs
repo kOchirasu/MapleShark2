@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using Maple2.PacketLib.Tools;
 using PacketDotNet;
 using PacketDotNet.Utils;

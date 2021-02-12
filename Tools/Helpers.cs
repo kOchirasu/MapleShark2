@@ -1,36 +1,22 @@
-﻿using System.IO;
-using System.Windows.Forms;
+﻿using System;
+using System.IO;
 
 namespace MapleShark2.Tools {
     public static class Helpers {
+        public static string GetScriptsRoot() {
+            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Scripts");
+        }
+
         public static string GetScriptFolder(byte locale, uint build) {
-            return string.Format(
-                "{1}{0}Scripts{0}{2}{0}{3}{0}",
-                Path.DirectorySeparatorChar,
-                Application.StartupPath,
-                locale,
-                build
-            );
+            return Path.Combine(GetScriptsRoot(), locale.ToString(), build.ToString());
         }
 
         public static string GetScriptPath(byte locale, uint build, bool outbound, ushort opcode) {
-            return string.Format(
-                "{1}{2}{0}0x{3:X4}.txt",
-                Path.DirectorySeparatorChar,
-                GetScriptFolder(locale, build),
-                outbound ? "Outbound" : "Inbound",
-                opcode
-            );
+            return Path.Combine(GetScriptFolder(locale, build), outbound ? "Outbound" : "Inbound", $"{opcode:X4}.txt");
         }
 
         public static string GetCommonScriptPath(byte locale, uint build) {
             return Path.Combine(GetScriptFolder(locale, build), "Common.txt");
-        }
-
-        public static void MakeSureFileDirectoryExists(string path) {
-            string dirname = Path.GetDirectoryName(path);
-            if (!Directory.Exists(dirname))
-                Directory.CreateDirectory(dirname);
         }
     }
 }

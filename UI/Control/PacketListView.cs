@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Windows.Forms;
 using MapleShark2.Logging;
 using MapleShark2.Tools;
@@ -97,8 +95,6 @@ namespace MapleShark2.UI.Control {
         // Private Event Handlers
         private void mPacketList_RetrieveVirtualItem(object sender, RetrieveVirtualItemEventArgs e) {
             if (mFilteredPackets.Count <= e.ItemIndex) {
-                File.AppendAllText("MapleShark Error.txt",
-                    $"Retrieving VirtualItem:{e.ItemIndex} >= Size:{mFilteredPackets.Count}\n");
                 return;
             }
 

@@ -83,6 +83,9 @@
         <Compile Include="Tools\ScriptAPI.cs" />
     </ItemGroup>
     <ItemGroup>
+      <None Include="README.md">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
       <Content Include="Resources\Button-Blank-Green-icon.png" />
       <Content Include="Resources\Button-Blank-Red-icon.png" />
       <Content Include="Resources\save-icon.png" />

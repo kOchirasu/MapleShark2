@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Windows.Forms;
 using Maple2.PacketLib.Tools;
 using MapleShark2.Logging;
@@ -341,7 +340,6 @@ namespace MapleShark2.UI {
                     }
                 } catch (Exception ex) {
                     Console.WriteLine(ex.ToString());
-                    File.AppendAllText("MapleShark Error.txt", ex + "\n" + ex.StackTrace);
                     session?.Close();
                 }
             }
@@ -360,8 +358,8 @@ namespace MapleShark2.UI {
         }
 
         private void helpToolStripButton_Click(object sender, EventArgs e) {
-            if (File.Exists("Readme.txt")) {
-                Process.Start(Environment.CurrentDirectory + @"\Readme.txt");
+            if (File.Exists("README.md")) {
+                Process.Start(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"README.md"));
             }
         }
 

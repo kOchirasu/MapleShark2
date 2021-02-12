@@ -1,8 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Drawing;
-using System.IO;
-using System.Reflection;
 using System.Windows.Forms;
 using MapleShark2.Logging;
 using MapleShark2.Theme;
@@ -63,8 +61,7 @@ namespace MapleShark2.UI.Child {
         }
 
         private void initialisator_DoWork(object sender, DoWorkEventArgs e) {
-            var filepath = Assembly.GetExecutingAssembly().Location;
-            Environment.CurrentDirectory = filepath.Remove(filepath.LastIndexOf(Path.DirectorySeparatorChar));
+            Environment.CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
             initialisator.ReportProgress(0, "Loading Script.NET context");
             RuntimeHost.Initialize();

@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
+using MapleShark2.Tools;
 
 namespace MapleShark2.Logging {
     public sealed class DefinitionsContainer {
         public static DefinitionsContainer Instance { get; private set; }
 
-        private Dictionary<byte, Dictionary<uint, List<Definition>>> _definitions =
+        private readonly Dictionary<byte, Dictionary<uint, List<Definition>>> definitions =
             new Dictionary<byte, Dictionary<uint, List<Definition>>>();
 
         public DefinitionsContainer() {
@@ -16,25 +17,22 @@ namespace MapleShark2.Logging {
         }
 
         public Definition GetDefinition(byte pLocale, uint pVersion, ushort pOpcode, bool pOutbound) {
-            if (!_definitions.ContainsKey(pLocale)) return null;
-            if (!_definitions[pLocale].ContainsKey(pVersion)) return null;
+            if (!definitions.ContainsKey(pLocale)) return null;
+            if (!definitions[pLocale].ContainsKey(pVersion)) return null;
 
-            return _definitions[pLocale][pVersion].Find(d => {
-                return d.Outbound == pOutbound && d.Opcode == pOpcode;
-            });
+            return definitions[pLocale][pVersion].Find(d => d.Outbound == pOutbound && d.Opcode == pOpcode);
         }
 
         public void SaveDefinition(Definition pDefinition) {
-            if (!_definitions.ContainsKey(pDefinition.Locale))
-                _definitions.Add(pDefinition.Locale, new Dictionary<uint, List<Definition>>());
-            if (!_definitions[pDefinition.Locale].ContainsKey(pDefinition.Build))
-                _definitions[pDefinition.Locale].Add(pDefinition.Build, new List<Definition>());
+            if (!definitions.ContainsKey(pDefinition.Locale))
+                definitions.Add(pDefinition.Locale, new Dictionary<uint, List<Definition>>());
+            if (!definitions[pDefinition.Locale].ContainsKey(pDefinition.Build))
+                definitions[pDefinition.Locale].Add(pDefinition.Build, new List<Definition>());
 
-            _definitions[pDefinition.Locale][pDefinition.Build].RemoveAll(d => {
-                return d.Outbound == pDefinition.Outbound && d.Opcode == pDefinition.Opcode;
-            });
+            definitions[pDefinition.Locale][pDefinition.Build].RemoveAll(d =>
+                d.Outbound == pDefinition.Outbound && d.Opcode == pDefinition.Opcode);
 
-            _definitions[pDefinition.Locale][pDefinition.Build].Add(pDefinition);
+            definitions[pDefinition.Locale][pDefinition.Build].Add(pDefinition);
         }
 
         public static void Load() {
@@ -42,33 +40,26 @@ namespace MapleShark2.Logging {
         }
 
         private void LoadDefinitions() {
-            if (!Directory.Exists("Scripts"))
+            string scriptsRoot = Helpers.GetScriptsRoot();
+            if (!Directory.Exists(scriptsRoot))
                 return;
 
-            foreach (var localePath in Directory.GetDirectories(Environment.CurrentDirectory
-                                                                + Path.DirectorySeparatorChar
-                                                                + "Scripts")) {
-                string localeDirName = localePath.Remove(0, localePath.LastIndexOf(Path.DirectorySeparatorChar) + 1);
-                byte locale = 0;
-                if (!byte.TryParse(localeDirName, out locale))
-                    continue;
+            foreach (string localePath in Directory.GetDirectories(scriptsRoot)) {
+                string localeDirName = Path.GetFileName(localePath.TrimEnd(Path.DirectorySeparatorChar));
+                if (!byte.TryParse(localeDirName, out byte locale)) continue;
 
-                _definitions.Add(locale, new Dictionary<uint, List<Definition>>());
+                definitions.Add(locale, new Dictionary<uint, List<Definition>>());
+                foreach (string versionPath in Directory.GetDirectories(localePath)) {
+                    string versionDirName = Path.GetFileName(versionPath.TrimEnd(Path.DirectorySeparatorChar));
+                    if (!ushort.TryParse(versionDirName, out ushort version)) continue;
 
-                foreach (var versionPath in Directory.GetDirectories(localePath)) {
-                    string versionDirName =
-                        versionPath.Remove(0, versionPath.LastIndexOf(Path.DirectorySeparatorChar) + 1);
-                    ushort version = 0;
-                    if (!ushort.TryParse(versionDirName, out version))
-                        continue;
-
-                    if (!File.Exists(versionPath + Path.DirectorySeparatorChar + "PacketDefinitions.xml")) continue;
+                    string definitionsPath = Path.Combine(versionPath, "PacketDefinitions.xml");
+                    if (!File.Exists(definitionsPath)) continue;
 
                     try {
-                        using (XmlReader xr =
-                            XmlReader.Create(versionPath + Path.DirectorySeparatorChar + "PacketDefinitions.xml")) {
-                            XmlSerializer xs = new XmlSerializer(typeof(List<Definition>));
-                            _definitions[locale].Add(version, xs.Deserialize(xr) as List<Definition>);
+                        var xs = new XmlSerializer(typeof(List<Definition>));
+                        using (var xr = XmlReader.Create(definitionsPath)) {
+                            definitions[locale].Add(version, xs.Deserialize(xr) as List<Definition>);
                         }
                     } catch { }
                 }
@@ -76,28 +67,21 @@ namespace MapleShark2.Logging {
         }
 
         public void Save() {
-            foreach (var kvpLocale in _definitions) {
-                foreach (var kvpVersion in kvpLocale.Value) {
-                    var path = Environment.CurrentDirectory
-                               + Path.DirectorySeparatorChar
-                               + "Scripts"
-                               + Path.DirectorySeparatorChar
-                               + kvpLocale.Key
-                               + Path.DirectorySeparatorChar
-                               + kvpVersion.Key;
+            foreach (KeyValuePair<byte, Dictionary<uint, List<Definition>>> kvpLocale in definitions) {
+                foreach (KeyValuePair<uint, List<Definition>> kvpVersion in kvpLocale.Value) {
+                    string path = Helpers.GetScriptFolder(kvpLocale.Key, kvpVersion.Key);
+                    Directory.CreateDirectory(path);
 
-                    if (!Directory.Exists(path))
-                        Directory.CreateDirectory(path);
-
-                    XmlWriterSettings xws = new XmlWriterSettings() {
+                    var xws = new XmlWriterSettings {
                         Indent = true,
                         IndentChars = "  ",
                         NewLineOnAttributes = true,
                         OmitXmlDeclaration = true
                     };
-                    using (XmlWriter xw = XmlWriter.Create(path + Path.DirectorySeparatorChar + "PacketDefinitions.xml",
-                        xws)) {
-                        XmlSerializer xs = new XmlSerializer(typeof(List<Definition>));
+
+                    string definitionsPath = Path.Combine(path, "PacketDefinitions.xml");
+                    using (var xw = XmlWriter.Create(definitionsPath, xws)) {
+                        var xs = new XmlSerializer(typeof(List<Definition>));
                         xs.Serialize(xw, kvpVersion.Value);
                     }
                 }
@@ -107,22 +91,21 @@ namespace MapleShark2.Logging {
         }
 
         internal void SaveProperties() {
-            Dictionary<ushort, Dictionary<uint, SortedDictionary<ushort, string>>>[] headerList =
-                new Dictionary<ushort, Dictionary<uint, SortedDictionary<ushort, string>>>[2];
+            Dictionary<byte, Dictionary<uint, IDictionary<ushort, string>>>[] headerList =
+                new Dictionary<byte, Dictionary<uint, IDictionary<ushort, string>>>[2];
 
             for (int i = 0; i < 2; i++) {
-                headerList[i] = new Dictionary<ushort, Dictionary<uint, SortedDictionary<ushort, string>>>();
+                headerList[i] = new Dictionary<byte, Dictionary<uint, IDictionary<ushort, string>>>();
             }
 
-            foreach (var kvpLocale in _definitions) {
-                foreach (var kvpVersion in kvpLocale.Value) {
-                    foreach (var d in kvpVersion.Value) {
+            foreach (KeyValuePair<byte, Dictionary<uint, List<Definition>>> kvpLocale in definitions) {
+                foreach (KeyValuePair<uint, List<Definition>> kvpVersion in kvpLocale.Value) {
+                    foreach (Definition d in kvpVersion.Value) {
                         if (d.Opcode == 0xFFFF) return;
                         byte outbound = (byte) (d.Outbound ? 1 : 0);
 
                         if (!headerList[outbound].ContainsKey(d.Locale))
-                            headerList[outbound].Add(d.Locale,
-                                new Dictionary<uint, SortedDictionary<ushort, string>>());
+                            headerList[outbound].Add(d.Locale, new Dictionary<uint, IDictionary<ushort, string>>());
                         if (!headerList[outbound][d.Locale].ContainsKey(d.Build))
                             headerList[outbound][d.Locale].Add(d.Build, new SortedDictionary<ushort, string>());
                         if (!headerList[outbound][d.Locale][d.Build].ContainsKey(d.Opcode))
@@ -134,25 +117,23 @@ namespace MapleShark2.Logging {
             }
 
             for (int i = 0; i < 2; i++) {
-                foreach (var dict in headerList[i]) {
-                    string map = "Scripts" + Path.DirectorySeparatorChar + dict.Key.ToString();
-                    if (!Directory.Exists(map))
-                        Directory.CreateDirectory(map);
+                foreach (KeyValuePair<byte, Dictionary<uint, IDictionary<ushort, string>>> kvpLocale in headerList[i]) {
+                    string localePath = Path.Combine(Helpers.GetScriptsRoot(), kvpLocale.Key.ToString());
+                    Directory.CreateDirectory(localePath);
 
-                    foreach (KeyValuePair<uint, SortedDictionary<ushort, string>> kvp in dict.Value) {
-                        string map2 = map + Path.DirectorySeparatorChar + kvp.Key;
-                        if (!Directory.Exists(map2))
-                            Directory.CreateDirectory(map2);
+                    foreach (KeyValuePair<uint, IDictionary<ushort, string>> kvpVersion in kvpLocale.Value) {
+                        string versionPath = Path.Combine(localePath, kvpVersion.Key.ToString());
+                        Directory.CreateDirectory(versionPath);
 
-                        string buff = "";
-                        buff += "# Generated by MapleShark2\r\n";
-                        foreach (KeyValuePair<ushort, string> kvp2 in kvp.Value) {
-                            buff += string.Format("{0} = 0x{1:X4}\r\n",
-                                kvp2.Value == "" ? "# NOT SET: " : kvp2.Value.Replace(' ', '_'), kvp2.Key);
+                        var builder = new StringBuilder();
+                        builder.AppendLine("# Generated by MapleShark2");
+                        foreach (KeyValuePair<ushort, string> kvp2 in kvpVersion.Value) {
+                            builder.AppendLine(
+                                $"{(kvp2.Value == "" ? "# NOT SET: " : kvp2.Value.Replace(' ', '_'))} = 0x{kvp2.Key:X4}");
                         }
 
-                        File.WriteAllText(
-                            map2 + Path.DirectorySeparatorChar + (i == 0 ? "send" : "recv") + ".properties", buff);
+                        string propertiesPath = Path.Combine(versionPath, $"{(i == 0 ? "send" : "recv")}.properties");
+                        File.WriteAllText(propertiesPath, builder.ToString());
                     }
                 }
             }

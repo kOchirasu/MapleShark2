@@ -466,10 +466,10 @@ namespace MapleShark2.UI {
         }
 
         private void mViewCommonScriptMenu_Click(object pSender, EventArgs pArgs) {
-            var scriptPath = Helpers.GetCommonScriptPath(Locale, Build);
-            Helpers.MakeSureFileDirectoryExists(scriptPath);
+            string scriptPath = Helpers.GetCommonScriptPath(Locale, Build);
+            Directory.CreateDirectory(scriptPath);
 
-            ScriptForm script = new ScriptForm(scriptPath, null);
+            var script = new ScriptForm(scriptPath, null);
             script.FormClosed += CommonScript_FormClosed;
             script.Show(DockPanel, new Rectangle(MainForm.Location, new Size(600, 300)));
         }
@@ -513,10 +513,10 @@ namespace MapleShark2.UI {
             if (ListView.SelectedIndices.Count == 0) return;
             MaplePacket packet = ListView.Selected;
 
-            var scriptPath = Helpers.GetScriptPath(Locale, Build, packet.Outbound, packet.Opcode);
-            Helpers.MakeSureFileDirectoryExists(scriptPath);
+            string scriptPath = Helpers.GetScriptPath(Locale, Build, packet.Outbound, packet.Opcode);
+            Directory.CreateDirectory(scriptPath);
 
-            ScriptForm script = new ScriptForm(scriptPath, packet);
+            var script = new ScriptForm(scriptPath, packet);
             script.FormClosed += Script_FormClosed;
             script.Show(DockPanel, new Rectangle(MainForm.Location, new Size(600, 300)));
         }
