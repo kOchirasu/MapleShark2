@@ -33,6 +33,7 @@ namespace MapleShark2.UI {
         private DateTime startTime;
         private MapleCipher.Decryptor outDecryptor;
         private MapleCipher.Decryptor inDecryptor;
+        private List<MaplePacket> bufferedPackets = new List<MaplePacket>();
         private readonly TcpReassembler tcpReassembler = new TcpReassembler();
         private readonly List<MaplePacket> mPackets = new List<MaplePacket>();
 
@@ -165,7 +166,6 @@ namespace MapleShark2.UI {
             int opcodeCount = Opcodes.Count;
             bool show = false;
             try {
-                ListView.BeginUpdate();
                 while (packetStream.TryRead(out byte[] packet)) {
                     Results result = ProcessPacket(packet, isOutbound, pArrivalTime);
                     switch (result) {
@@ -175,16 +175,8 @@ namespace MapleShark2.UI {
                             show = true;
                             break;
                         default:
-                            ListView.EndUpdate();
                             return result;
                     }
-                }
-
-                ListView.EndUpdate();
-
-                // This should be called after EndUpdate so VirtualListSize is set properly
-                if (ListView.SelectedIndices.Count == 0 && FilteredPackets.Count > 0) {
-                    ListView.Items[FilteredPackets.Count - 1]?.EnsureVisible();
                 }
             } catch (Exception ex) {
                 Console.WriteLine(ex);
@@ -252,7 +244,7 @@ namespace MapleShark2.UI {
                     Opcodes.Add(new Opcode(maplePacket.Outbound, maplePacket.Opcode));
                 }
 
-                AddPacket(maplePacket, true);
+                AddPacket(maplePacket, false, true);
 
                 Console.WriteLine("[CONNECTION] MapleStory2 V{0}", Build);
 
@@ -295,7 +287,7 @@ namespace MapleShark2.UI {
 
             ListView.BeginUpdate();
             foreach (MaplePacket packet in packets) {
-                AddPacket(packet);
+                AddPacket(packet, false);
             }
 
             ListView.EndUpdate();
@@ -536,7 +528,9 @@ namespace MapleShark2.UI {
             }
         }
 
-        private void SessionForm_Load(object sender, EventArgs e) { }
+        private void SessionForm_Load(object sender, EventArgs e) {
+            timer.Enabled = true;
+        }
 
         private void mMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e) { }
 
@@ -646,27 +640,56 @@ namespace MapleShark2.UI {
             DefinitionsContainer.Instance.SaveDefinition(locale, build, definition);
         }
 
-        private void AddPacket(MaplePacket packetItem, bool forceAdd = false) {
-            mPackets.Add(packetItem);
+        private void AddPacket(MaplePacket packet, bool buffered = true, bool forceAdd = false) {
+            mPackets.Add(packet);
 
             Definition definition =
-                Config.Instance.GetDefinition(Build, Locale, packetItem.Outbound, packetItem.Opcode);
-            if (!Opcodes.Exists(op => op.Outbound == packetItem.Outbound && op.Header == packetItem.Opcode)) {
-                Opcodes.Add(new Opcode(packetItem.Outbound, packetItem.Opcode));
+                Config.Instance.GetDefinition(Build, Locale, packet.Outbound, packet.Opcode);
+            if (!Opcodes.Exists(op => op.Outbound == packet.Outbound && op.Header == packet.Opcode)) {
+                Opcodes.Add(new Opcode(packet.Outbound, packet.Opcode));
             }
 
             if (!forceAdd) {
                 if (definition != null && !mViewIgnoredMenu.Checked && definition.Ignore) return;
-                if (packetItem.Outbound && !mViewOutboundMenu.Checked) return;
-                if (!packetItem.Outbound && !mViewInboundMenu.Checked) return;
+                if (packet.Outbound && !mViewOutboundMenu.Checked) return;
+                if (!packet.Outbound && !mViewInboundMenu.Checked) return;
             }
 
-            ListView.AddPacket(packetItem);
+            if (buffered) {
+                bufferedPackets.Add(packet);
+            } else {
+                ListView.AddPacket(packet);
+            }
+        }
+
+        private void timer_Tick(object sender, EventArgs e) {
+            if (bufferedPackets.Count == 0) {
+                return;
+            }
+
+            timer.Enabled = false;
+
+            List<MaplePacket> copy = bufferedPackets;
+            bufferedPackets = new List<MaplePacket>(copy.Count);
+
+            ListView.BeginUpdate();
+            foreach (MaplePacket packet in copy) {
+                ListView.AddPacket(packet);
+            }
+            ListView.EndUpdate();
+
+            // This should be called after EndUpdate so VirtualListSize is set properly
+            if (ListView.SelectedIndices.Count == 0 && FilteredPackets.Count > 0) {
+                ListView.Items[FilteredPackets.Count - 1]?.EnsureVisible();
+            }
+
+            timer.Enabled = true;
         }
 
         private void Terminate() {
             if (mTerminated) return;
 
+            timer.Enabled = false;
             mTerminated = true;
             Text += " (Terminated)";
             OnTerminated?.Invoke(this);

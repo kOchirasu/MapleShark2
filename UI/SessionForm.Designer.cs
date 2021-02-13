@@ -74,6 +74,7 @@ namespace MapleShark2.UI
             this.removeLoggedPacketsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mSaveDialog = new System.Windows.Forms.SaveFileDialog();
             this.mExportDialog = new System.Windows.Forms.SaveFileDialog();
+            this.timer = new System.Windows.Forms.Timer(this.components);
             this.mPacketContextMenu.SuspendLayout();
             this.mMenu.SuspendLayout();
             this.SuspendLayout();
@@ -452,6 +453,11 @@ namespace MapleShark2.UI
             this.mExportDialog.RestoreDirectory = true;
             this.mExportDialog.Title = "Export";
             //
+            // timer
+            //
+            this.timer.Interval = 10;
+            this.timer.Tick += new System.EventHandler(this.timer_Tick);
+            //
             // SessionForm
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
@@ -525,6 +531,7 @@ namespace MapleShark2.UI
         private System.Windows.Forms.ToolStripMenuItem allToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem onlyVisibleToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem allToolStripMenuItem1;
+        private System.Windows.Forms.Timer timer;
         private WeifenLuo.WinFormsUI.Docking.VisualStudioToolStripExtender toolStripExtender;
     }
 }
