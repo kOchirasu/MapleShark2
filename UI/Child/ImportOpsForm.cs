@@ -62,19 +62,17 @@ namespace MapleShark2.UI.Child {
             Definition def = Config.Instance.GetDefinition(pBuild, pLocale, pOutbound, pOpcode);
             if (def == null) {
                 def = new Definition();
-                txtLog.AppendText($"Adding opcode {pName}: 0x{pOpcode:X4}\n");
+                txtLog.AppendText($"Adding opcode {pName}: 0x{pOpcode:X4}\r\n");
             } else {
-                txtLog.AppendText($"Replacing opcode {def.Name} 0x{pOpcode:X4} for {pName}\n");
+                txtLog.AppendText($"Replacing opcode {def.Name} 0x{pOpcode:X4} for {pName}\r\n");
             }
 
-            def.Build = pBuild;
-            def.Locale = pLocale;
             def.Opcode = pOpcode;
             def.Outbound = pOutbound;
             def.Name = pName;
             def.Ignore = false;
 
-            DefinitionsContainer.Instance.SaveDefinition(def);
+            DefinitionsContainer.Instance.SaveDefinition(pLocale, pBuild, def);
         }
     }
 }

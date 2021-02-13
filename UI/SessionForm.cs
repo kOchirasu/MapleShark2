@@ -241,12 +241,10 @@ namespace MapleShark2.UI {
                 if (definition == null) {
                     definition = new Definition {
                         Outbound = false,
-                        Locale = Locale,
                         Opcode = opcode,
                         Name = "RequestVersion",
-                        Build = Build
                     };
-                    SaveDefinition(definition);
+                    SaveDefinition(Locale, Build, definition);
                 }
 
                 ArraySegment<byte> segment = new ArraySegment<byte>(packet.Buffer);
@@ -488,15 +486,13 @@ namespace MapleShark2.UI {
                 Definition definition = Config.Instance.GetDefinition(packet);
                 if (definition == null) {
                     definition = new Definition {
-                        Build = Build,
                         Outbound = packet.Outbound,
                         Opcode = packet.Opcode,
-                        Locale = Locale
                     };
                 }
 
                 definition.Name = mPacketContextNameBox.Text;
-                SaveDefinition(definition);
+                SaveDefinition(Locale, Build, definition);
 
                 pArgs.SuppressKeyPress = true;
                 mPacketContextMenu.Close();
@@ -514,15 +510,13 @@ namespace MapleShark2.UI {
                 Config.Instance.GetDefinition(Build, Locale, packetItem.Outbound, packetItem.Opcode);
             if (definition == null) {
                 definition = new Definition {
-                    Locale = Locale,
-                    Build = Build,
                     Outbound = packetItem.Outbound,
                     Opcode = packetItem.Opcode,
                 };
             }
 
             definition.Ignore = mPacketContextIgnoreMenu.Checked;
-            SaveDefinition(definition);
+            SaveDefinition(Locale, Build, definition);
 
             // If viewing ignored packets, ignoring a new packet does not change view
             if (mViewIgnoredMenu.Checked) return;
@@ -651,8 +645,8 @@ namespace MapleShark2.UI {
             RefreshPackets();
         }
 
-        private void SaveDefinition(Definition definition) {
-            DefinitionsContainer.Instance.SaveDefinition(definition);
+        private void SaveDefinition(byte locale, uint build, Definition definition) {
+            DefinitionsContainer.Instance.SaveDefinition(locale, build, definition);
         }
 
         private void AddPacket(MaplePacket packetItem, bool forceAdd = false) {
