@@ -66,6 +66,17 @@ namespace MapleShark2.UI {
         internal SessionForm() {
             ClearedPackets = false;
             InitializeComponent();
+
+            // Apply themes
+            toolStripExtender.DefaultRenderer = new ToolStripProfessionalRenderer();
+            toolStripExtender.SetStyle(mMenu, VisualStudioToolStripExtender.VsVersion.Vs2015,
+                Config.Instance.Theme.DockSuiteTheme);
+            toolStripExtender.SetStyle(mPacketContextMenu, VisualStudioToolStripExtender.VsVersion.Vs2015,
+                Config.Instance.Theme.DockSuiteTheme);
+
+            ThemeApplier.ApplyTheme(Config.Instance.Theme, Controls);
+            ThemeApplier.ApplyTheme(Config.Instance.Theme, mPacketContextMenu.Controls);
+
             ScaleColumns();
             Saved = false;
 
@@ -78,19 +89,6 @@ namespace MapleShark2.UI {
                 ListView.ColumnHeaderCollection columns = ((PacketListView) sender).Columns;
                 columns[columns.Count - 1].Width = -2;
             };
-        }
-
-        public new void Show(DockPanel panel, DockState state) {
-            base.Show(panel, state);
-
-            toolStripExtender.DefaultRenderer = new ToolStripProfessionalRenderer();
-            toolStripExtender.SetStyle(mMenu, VisualStudioToolStripExtender.VsVersion.Vs2015,
-                Config.Instance.Theme.DockSuiteTheme);
-            toolStripExtender.SetStyle(mPacketContextMenu, VisualStudioToolStripExtender.VsVersion.Vs2015,
-                Config.Instance.Theme.DockSuiteTheme);
-
-            ThemeApplier.ApplyTheme(Config.Instance.Theme, Controls);
-            ThemeApplier.ApplyTheme(Config.Instance.Theme, mPacketContextMenu.Controls);
         }
 
         // Fix column widths when using screen scaling.

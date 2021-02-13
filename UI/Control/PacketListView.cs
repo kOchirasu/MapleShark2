@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using MapleShark2.Logging;
@@ -13,6 +14,9 @@ namespace MapleShark2.UI.Control {
 
         public Color DividerColor = DefaultBackColor;
         public Color HighlightColor = DefaultBackColor;
+
+        private int firstItem; //stores the index of the first item in the cache
+        private MaplePacketItem[] cache; //array to cache items for the virtual list
         private readonly List<MaplePacket> mFilteredPackets;
         private bool updating;
 
@@ -23,6 +27,7 @@ namespace MapleShark2.UI.Control {
             OwnerDraw = true;
 
             RetrieveVirtualItem += this.mPacketList_RetrieveVirtualItem;
+            CacheVirtualItems += this.mPacketList_CacheVirtualItem;
             SearchForVirtualItem += this.mPacketList_SearchForVirtualItem;
             DrawColumnHeader += this.mPacketList_DrawColumnHeader;
             DrawItem += this.mPacketList_DrawItem;
@@ -94,20 +99,47 @@ namespace MapleShark2.UI.Control {
 
         // Private Event Handlers
         private void mPacketList_RetrieveVirtualItem(object sender, RetrieveVirtualItemEventArgs e) {
-            if (mFilteredPackets.Count <= e.ItemIndex) {
+            //check to see if the requested item is currently in the cache
+            if (cache != null && e.ItemIndex >= firstItem && e.ItemIndex < firstItem + cache.Length) {
+                //A cache hit, so get the ListViewItem from the cache instead of making a new one.
+                e.Item = cache[e.ItemIndex - firstItem];
+            } else if (mFilteredPackets.Count > e.ItemIndex) {
+                //A cache miss, so create a new ListViewItem and pass it back.
+                MaplePacket packet = mFilteredPackets[e.ItemIndex];
+                e.Item = CreateListItem(packet);
+            }
+        }
+
+        private void mPacketList_CacheVirtualItem(object sender, CacheVirtualItemsEventArgs e) {
+            //We've gotten a request to refresh the cache. First check if it's really necessary.
+            if (cache != null && e.StartIndex >= firstItem && e.EndIndex <= firstItem + cache.Length) {
+                //If the newly requested cache is a subset of the old cache,
+                //no need to rebuild everything, so do nothing.
                 return;
             }
 
-            MaplePacket packet = mFilteredPackets[e.ItemIndex];
+            //Now we need to rebuild the cache.
+            firstItem = e.StartIndex;
+            int length = e.EndIndex - e.StartIndex + 1; //indexes are inclusive
+            cache = new MaplePacketItem[length];
+
+            //Fill the cache with the appropriate ListViewItems.
+            for (int i = 0; i < length; i++) {
+                MaplePacket packet = mFilteredPackets[i + firstItem];
+                cache[i] = CreateListItem(packet);
+            }
+        }
+
+        private MaplePacketItem CreateListItem(MaplePacket packet) {
             Definition definition = Config.Instance.GetDefinition(packet);
             string name = definition == null ? "" : definition.Name;
 
-            var packetItem = new MaplePacketItem(packet, name);
-            if (packetItem.Packet.Outbound) {
-                packetItem.BackColor = HighlightColor;
+            var item = new MaplePacketItem(packet, name);
+            if (item.Packet.Outbound) {
+                item.BackColor = HighlightColor;
             }
 
-            e.Item = packetItem;
+            return item;
         }
 
         private void mPacketList_SearchForVirtualItem(object sender, SearchForVirtualItemEventArgs e) {
