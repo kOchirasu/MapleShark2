@@ -31,6 +31,7 @@ namespace MapleShark2.UI {
         private readonly string[] startupArguments;
 
         private List<RawCapture> packetQueue = new List<RawCapture>();
+        private HashSet<SessionForm> sessions = new HashSet<SessionForm>();
 
         public byte Locale => ((SessionForm) mDockPanel.ActiveDocument).Locale;
 
@@ -79,6 +80,14 @@ namespace MapleShark2.UI {
                 SearchForm.SetHexBoxBytes(buffer);
                 pArgs.SuppressKeyPress = true;
             }
+        }
+
+        private SessionForm NewSession() {
+            var session = new SessionForm();
+            session.OnTerminated += s => sessions.Remove(s);
+            sessions.Add(session);
+
+            return session;
         }
 
         private DialogResult ShowSetupForm() {
@@ -161,7 +170,7 @@ namespace MapleShark2.UI {
             mTimer.Enabled = true;
 
             foreach (string arg in startupArguments) {
-                var session = new SessionForm();
+                SessionForm session = NewSession();
                 session.OpenReadOnly(arg);
                 session.Show(mDockPanel, DockState.Document);
             }
@@ -216,7 +225,7 @@ namespace MapleShark2.UI {
 
                 try {
                     if (tcpPacket.Synchronize && !tcpPacket.Acknowledgment) {
-                        session = new SessionForm();
+                        session = NewSession();
                     } else if (session == null || !session.MatchTcpPacket(tcpPacket)) {
                         continue;
                     }
@@ -242,7 +251,7 @@ namespace MapleShark2.UI {
             }
 
             foreach (string path in mOpenDialog.FileNames) {
-                var session = new SessionForm();
+                SessionForm session = NewSession();
                 session.OpenReadOnly(path);
                 session.Show(mDockPanel, DockState.Document);
             }
@@ -322,12 +331,14 @@ namespace MapleShark2.UI {
                 try {
                     SessionForm.Results? result;
                     if (tcpPacket.Synchronize && !tcpPacket.Acknowledgment && InPortRange(tcpPacket.DestinationPort)) {
-                        session = new SessionForm();
+                        session = NewSession();
                         result = session.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
                     } else {
-                        session =
-                            Array.Find(MdiChildren,
-                                f => ((SessionForm) f).MatchTcpPacket(tcpPacket)) as SessionForm;
+                        session = sessions.FirstOrDefault(s => s.MatchTcpPacket(tcpPacket));
+                        if (session == null) {
+                            continue;
+                        }
+
                         result = session?.BufferTcpPacket(tcpPacket, packet.Timeval.Date);
                     }
 
@@ -400,7 +411,7 @@ namespace MapleShark2.UI {
 
                 switch (Path.GetExtension(file)) {
                     case ".msb": {
-                        var session = new SessionForm();
+                        SessionForm session = NewSession();
                         session.OpenReadOnly(file);
                         session.Show(mDockPanel, DockState.Document);
                         break;

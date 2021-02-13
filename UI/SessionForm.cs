@@ -29,7 +29,6 @@ namespace MapleShark2.UI {
         private bool mTerminated = false;
         private ushort mLocalPort = 0;
         private ushort mRemotePort = 0;
-        private ushort mProxyPort = 0;
 
         private DateTime startTime;
         private MapleCipher.Decryptor outDecryptor;
@@ -50,6 +49,8 @@ namespace MapleShark2.UI {
         public List<Opcode> Opcodes { get; private set; } = new List<Opcode>();
 
         public bool Saved { get; private set; }
+
+        public Action<SessionForm> OnTerminated;
 
         // Used for determining if the session did receive a packet at all, or if it just emptied its buffers
         public bool ClearedPackets { get; private set; }
@@ -107,10 +108,8 @@ namespace MapleShark2.UI {
 
         internal bool MatchTcpPacket(TcpPacket tcpPacket) {
             if (mTerminated) return false;
-            if (tcpPacket.SourcePort == mLocalPort
-                && tcpPacket.DestinationPort == (mProxyPort > 0 ? mProxyPort : mRemotePort)) return true;
-            if (tcpPacket.SourcePort == (mProxyPort > 0 ? mProxyPort : mRemotePort)
-                && tcpPacket.DestinationPort == mLocalPort) return true;
+            if (tcpPacket.SourcePort == mLocalPort && tcpPacket.DestinationPort == mRemotePort) return true;
+            if (tcpPacket.SourcePort == mRemotePort && tcpPacket.DestinationPort == mLocalPort) return true;
             return false;
         }
 
@@ -666,8 +665,15 @@ namespace MapleShark2.UI {
         }
 
         private void Terminate() {
+            if (mTerminated) return;
+
             mTerminated = true;
             Text += " (Terminated)";
+            OnTerminated?.Invoke(this);
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e) {
+            Terminate();
         }
     }
 }
