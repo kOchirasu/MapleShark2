@@ -381,7 +381,7 @@ namespace MapleShark2.UI {
 
         private void mViewCommonScriptMenu_Click(object pSender, EventArgs pArgs) {
             string scriptPath = Helpers.GetCommonScriptPath(Locale, Build);
-            Directory.CreateDirectory(scriptPath);
+            Helpers.MakeSureFileDirectoryExists(scriptPath);
 
             var script = new ScriptForm(scriptPath, null);
             script.FormClosed += CommonScript_FormClosed;
@@ -428,7 +428,7 @@ namespace MapleShark2.UI {
             MaplePacket packet = ListView.Selected;
 
             string scriptPath = Helpers.GetScriptPath(Locale, Build, packet.Outbound, packet.Opcode);
-            Directory.CreateDirectory(scriptPath);
+            Helpers.MakeSureFileDirectoryExists(scriptPath);
 
             var script = new ScriptForm(scriptPath, packet);
             script.FormClosed += Script_FormClosed;

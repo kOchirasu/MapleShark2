@@ -36,20 +36,20 @@ namespace MapleShark2.UI {
             pPacketItem.Reset(); // Seek back to beginning
             packet = pPacketItem;
 
-            var scriptPath = Helpers.GetScriptPath(pPacketItem.Locale, pPacketItem.Build, pPacketItem.Outbound,
+            string scriptPath = Helpers.GetScriptPath(pPacketItem.Locale, pPacketItem.Build, pPacketItem.Outbound,
                 pPacketItem.Opcode);
-            var commonPath = Helpers.GetCommonScriptPath(pPacketItem.Locale, pPacketItem.Build);
+            string commonPath = Helpers.GetCommonScriptPath(pPacketItem.Locale, pPacketItem.Build);
 
             if (File.Exists(scriptPath)) {
                 try {
-                    StringBuilder scriptCode = new StringBuilder();
+                    var scriptCode = new StringBuilder();
                     scriptCode.Append(File.ReadAllText(scriptPath));
                     if (File.Exists(commonPath)) scriptCode.Append(File.ReadAllText(commonPath));
                     Script script = Script.Compile(scriptCode.ToString());
                     script.Context.SetItem("ScriptAPI", new ScriptAPI(this));
                     script.Execute();
                 } catch (Exception exc) {
-                    OutputForm output = new OutputForm("Script Error");
+                    var output = new OutputForm("Script Error");
                     output.Append(exc.ToString());
                     output.Show(DockPanel, new Rectangle(MainForm.Location, new Size(400, 400)));
                 }
