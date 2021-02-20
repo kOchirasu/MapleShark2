@@ -1,24 +1,18 @@
 ﻿using System;
-using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
 using MapleShark2.Tools;
 using MapleShark2.UI;
 using MapleShark2.UI.Child;
+using NLog;
 
 namespace MapleShark2 {
     internal static class Program {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         [STAThread]
         private static void Main(string[] pArgs) {
-            AppDomain.CurrentDomain.UnhandledException += (sender, args) => {
-                File.AppendAllText("error.log", args.ExceptionObject.ToString());
-
-                const string message = "Exception occurred. Open error in notepad?";
-                if (MessageBox.Show(message, "MapleShark2", MessageBoxButtons.YesNo) == DialogResult.Yes) {
-                    Process.Start("notepad", "error.log");
-                }
-            };
+            AppDomain.CurrentDomain.UnhandledException += HandleUnhandledException;
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -41,6 +35,14 @@ namespace MapleShark2 {
                 var mainForm = new MainForm(pArgs);
                 Application.Run(mainForm);
             }
+        }
+
+        private static void HandleUnhandledException(object sender, UnhandledExceptionEventArgs args) {
+            var ex = (Exception) args.ExceptionObject;
+            logger.Fatal(ex, "Unhandled Exception");
+
+            string message = $"{ex.Message}";
+            MessageBox.Show(message, "MapleShark2 Exception", MessageBoxButtons.OK);
         }
 
         internal static string AssemblyVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString();

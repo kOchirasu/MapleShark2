@@ -41,8 +41,6 @@
         <Compile Include="Theme\ThemeApplier.cs" />
         <Compile Include="Tools\FileLoader.cs" />
         <Compile Include="Tools\TcpReassembler.cs" />
-        <Compile Include="UI\Child\OutputForm.cs" />
-        <Compile Include="UI\Child\OutputForm.Designer.cs" />
         <Compile Include="UI\Child\ScriptForm.cs" />
         <Compile Include="UI\Child\ScriptForm.Designer.cs" />
         <Compile Include="UI\Child\SessionInfoForm.cs" />
@@ -54,6 +52,8 @@
         <Compile Include="UI\DataForm.Designer.cs" />
         <Compile Include="UI\Child\ImportOpsForm.cs" />
         <Compile Include="UI\Child\ImportOpsForm.Designer.cs" />
+        <Compile Include="UI\LogForm.cs" />
+        <Compile Include="UI\LogForm.Designer.cs" />
         <Compile Include="UI\MainForm.cs" />
         <Compile Include="UI\MainForm.Designer.cs" />
         <Compile Include="UI\Child\SetupForm.cs" />
@@ -83,6 +83,9 @@
         <Compile Include="Tools\ScriptAPI.cs" />
     </ItemGroup>
     <ItemGroup>
+      <None Include="nlog.config">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
       <None Include="README.md">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
@@ -94,11 +97,11 @@
       <Content Include="Resources\SharkLogo.png" />
     </ItemGroup>
     <ItemGroup>
-      <EmbeddedResource Include="UI\Child\OutputForm.resx" />
       <EmbeddedResource Include="UI\Child\ScriptForm.resx" />
       <EmbeddedResource Include="UI\Child\SessionInfoForm.resx" />
       <EmbeddedResource Include="UI\DataForm.resx" />
       <EmbeddedResource Include="UI\Child\ImportOpsForm.resx" />
+      <EmbeddedResource Include="UI\LogForm.resx" />
       <EmbeddedResource Include="UI\MainForm.resx" />
       <EmbeddedResource Include="UI\Child\SetupForm.resx" />
       <EmbeddedResource Include="UI\Child\SplashForm.resx" />
@@ -131,6 +134,7 @@
       <PackageReference Include="DockPanelSuite" Version="3.0.6" />
       <PackageReference Include="DockPanelSuite.ThemeVS2015" Version="3.0.6" />
       <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.18.2" />
+      <PackageReference Include="NLog.Windows.Forms" Version="4.3.0" />
       <PackageReference Include="PacketDotNet" Version="1.2.0" />
       <PackageReference Include="SharpPcap" Version="5.4.0" />
       <PackageReference Include="SSharp.Net" Version="1.0.1" />

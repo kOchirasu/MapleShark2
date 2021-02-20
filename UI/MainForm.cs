@@ -9,6 +9,7 @@ using MapleShark2.Logging;
 using MapleShark2.Properties;
 using MapleShark2.Tools;
 using MapleShark2.UI.Child;
+using NLog;
 using PacketDotNet;
 using SharpPcap;
 using SharpPcap.LibPcap;
@@ -18,11 +19,14 @@ namespace MapleShark2.UI {
     public sealed partial class MainForm : Form {
         private const string LAYOUT_FILE = "Layout.xml";
 
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         private bool closed;
         private bool sniffEnabled = true;
         private PcapDevice device;
 
         // DockContent Controls
+        public LogForm LogForm { get; private set; }
         public SearchForm SearchForm { get; private set; }
         public DataForm DataForm { get; private set; }
         public StructureForm StructureForm { get; private set; }
@@ -45,6 +49,7 @@ namespace MapleShark2.UI {
         }
 
         private void CreateStandardControls() {
+            LogForm = new LogForm();
             SearchForm = new SearchForm();
             DataForm = new DataForm();
             StructureForm = new StructureForm();
@@ -52,6 +57,10 @@ namespace MapleShark2.UI {
         }
 
         private IDockContent GetContentFromPersistString(string persistString) {
+            if (persistString == typeof(LogForm).ToString()) {
+                return LogForm;
+            }
+
             if (persistString == typeof(SearchForm).ToString()) {
                 return SearchForm;
             }
@@ -150,7 +159,8 @@ namespace MapleShark2.UI {
                 mDockPanel.LoadFromXml(LAYOUT_FILE, GetContentFromPersistString);
             } catch {
                 // If we fail to load, it will just use the default layout.
-                Console.WriteLine("Using default layout");
+                logger.Debug("Using default layout");
+                LogForm.Show(mDockPanel);
                 SearchForm.Show(mDockPanel);
                 DataForm.Show(mDockPanel);
                 StructureForm.Show(mDockPanel);
@@ -161,6 +171,7 @@ namespace MapleShark2.UI {
                 PropertyForm.DockState = DockState.DockRight;
             }
 
+            LogForm.ApplyTheme();
             SearchForm.ApplyTheme();
             DataForm.ApplyTheme();
             StructureForm.ApplyTheme();
@@ -236,7 +247,7 @@ namespace MapleShark2.UI {
                         session = null;
                     }
                 } catch (Exception ex) {
-                    Console.WriteLine($"Exception while parsing logfile: {ex}");
+                    logger.Fatal(ex, $"Exception while parsing logfile: {fileName}");
                     session?.Close();
                     session = null;
                 }
@@ -262,10 +273,16 @@ namespace MapleShark2.UI {
         }
 
         private void mViewMenu_DropDownOpening(object pSender, EventArgs pArgs) {
-            mViewSearchMenu.Checked = SearchForm.Visible;
-            mViewDataMenu.Checked = DataForm.Visible;
-            mViewStructureMenu.Checked = StructureForm.Visible;
-            mViewPropertiesMenu.Checked = PropertyForm.Visible;
+            mViewLogMenu.Checked = !LogForm.IsHidden;
+            mViewSearchMenu.Checked = !SearchForm.IsHidden;
+            mViewDataMenu.Checked = !DataForm.IsHidden;
+            mViewStructureMenu.Checked = !StructureForm.IsHidden;
+            mViewPropertiesMenu.Checked = !PropertyForm.IsHidden;
+        }
+
+        private void mViewLogMenu_CheckedChanged(object pSender, EventArgs pArgs) {
+            if (mViewLogMenu.Checked) LogForm.Show();
+            else LogForm.Hide();
         }
 
         private void mViewSearchMenu_CheckedChanged(object pSender, EventArgs pArgs) {
@@ -351,7 +368,7 @@ namespace MapleShark2.UI {
                             break;
                     }
                 } catch (Exception ex) {
-                    Console.WriteLine(ex.ToString());
+                    logger.Fatal(ex, "Exception while processing packet queue");
                     session?.Close();
                 }
             }

@@ -64,6 +64,7 @@ namespace MapleShark2.UI
             this.mFileSeparatorMenu = new System.Windows.Forms.ToolStripSeparator();
             this.mFileQuit = new System.Windows.Forms.ToolStripMenuItem();
             this.mViewMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.mViewLogMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.mViewSearchMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.mViewDataMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.mViewStructureMenu = new System.Windows.Forms.ToolStripMenuItem();
@@ -154,12 +155,22 @@ namespace MapleShark2.UI
             //
             // mViewMenu
             //
-            this.mViewMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[]
-                {this.mViewSearchMenu, this.mViewDataMenu, this.mViewStructureMenu, this.mViewPropertiesMenu});
+            this.mViewMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {this.mViewLogMenu,
+                this.mViewSearchMenu, this.mViewDataMenu, this.mViewStructureMenu, this.mViewPropertiesMenu});
             this.mViewMenu.Name = "mViewMenu";
             this.mViewMenu.Size = new System.Drawing.Size(44, 20);
             this.mViewMenu.Text = "&View";
             this.mViewMenu.DropDownOpening += new System.EventHandler(this.mViewMenu_DropDownOpening);
+            //
+            // mViewLogMenu
+            //
+            this.mViewLogMenu.Checked = true;
+            this.mViewLogMenu.CheckOnClick = true;
+            this.mViewLogMenu.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.mViewLogMenu.Name = "mViewLogMenu";
+            this.mViewLogMenu.Size = new System.Drawing.Size(152, 22);
+            this.mViewLogMenu.Text = "&Log";
+            this.mViewLogMenu.CheckedChanged += new System.EventHandler(this.mViewLogMenu_CheckedChanged);
             //
             // mViewSearchMenu
             //
@@ -383,21 +394,22 @@ namespace MapleShark2.UI
         }
         #endregion
 
+        private System.Windows.Forms.Timer mTimer;
         private System.Windows.Forms.MenuStrip mMenu;
         private System.Windows.Forms.ToolStripMenuItem mFileMenu;
         private System.Windows.Forms.ToolStripMenuItem mFileImportMenu;
         private System.Windows.Forms.ToolStripMenuItem mFileOpenMenu;
-        private System.Windows.Forms.Timer mTimer;
         private System.Windows.Forms.OpenFileDialog mImportDialog;
         private System.Windows.Forms.OpenFileDialog mOpenDialog;
         private WeifenLuo.WinFormsUI.Docking.DockPanel mDockPanel;
-        private System.Windows.Forms.ToolStripMenuItem mViewMenu;
-        private System.Windows.Forms.ToolStripMenuItem mViewPropertiesMenu;
-        private System.Windows.Forms.ToolStripMenuItem mViewStructureMenu;
         private System.Windows.Forms.ToolStripSeparator mFileSeparatorMenu;
         private System.Windows.Forms.ToolStripMenuItem mFileQuit;
-        private System.Windows.Forms.ToolStripMenuItem mViewDataMenu;
+        private System.Windows.Forms.ToolStripMenuItem mViewMenu;
+        private System.Windows.Forms.ToolStripMenuItem mViewLogMenu;
         private System.Windows.Forms.ToolStripMenuItem mViewSearchMenu;
+        private System.Windows.Forms.ToolStripMenuItem mViewDataMenu;
+        private System.Windows.Forms.ToolStripMenuItem mViewStructureMenu;
+        private System.Windows.Forms.ToolStripMenuItem mViewPropertiesMenu;
         private System.Windows.Forms.ToolStrip toolStrip;
         private System.Windows.Forms.ToolStripButton openToolStripButton;
         private System.Windows.Forms.ToolStripButton saveToolStripButton;

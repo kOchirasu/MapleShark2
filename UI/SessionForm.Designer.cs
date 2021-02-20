@@ -100,6 +100,7 @@ namespace MapleShark2.UI
             this.ListView.TabIndex = 0;
             this.ListView.UseCompatibleStateImageBehavior = false;
             this.ListView.View = System.Windows.Forms.View.Details;
+            this.ListView.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.ListView.ItemActivate += new System.EventHandler(this.mPacketList_ItemActivate);
             this.ListView.SelectedIndexChanged += new System.EventHandler(this.mPacketList_SelectedIndexChanged);
             //

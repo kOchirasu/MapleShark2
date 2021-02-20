@@ -7,11 +7,14 @@ using MapleShark2.Logging;
 using MapleShark2.Theme;
 using MapleShark2.Tools;
 using Microsoft.Win32;
+using NLog;
 using Scripting.SSharp.Runtime;
 using SharpPcap.LibPcap;
 
 namespace MapleShark2.UI.Child {
     public sealed partial class SplashForm : Form {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         private int centerX = 0, centerY = 0;
         private int lastX = -1;
         private int timer = 0;
@@ -137,7 +140,7 @@ namespace MapleShark2.UI.Child {
                     }
                 }
             } catch (Exception ex) {
-                Console.WriteLine("Error registering file association: {0}", ex.ToString());
+                logger.Error(ex, "Error registering file association");
             }
         }
 

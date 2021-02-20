@@ -47,6 +47,7 @@
             this.mHex.TabIndex = 2;
             this.mHex.UseFixedBytesPerLine = true;
             this.mHex.VScrollBarVisible = true;
+            this.mHex.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.mHex.SelectionLengthChanged += new System.EventHandler(this.mHex_SelectionLengthChanged);
             this.mHex.KeyDown += new System.Windows.Forms.KeyEventHandler(this.mHex_KeyDown);
             //

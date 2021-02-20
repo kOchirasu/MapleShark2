@@ -6,8 +6,6 @@
 The script engine used is called ScriptDotNet, also known as S#.
 Information regarding the syntax of S# itself can be found at http://www.protsyk.com/scriptdotnet/
 
-
-
 Shared functions can be written in `Common.txt` which is located at the root of the script-version directory.
 
 ---
@@ -100,6 +98,10 @@ void EndNode(bool expand)
 void Write(string file, string line)
 
   Appends the given line of text to the given file, and returns nothing.
+  
+void Log(string message, string level = "Info")
+
+  Logs the specified message with a log level. (Trace, Debug, Info, Warn, Error, Fatal)
   
 int Remaining()
 

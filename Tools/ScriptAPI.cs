@@ -1,9 +1,13 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.IO;
 using MapleShark2.UI;
+using NLog;
 
 namespace MapleShark2.Tools {
     public sealed class ScriptAPI {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         private StructureForm mStructure = null;
 
         [Bindable(false)]
@@ -88,6 +92,18 @@ namespace MapleShark2.Tools {
             using (StreamWriter writer = File.AppendText(pPath)) {
                 writer.WriteLine(pLine);
             }
+        }
+
+        public void Log(string message) => Log(message, "Info");
+        public void Log(string message, string level) {
+            LogLevel logLevel;
+            try {
+                logLevel = LogLevel.FromString(level);
+            } catch {
+                logLevel = LogLevel.Info;
+            }
+
+            logger.Log(logLevel, message);
         }
 
         public long Remaining() {

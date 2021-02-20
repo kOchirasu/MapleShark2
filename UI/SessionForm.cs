@@ -13,6 +13,7 @@ using MapleShark2.Theme;
 using MapleShark2.Tools;
 using MapleShark2.UI.Child;
 using MapleShark2.UI.Control;
+using NLog;
 using PacketDotNet;
 using WeifenLuo.WinFormsUI.Docking;
 
@@ -24,6 +25,8 @@ namespace MapleShark2.UI {
             Terminated,
             CloseMe
         }
+
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         private string mFilename = null;
         private bool mTerminated = false;
@@ -152,7 +155,7 @@ namespace MapleShark2.UI {
                     try {
                         mRemoteEndpoint = $"{((IPv4Packet) pTcpPacket.ParentPacket).SourceAddress}:{mLocalPort}";
                         mLocalEndpoint = $"{((IPv4Packet) pTcpPacket.ParentPacket).DestinationAddress}:{mRemotePort}";
-                        Console.WriteLine("[CONNECTION] From {0} to {1}", mRemoteEndpoint, mLocalEndpoint);
+                        logger.Debug($"[CONNECTION] From {mRemoteEndpoint} to {mLocalEndpoint}");
                     } catch {
                         return Results.CloseMe;
                     }
@@ -179,7 +182,7 @@ namespace MapleShark2.UI {
                     }
                 }
             } catch (Exception ex) {
-                Console.WriteLine(ex);
+                logger.Fatal(ex, "Exception while buffering packets");
                 Terminate();
                 return Results.Terminated;
             }
@@ -199,15 +202,14 @@ namespace MapleShark2.UI {
                 packet.Read<ushort>(); // rawSeq
                 int length = packet.ReadInt();
                 if (bytes.Length - 6 < length) {
-                    Console.WriteLine("Connection on port {0} did not have a MapleStory2 Handshake", mLocalEndpoint);
+                    logger.Debug($"Connection on port {mLocalEndpoint} did not have a MapleStory2 Handshake");
                     return Results.CloseMe;
                 }
 
                 ushort opcode = packet.Read<ushort>();
                 if (opcode != 0x01) {
                     // RequestVersion
-                    Console.WriteLine("Connection on port {0} did not have a valid MapleStory2 Connection Header",
-                        mLocalEndpoint);
+                    logger.Debug($"Connection on port {mLocalEndpoint} did not have a valid MapleStory2 Connection Header");
                     return Results.CloseMe;
                 }
 
@@ -246,7 +248,7 @@ namespace MapleShark2.UI {
 
                 AddPacket(maplePacket, false, true);
 
-                Console.WriteLine("[CONNECTION] MapleStory2 V{0}", Build);
+                logger.Info($"[CONNECTION] {mRemoteEndpoint} <-> {mLocalEndpoint}: MapleStory2 V{Build}");
 
                 return Results.Show;
             }
@@ -267,7 +269,7 @@ namespace MapleShark2.UI {
 
                 return Results.Continue;
             } catch (ArgumentException ex) {
-                Console.WriteLine(ex);
+                logger.Fatal(ex, "Exception while processing packets");
                 return Results.CloseMe;
             }
         }
@@ -294,7 +296,7 @@ namespace MapleShark2.UI {
             if (ListView.VirtualListSize > 0) ListView.EnsureVisible(0);
 
             Text = $"{Path.GetFileName(pFilename)} (ReadOnly)";
-            Console.WriteLine("Loaded file: {0}", pFilename);
+            logger.Info($"Loaded file: {pFilename}");
         }
 
         public void RefreshPackets() {

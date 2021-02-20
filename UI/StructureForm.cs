@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -8,13 +7,15 @@ using System.Windows.Forms;
 using MapleShark2.Logging;
 using MapleShark2.Theme;
 using MapleShark2.Tools;
-using MapleShark2.UI.Child;
 using MapleShark2.UI.Control;
+using NLog;
 using Scripting.SSharp;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace MapleShark2.UI {
     public partial class StructureForm : DockContent {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         private MaplePacket packet;
         private Stack<StructureNode> mSubNodes = new Stack<StructureNode>();
 
@@ -48,10 +49,9 @@ namespace MapleShark2.UI {
                     Script script = Script.Compile(scriptCode.ToString());
                     script.Context.SetItem("ScriptAPI", new ScriptAPI(this));
                     script.Execute();
-                } catch (Exception exc) {
-                    var output = new OutputForm("Script Error");
-                    output.Append(exc.ToString());
-                    output.Show(DockPanel, new Rectangle(MainForm.Location, new Size(400, 400)));
+                } catch (Exception ex) {
+                    logger.Error(ex);
+                    MessageBox.Show(ex.Message, "Script Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
 

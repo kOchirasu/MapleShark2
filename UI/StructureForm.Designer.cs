@@ -37,6 +37,7 @@
             this.mTree.Location = new System.Drawing.Point(0, 0);
             this.mTree.Name = "mTree";
             this.mTree.Size = new System.Drawing.Size(288, 364);
+            this.mTree.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.mTree.TabIndex = 3;
             this.mTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.mTree_AfterSelect);
             this.mTree.KeyDown += new System.Windows.Forms.KeyEventHandler(this.mTree_KeyDown);

@@ -21,13 +21,13 @@ namespace MapleShark2.Theme {
                     button.ForeColor = theme.ForeColor;
                     button.FlatAppearance.BorderColor = theme.BorderColor;
                 } else if (component is TextBox textBox) {
-                    textBox.BackColor = theme.ControlBackColor;
+                    textBox.BackColor = textBox.ReadOnly ? theme.BackColor : theme.ControlBackColor;
                     textBox.ForeColor = theme.ForeColor;
                 } else if (component is ComboBox comboBox) {
                     comboBox.BackColor = theme.ControlBackColor;
                     comboBox.ForeColor = theme.ForeColor;
                 } else if (component is NumericUpDown numericBox) {
-                    numericBox.BackColor = theme.ControlBackColor;
+                    numericBox.BackColor = numericBox.ReadOnly ? theme.BackColor : theme.ControlBackColor;
                     numericBox.ForeColor = theme.ForeColor;
                 } else if (component is PropertyGrid propertyGrid) {
                     propertyGrid.BackColor = theme.BackColor;

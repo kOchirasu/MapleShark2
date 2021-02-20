@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
 using MapleShark2.Logging;
+using NLog;
 
 namespace MapleShark2.Tools {
     public class MsbMetadata {
@@ -18,6 +19,8 @@ namespace MapleShark2.Tools {
         private const ushort LEGACY_VERSION = 0x2027;
         private const ushort VERSION = 0x2030;
 
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         public static void WriteMsbFile(string fileName, MsbMetadata metadata, IEnumerable<MaplePacket> packets) {
             using (var stream = new FileStream(fileName, FileMode.Create, FileAccess.Write)) {
                 var writer = new BinaryWriter(stream);
@@ -32,7 +35,7 @@ namespace MapleShark2.Tools {
                 foreach (MaplePacket packet in packets) {
                     ArraySegment<byte> segment = packet.GetSegment(packet.Offset, packet.Length);
                     if (segment.Array == null) {
-                        Console.WriteLine("Failed to save packet: " + packet);
+                        logger.Error($"Failed to save packet: {packet}");
                         continue;
                     }
 
@@ -61,7 +64,7 @@ namespace MapleShark2.Tools {
                 foreach (MaplePacket packet in packets) {
                     ArraySegment<byte> segment = packet.GetSegment(packet.Offset, packet.Length);
                     if (segment.Array == null) {
-                        Console.WriteLine("Failed to save packet: " + packet);
+                        logger.Error($"Failed to save packet: {packet}");
                         continue;
                     }
 
@@ -94,7 +97,7 @@ namespace MapleShark2.Tools {
                         v2 = (byte) ((version >> 8) & 0xF),
                         v3 = (byte) ((version >> 4) & 0xF),
                         v4 = (byte) ((version >> 0) & 0xF);
-                    Console.WriteLine("Loading MSB file, saved by MapleShark V{0}.{1}.{2}.{3}", v1, v2, v3, v4);
+                    logger.Info($"Loading MSB file, saved by MapleShark V{v1}.{v2}.{v3}.{v4}");
 
                     if (version == 0x2012) {
                         metadata.Locale = (byte) reader.ReadUInt16();
