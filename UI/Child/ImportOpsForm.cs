@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Windows.Forms;
 using MapleShark2.Logging;
@@ -10,18 +10,29 @@ namespace MapleShark2.UI.Child {
     public sealed partial class ImportOpsForm : Form {
         public ImportOpsForm() {
             InitializeComponent();
+
             ThemeApplier.ApplyTheme(Config.Instance.Theme, this);
         }
 
         private void button1_Click(object sender, EventArgs e) {
-            if (ofdPropFile.ShowDialog() == DialogResult.OK) {
-                txtPropFile.Text = ofdPropFile.FileName;
+            if (ofdPropFile.ShowDialog() != DialogResult.OK) {
+                return;
+            }
+
+            txtPropFilePath.Text = ofdPropFile.FileName;
+
+            // Automatically check the boxes
+            string fileName = Path.GetFileName(ofdPropFile.FileName);
+            if (fileName.StartsWith("send", StringComparison.OrdinalIgnoreCase)) {
+                chkIsSend.Checked = true;
+            } else if (fileName.StartsWith("recv", StringComparison.OrdinalIgnoreCase)) {
+                chkIsSend.Checked = false;
             }
         }
 
         private void btnImport_Click(object sender, EventArgs e) {
-            if (!File.Exists(txtPropFile.Text)) {
-                string message = $"File {txtPropFile.Text} does not exist!";
+            if (!File.Exists(txtPropFilePath.Text)) {
+                string message = $"File {txtPropFilePath.Text} does not exist!";
                 MessageBox.Show(message, "MapleShark2", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
@@ -30,27 +41,27 @@ namespace MapleShark2.UI.Child {
             byte locale = Convert.ToByte(nudLocale.Value);
             ushort version = Convert.ToUInt16(nudVersion.Value);
 
-            string[] opcodes = File.ReadAllLines(txtPropFile.Text);
-            List<ushort> loadedOps = new List<ushort>();
+            string[] opcodes = File.ReadAllLines(txtPropFilePath.Text);
             foreach (string opcode in opcodes) {
                 string val = opcode;
-                if (val.Contains("#"))
+
+                // Strip comments
+                if (val.Contains("#")) {
                     val = val.Remove(val.IndexOf('#'));
+                }
 
                 val = val.Trim();
-                if (val == "") continue;
+                if (string.IsNullOrWhiteSpace(val)) continue;
 
-                string[] splitted = val.Split('=');
-                if (splitted.Length != 2) continue;
+                string[] keyValue = val.Split('=');
+                if (keyValue.Length != 2) continue;
 
-                string name = splitted[0].Trim();
-                ushort header = 0;
+                string name = keyValue[0].Trim();
 
-                string headerval = splitted[1].Trim();
-                if (headerval.StartsWith("0x"))
-                    header = ushort.Parse(headerval.Substring(2), System.Globalization.NumberStyles.HexNumber);
-                else
-                    header = ushort.Parse(headerval, System.Globalization.NumberStyles.Integer);
+                string headerStr = keyValue[1].Trim();
+                ushort header = headerStr.StartsWith("0x")
+                    ? ushort.Parse(headerStr.Substring(2), NumberStyles.HexNumber)
+                    : ushort.Parse(headerStr, NumberStyles.Integer);
 
                 AddOpcode(version, locale, !chkIsSend.Checked, header, name);
             }
@@ -62,10 +73,12 @@ namespace MapleShark2.UI.Child {
             Definition def = Config.Instance.GetDefinition(pBuild, pLocale, pOutbound, pOpcode);
             if (def == null) {
                 def = new Definition();
-                txtLog.AppendText($"Adding opcode {pName}: 0x{pOpcode:X4}\r\n");
+                txtLog.AppendText($"Adding opcode {pName}: 0x{pOpcode:X4}");
             } else {
-                txtLog.AppendText($"Replacing opcode {def.Name} 0x{pOpcode:X4} for {pName}\r\n");
+                txtLog.AppendText($"Replacing opcode {def.Name} 0x{pOpcode:X4} for {pName}");
             }
+
+            txtLog.AppendText(Environment.NewLine);
 
             def.Opcode = pOpcode;
             def.Outbound = pOutbound;

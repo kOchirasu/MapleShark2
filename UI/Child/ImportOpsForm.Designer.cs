@@ -21,14 +21,12 @@
         }
 
         #region Windows Form Designer generated code
-
         /// <summary>
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent()
-        {
-            this.txtPropFile = new System.Windows.Forms.TextBox();
+        private void InitializeComponent() {
+            this.txtPropFilePath = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.nudLocale = new System.Windows.Forms.NumericUpDown();
@@ -41,17 +39,17 @@
             this.label4 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.txtLog = new System.Windows.Forms.TextBox();
-            ((System.ComponentModel.ISupportInitialize)(this.nudLocale)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.nudVersion)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.nudLocale)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.nudVersion)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             //
-            // txtPropFile
+            // txtPropFilePath
             //
-            this.txtPropFile.Location = new System.Drawing.Point(141, 12);
-            this.txtPropFile.Name = "txtPropFile";
-            this.txtPropFile.Size = new System.Drawing.Size(164, 20);
-            this.txtPropFile.TabIndex = 0;
+            this.txtPropFilePath.Location = new System.Drawing.Point(141, 12);
+            this.txtPropFilePath.Name = "txtPropFilePath";
+            this.txtPropFilePath.Size = new System.Drawing.Size(164, 20);
+            this.txtPropFilePath.TabIndex = 0;
             //
             // label1
             //
@@ -74,11 +72,7 @@
             // nudLocale
             //
             this.nudLocale.Location = new System.Drawing.Point(141, 38);
-            this.nudLocale.Maximum = new decimal(new int[] {
-            20,
-            0,
-            0,
-            0});
+            this.nudLocale.Maximum = new decimal(new int[] {20, 0, 0, 0});
             this.nudLocale.Name = "nudLocale";
             this.nudLocale.Size = new System.Drawing.Size(213, 20);
             this.nudLocale.TabIndex = 3;
@@ -95,23 +89,19 @@
             // nudVersion
             //
             this.nudVersion.Location = new System.Drawing.Point(141, 64);
-            this.nudVersion.Maximum = new decimal(new int[] {
-            65535,
-            0,
-            0,
-            0});
+            this.nudVersion.Maximum = new decimal(new int[] {65535, 0, 0, 0});
             this.nudVersion.Name = "nudVersion";
             this.nudVersion.Size = new System.Drawing.Size(213, 20);
             this.nudVersion.TabIndex = 5;
             //
             // btnBrowse
             //
+            this.btnBrowse.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnBrowse.Location = new System.Drawing.Point(311, 12);
             this.btnBrowse.Name = "btnBrowse";
             this.btnBrowse.Size = new System.Drawing.Size(43, 20);
             this.btnBrowse.TabIndex = 8;
             this.btnBrowse.Text = "...";
-            this.btnBrowse.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnBrowse.UseVisualStyleBackColor = true;
             this.btnBrowse.Click += new System.EventHandler(this.button1_Click);
             //
@@ -123,12 +113,12 @@
             //
             // btnImport
             //
+            this.btnImport.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnImport.Location = new System.Drawing.Point(12, 111);
             this.btnImport.Name = "btnImport";
             this.btnImport.Size = new System.Drawing.Size(344, 23);
             this.btnImport.TabIndex = 11;
             this.btnImport.Text = "Import File";
-            this.btnImport.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnImport.UseVisualStyleBackColor = true;
             this.btnImport.Click += new System.EventHandler(this.btnImport_Click);
             //
@@ -162,15 +152,17 @@
             //
             // txtLog
             //
+            this.txtLog.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
             this.txtLog.Location = new System.Drawing.Point(6, 19);
             this.txtLog.MaxLength = 3276700;
             this.txtLog.Multiline = true;
             this.txtLog.Name = "txtLog";
-            this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtLog.Size = new System.Drawing.Size(330, 157);
             this.txtLog.TabIndex = 0;
+            this.txtLog.WordWrap = false;
             //
-            // frmImportProps
+            // ImportOpsForm
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -185,23 +177,22 @@
             this.Controls.Add(this.nudLocale);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.txtPropFile);
+            this.Controls.Add(this.txtPropFilePath);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "ImportOpsForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Import Properties File";
-            ((System.ComponentModel.ISupportInitialize)(this.nudLocale)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.nudVersion)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.nudLocale)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.nudVersion)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion
 
-        private System.Windows.Forms.TextBox txtPropFile;
+        private System.Windows.Forms.TextBox txtPropFilePath;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.NumericUpDown nudLocale;
