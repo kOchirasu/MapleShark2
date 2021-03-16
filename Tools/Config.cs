@@ -61,7 +61,7 @@ namespace MapleShark2.Tools {
         }
 
         internal Definition GetDefinition(MaplePacket packet) {
-            return GetDefinition(packet.Build, packet.Locale, packet.Outbound, packet.Opcode);
+            return GetDefinition(packet.Version, packet.Locale, packet.Outbound, packet.Opcode);
         }
 
         internal Definition GetDefinition(uint pBuild, byte pLocale, bool pOutbound, ushort pOpcode) {

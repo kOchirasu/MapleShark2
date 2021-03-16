@@ -2,25 +2,30 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Windows.Forms;
 using MapleShark2.Logging;
 using MapleShark2.Theme;
 using MapleShark2.Tools;
 using MapleShark2.UI.Control;
+using Microsoft.Scripting.Hosting;
 using NLog;
-using Scripting.SSharp;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace MapleShark2.UI {
     public partial class StructureForm : DockContent {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
+        private readonly ScriptManager scriptManager;
+        private readonly Stack<StructureNode> subNodes = new Stack<StructureNode>();
+
         private MaplePacket packet;
-        private Stack<StructureNode> mSubNodes = new Stack<StructureNode>();
+        private MainForm MainForm => ParentForm as MainForm;
+        public TreeView Tree => tree;
 
         public StructureForm() {
             InitializeComponent();
+
+            scriptManager = new ScriptManager(this);
         }
 
         public void ApplyTheme() {
@@ -28,121 +33,36 @@ namespace MapleShark2.UI {
             ThemeApplier.ApplyTheme(Config.Instance.Theme, Controls);
         }
 
-        public MainForm MainForm => ParentForm as MainForm;
-        public TreeView Tree => mTree;
+        public void ParseMaplePacket(MaplePacket packet) {
+            tree.Nodes.Clear();
+            subNodes.Clear();
+            packet.Reset(); // Seek back to beginning
+            this.packet = packet;
 
-        public void ParseMaplePacket(MaplePacket pPacketItem) {
-            mTree.Nodes.Clear();
-            mSubNodes.Clear();
-            pPacketItem.Reset(); // Seek back to beginning
-            packet = pPacketItem;
-
-            string scriptPath = Helpers.GetScriptPath(pPacketItem.Locale, pPacketItem.Build, pPacketItem.Outbound,
-                pPacketItem.Opcode);
-            string commonPath = Helpers.GetCommonScriptPath(pPacketItem.Locale, pPacketItem.Build);
-
-            if (File.Exists(scriptPath)) {
-                try {
-                    var scriptCode = new StringBuilder();
-                    scriptCode.Append(File.ReadAllText(scriptPath));
-                    if (File.Exists(commonPath)) scriptCode.Append(File.ReadAllText(commonPath));
-                    Script script = Script.Compile(scriptCode.ToString());
-                    script.Context.SetItem("ScriptAPI", new ScriptAPI(this));
-                    script.Execute();
-                } catch (Exception ex) {
-                    logger.Error(ex);
-                    MessageBox.Show(ex.Message, "Script Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            ScriptEngine engine = scriptManager.GetEngine(packet.Locale, packet.Version);
+            try {
+                string scriptPath = Helpers.GetScriptPath(packet.Locale, packet.Version, packet.Outbound, packet.Opcode);
+                if (!File.Exists(scriptPath)) {
+                    return;
                 }
+
+                ScriptSource script = engine.CreateScriptSourceFromFile(scriptPath);
+                // TODO: Compile scripts for reuse? "script.Compile();"
+                script.Execute();
+            } catch (Exception ex) {
+                var exceptionOperations = engine.GetService<ExceptionOperations>();
+                string message = exceptionOperations.FormatException(ex);
+                logger.Error(message);
+                MessageBox.Show(ex.Message, "Script Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
-            if (packet.Available > 0) {
-                APIAddField("Undefined", packet.Available);
-            }
-        }
-
-        private TreeNodeCollection CurrentNodes => mSubNodes.Count > 0 ? mSubNodes.Peek().Nodes : mTree.Nodes;
-
-        internal string APIGetFiletime() {
-            string ret = DateTime.Now.ToFileTime().ToString().Substring(12);
-            return ret;
-        }
-
-        internal byte APIAddByte(string pName) => ReadToNode<byte>(pName);
-
-        internal sbyte APIAddSByte(string pName) => ReadToNode<sbyte>(pName);
-
-        internal ushort APIAddUShort(string pName) => ReadToNode<ushort>(pName);
-
-        internal short APIAddShort(string pName) => ReadToNode<short>(pName);
-
-        internal uint APIAddUInt(string pName) => ReadToNode<uint>(pName);
-
-        internal int APIAddInt(string pName) => ReadToNode<int>(pName);
-
-        internal float APIAddFloat(string pName) => ReadToNode<float>(pName);
-
-        internal bool APIAddBool(string pName) => ReadToNode<bool>(pName);
-
-        internal long APIAddLong(string pName) => ReadToNode<long>(pName);
-
-        internal double APIAddDouble(string pName) => ReadToNode<double>(pName);
-
-        internal string APIAddString(string pName) {
-            APIStartNode(pName);
-            short size = APIAddShort("Size");
-            string value = APIAddPaddedString("String", size);
-            APIEndNode(false);
-            return value;
-        }
-
-        internal string APIAddUnicodeString(string pName) {
-            APIStartNode(pName);
-            short size = APIAddShort("Size");
-            CurrentNodes.Add(new StructureNode(pName, packet.GetReadSegment(size * 2))); // Unicode is 2-width
-            string value = packet.ReadRawUnicodeString(size);
-            APIEndNode(false);
-            return value;
-        }
-
-        internal string APIAddPaddedString(string pName, int pLength) {
-            CurrentNodes.Add(new StructureNode(pName, packet.GetReadSegment(pLength)));
-            return packet.ReadRawString(pLength);
-        }
-
-        internal void APIAddField(string pName, int pLength) {
-            CurrentNodes.Add(new StructureNode(pName, packet.GetReadSegment(pLength)));
-            packet.Skip(pLength);
-        }
-
-        internal void APIAddComment(string pComment) {
-            CurrentNodes.Add(new StructureNode(pComment, packet.GetReadSegment(0)));
-        }
-
-        internal void APIStartNode(string pName) {
-            var node = new StructureNode(pName, packet.GetReadSegment(0));
-            if (mSubNodes.Count > 0) mSubNodes.Peek().Nodes.Add(node);
-            else mTree.Nodes.Add(node);
-            mSubNodes.Push(node);
-        }
-
-        internal void APIEndNode(bool pExpand) {
-            if (mSubNodes.Count > 0) {
-                StructureNode node = mSubNodes.Pop();
-                int length = packet.Position - node.Data.Offset;
-                node.UpdateData(packet.GetSegment(node.Data.Offset, length));
-                if (pExpand) node.Expand();
+            if (this.packet.Available > 0) {
+                CurrentNodes.Add(new StructureNode("Undefined", this.packet.GetReadSegment(this.packet.Available)));
+                this.packet.Skip(this.packet.Available);
             }
         }
 
-        internal int APIRemaining() {
-            return packet.Available;
-        }
-
-        private T ReadToNode<T>(string name) where T : struct {
-            int size = Unsafe.SizeOf<T>();
-            CurrentNodes.Add(new StructureNode(name, packet.GetReadSegment(size)));
-            return packet.Read<T>();
-        }
+        private TreeNodeCollection CurrentNodes => subNodes.Count > 0 ? subNodes.Peek().Nodes : tree.Nodes;
 
         private void mTree_AfterSelect(object pSender, TreeViewEventArgs pArgs) {
             if (!(pArgs.Node is StructureNode node)) {
@@ -155,8 +75,51 @@ namespace MapleShark2.UI {
             MainForm.PropertyForm.Properties.SelectedObject = new StructureSegment(node.Data, MainForm.Locale);
         }
 
-        private void mTree_KeyDown(object pSender, KeyEventArgs pArgs) {
-            MainForm.CopyPacketHex(pArgs);
+        private void mTree_KeyDown(object sender, KeyEventArgs args) {
+            MainForm.CopyPacketHex(args);
+        }
+
+        // Scripting functions
+        public T Add<T>(string name) where T : struct {
+            int size = Unsafe.SizeOf<T>();
+            CurrentNodes.Add(new StructureNode(name, packet.GetReadSegment(size)));
+            return packet.Read<T>();
+        }
+
+        public byte[] AddField(string name, int length) {
+            CurrentNodes.Add(new StructureNode(name, packet.GetReadSegment(length)));
+            return packet.Read(length);
+        }
+
+        public void StartNode(string name) {
+            var node = new StructureNode(name, packet.GetReadSegment(0));
+            if (subNodes.Count > 0) subNodes.Peek().Nodes.Add(node);
+            else tree.Nodes.Add(node);
+            subNodes.Push(node);
+        }
+
+        public void EndNode(bool expand) {
+            if (subNodes.Count > 0) {
+                StructureNode node = subNodes.Pop();
+                int length = packet.Position - node.Data.Offset;
+                node.UpdateData(packet.GetSegment(node.Data.Offset, length));
+                if (expand) node.Expand();
+            }
+        }
+
+        public int Remaining() {
+            return packet.Available;
+        }
+
+        public void Log(string message, string level) {
+            LogLevel logLevel;
+            try {
+                logLevel = LogLevel.FromString(level);
+            } catch {
+                logLevel = LogLevel.Info;
+            }
+
+            logger.Log(logLevel, message);
         }
     }
 }

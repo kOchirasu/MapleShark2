@@ -12,11 +12,11 @@ namespace MapleShark2.Tools {
         }
 
         public static string GetScriptPath(byte locale, uint build, bool outbound, ushort opcode) {
-            return Path.Combine(GetScriptFolder(locale, build), outbound ? "Outbound" : "Inbound", $"0x{opcode:X4}.txt");
+            return Path.Combine(GetScriptFolder(locale, build), outbound ? "Outbound" : "Inbound", $"0x{opcode:X4}.py");
         }
 
         public static string GetCommonScriptPath(byte locale, uint build) {
-            return Path.Combine(GetScriptFolder(locale, build), "Common.txt");
+            return Path.Combine(GetScriptFolder(locale, build), "common.py");
         }
 
         public static void MakeSureFileDirectoryExists(string path) {

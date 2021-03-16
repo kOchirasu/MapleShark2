@@ -5,7 +5,7 @@ namespace MapleShark2.Logging {
     public class MaplePacket {
         public DateTime Timestamp { get; }
         public bool Outbound { get; }
-        public uint Build { get; }
+        public uint Version { get; }
         public byte Locale { get; }
         public ushort Opcode { get; }
 
@@ -17,14 +17,14 @@ namespace MapleShark2.Logging {
         public int Length => buffer.Count;
         public int Available => reader.Available;
 
-        internal MaplePacket(DateTime pTimestamp, bool pOutbound, uint pBuild, ushort pOpcode, ArraySegment<byte> pBuffer) {
-            Timestamp = pTimestamp;
-            Outbound = pOutbound;
-            Build = pBuild;
+        internal MaplePacket(DateTime timestamp, bool outbound, uint version, ushort opcode, ArraySegment<byte> buffer) {
+            Timestamp = timestamp;
+            Outbound = outbound;
+            Version = version;
             Locale = MapleLocale.UNKNOWN;
-            Opcode = pOpcode;
-            buffer = pBuffer;
-            reader = new ByteReader(buffer.Array, buffer.Offset);
+            Opcode = opcode;
+            this.buffer = buffer;
+            reader = new ByteReader(this.buffer.Array, this.buffer.Offset);
         }
 
         public void Reset() {
@@ -60,8 +60,7 @@ namespace MapleShark2.Logging {
         }
 
         public T Read<T>() where T : struct => reader.Read<T>();
-        public string ReadRawString(int size) => reader.ReadRawString(size);
-        public string ReadRawUnicodeString(int size) => reader.ReadRawUnicodeString(size);
+        public byte[] Read(int count) => reader.ReadBytes(count);
         public void Skip(int count) => reader.Skip(count);
 
         private unsafe string ToHexString() {

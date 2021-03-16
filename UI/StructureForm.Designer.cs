@@ -26,28 +26,28 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.mTree = new System.Windows.Forms.TreeView();
+            this.tree = new System.Windows.Forms.TreeView();
             this.SuspendLayout();
             //
             // mTree
             //
-            this.mTree.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mTree.FullRowSelect = true;
-            this.mTree.HideSelection = false;
-            this.mTree.Location = new System.Drawing.Point(0, 0);
-            this.mTree.Name = "mTree";
-            this.mTree.Size = new System.Drawing.Size(288, 364);
-            this.mTree.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.mTree.TabIndex = 3;
-            this.mTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.mTree_AfterSelect);
-            this.mTree.KeyDown += new System.Windows.Forms.KeyEventHandler(this.mTree_KeyDown);
+            this.tree.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tree.FullRowSelect = true;
+            this.tree.HideSelection = false;
+            this.tree.Location = new System.Drawing.Point(0, 0);
+            this.tree.Name = "tree";
+            this.tree.Size = new System.Drawing.Size(288, 364);
+            this.tree.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.tree.TabIndex = 3;
+            this.tree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.mTree_AfterSelect);
+            this.tree.KeyDown += new System.Windows.Forms.KeyEventHandler(this.mTree_KeyDown);
             //
             // StructureForm
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(288, 364);
-            this.Controls.Add(this.mTree);
+            this.Controls.Add(this.tree);
             this.DockAreas =
                 ((WeifenLuo.WinFormsUI.Docking.DockAreas) ((
                     (((WeifenLuo.WinFormsUI.Docking.DockAreas.Float | WeifenLuo.WinFormsUI.Docking.DockAreas.DockLeft) |
@@ -64,6 +64,6 @@
         }
         #endregion
 
-        private System.Windows.Forms.TreeView mTree;
+        private System.Windows.Forms.TreeView tree;
     }
 }

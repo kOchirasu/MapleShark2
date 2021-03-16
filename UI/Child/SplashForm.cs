@@ -8,7 +8,6 @@ using MapleShark2.Theme;
 using MapleShark2.Tools;
 using Microsoft.Win32;
 using NLog;
-using Scripting.SSharp.Runtime;
 using SharpPcap.LibPcap;
 
 namespace MapleShark2.UI.Child {
@@ -70,9 +69,6 @@ namespace MapleShark2.UI.Child {
 
             initialisator.ReportProgress(0, "Initializing network devices");
             InitializeNetworkDevices();
-
-            initialisator.ReportProgress(0, "Loading Script.NET context");
-            RuntimeHost.Initialize();
 
             initialisator.ReportProgress(0, "Loading packet definitions");
             DefinitionsContainer.Load();

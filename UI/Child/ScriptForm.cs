@@ -9,7 +9,7 @@ using WeifenLuo.WinFormsUI.Docking;
 
 namespace MapleShark2.UI.Child {
     public sealed partial class ScriptForm : DockContent {
-        private const string SYNTAX_DEF = "MapleShark2.Resources.ScriptSyntax.txt";
+        private const string SYNTAX_DEF = "MapleShark2.Resources.Python.syn";
 
         private readonly string path;
         internal MaplePacket Packet { get; }
