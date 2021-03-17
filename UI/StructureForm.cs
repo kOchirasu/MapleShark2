@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using MapleShark2.Logging;
@@ -39,19 +38,13 @@ namespace MapleShark2.UI {
             packet.Reset(); // Seek back to beginning
             this.packet = packet;
 
-            ScriptEngine engine = scriptManager.GetEngine(packet.Locale, packet.Version);
             try {
-                string scriptPath = Helpers.GetScriptPath(packet.Locale, packet.Version, packet.Outbound, packet.Opcode);
-                if (!File.Exists(scriptPath)) {
-                    return;
-                }
-
-                ScriptSource script = engine.CreateScriptSourceFromFile(scriptPath);
-                // TODO: Compile scripts for reuse? "script.Compile();"
-                script.Execute();
+                scriptManager.ExecuteScript(packet.Locale, packet.Version, packet.Outbound, packet.Opcode);
             } catch (Exception ex) {
+                ScriptEngine engine = scriptManager.GetEngine(packet.Locale, packet.Version);
                 var exceptionOperations = engine.GetService<ExceptionOperations>();
                 string message = exceptionOperations.FormatException(ex);
+
                 logger.Error(message);
                 MessageBox.Show(ex.Message, "Script Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
