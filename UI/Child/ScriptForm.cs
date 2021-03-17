@@ -1,21 +1,21 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using MapleShark2.Logging;
 using MapleShark2.Theme;
 using MapleShark2.Tools;
+using ScintillaNET;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace MapleShark2.UI.Child {
     public sealed partial class ScriptForm : DockContent {
-        private const string SYNTAX_DEF = "MapleShark2.Resources.Python.syn";
-
         private readonly string path;
+        private int maxLineNumberCharLength;
         internal MaplePacket Packet { get; }
 
-        public ScriptForm(string pPath, MaplePacket packet) {
-            path = pPath;
+        public ScriptForm(string path, MaplePacket packet) {
+            this.path = path;
             Packet = packet;
 
             InitializeComponent();
@@ -26,22 +26,47 @@ namespace MapleShark2.UI.Child {
                 : "Common Script";
         }
 
-        private void ScriptForm_Load(object pSender, EventArgs pArgs) {
-            mScriptEditor.Document.SetSyntaxFromEmbeddedResource(Assembly.GetExecutingAssembly(), SYNTAX_DEF);
+        private void ScriptForm_Load(object sender, EventArgs args) {
             if (File.Exists(path)) {
-                mScriptEditor.Open(path);
+                mScriptEditor.Text = File.ReadAllText(path);
             }
         }
 
-        private void mScriptEditor_TextChanged(object pSender, EventArgs pArgs) {
+        private void mScriptEditor_TextChanged(object sender, EventArgs args) {
             mSaveButton.Enabled = true;
+
+            // Did the number of characters in the line number display change?
+            // i.e. nnn VS nn, or nnnn VS nn, etc...
+            int newMaxLineNumberCharLength = mScriptEditor.Lines.Count.ToString().Length;
+            if (newMaxLineNumberCharLength == maxLineNumberCharLength) {
+                return;
+            }
+
+            // Calculate the width required to display the last line number
+            // and include some padding for good measure.
+            const int padding = 2;
+            mScriptEditor.Margins[0].Width = mScriptEditor.TextWidth(Style.LineNumber,
+                new string('9', newMaxLineNumberCharLength + 1)) + padding;
+            maxLineNumberCharLength = newMaxLineNumberCharLength;
         }
 
-        private void mSaveButton_Click(object pSender, EventArgs pArgs) {
-            if (mScriptEditor.Document.Text.Length == 0) {
+        private void mScriptEditor_InsertCheck(object sender, InsertCheckEventArgs e) {
+            if (!e.Text.EndsWith("\r") && !e.Text.EndsWith("\n")) {
+                return;
+            }
+
+            int curLine = mScriptEditor.LineFromPosition(e.Position);
+            string curLineText = mScriptEditor.Lines[curLine].Text;
+
+            Match indent = Regex.Match(curLineText, @"^\s*");
+            e.Text += indent.Value; // Add indent following "\r\n"
+        }
+
+        private void mSaveButton_Click(object sender, EventArgs args) {
+            if (string.IsNullOrWhiteSpace(mScriptEditor.Text)) {
                 File.Delete(path);
             } else {
-                mScriptEditor.Save(path);
+                File.WriteAllText(path, mScriptEditor.Text);
             }
 
             Close();
@@ -51,7 +76,7 @@ namespace MapleShark2.UI.Child {
             if (FileImporter.ShowDialog() != DialogResult.OK) return;
             if (!File.Exists(FileImporter.FileName)) return;
 
-            if (mScriptEditor.Document.Text.Length > 0) {
+            if (string.IsNullOrWhiteSpace(mScriptEditor.Text)) {
                 const string message = "Are you sure you want to open this file? "
                                        + "The current script will be replaced with the file you selected.";
                 DialogResult result =
@@ -59,7 +84,7 @@ namespace MapleShark2.UI.Child {
                 if (result == DialogResult.No) return;
             }
 
-            mScriptEditor.Open(FileImporter.FileName);
+            mScriptEditor.Text = File.ReadAllText(FileImporter.FileName);
         }
     }
 }

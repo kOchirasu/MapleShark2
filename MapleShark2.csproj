@@ -93,7 +93,6 @@
       <Content Include="Resources\Button-Blank-Green-icon.png" />
       <Content Include="Resources\Button-Blank-Red-icon.png" />
       <Content Include="Resources\save-icon.png" />
-      <EmbeddedResource Include="Resources\Python.syn" />
       <None Include="Resources\script_api.py">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
@@ -133,12 +132,12 @@
       </ProjectReference>
     </ItemGroup>
     <ItemGroup>
-      <PackageReference Include="Alsing.SyntaxBox" Version="2.0.0" />
       <PackageReference Include="Be.Windows.Forms.HexBox" Version="1.6.1" />
       <PackageReference Include="DockPanelSuite" Version="3.0.6" />
       <PackageReference Include="DockPanelSuite.ThemeVS2015" Version="3.0.6" />
       <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.18.2" />
       <PackageReference Include="IronPython" Version="2.7.11" />
+      <PackageReference Include="jacobslusser.ScintillaNET" Version="3.6.3" />
       <PackageReference Include="NLog.Windows.Forms" Version="4.3.0" />
       <PackageReference Include="PacketDotNet" Version="1.2.0" />
       <PackageReference Include="SharpPcap" Version="5.4.0" />
