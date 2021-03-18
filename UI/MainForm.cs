@@ -183,6 +183,7 @@ namespace MapleShark2.UI {
             foreach (string arg in startupArguments) {
                 SessionForm session = NewSession();
                 session.OpenReadOnly(arg);
+                StructureForm.InitEngine(session.Locale, session.Build);
                 session.Show(mDockPanel, DockState.Document);
             }
         }
@@ -264,6 +265,7 @@ namespace MapleShark2.UI {
             foreach (string path in mOpenDialog.FileNames) {
                 SessionForm session = NewSession();
                 session.OpenReadOnly(path);
+                StructureForm.InitEngine(session.Locale, session.Build);
                 session.Show(mDockPanel, DockState.Document);
             }
         }
@@ -361,6 +363,7 @@ namespace MapleShark2.UI {
 
                     switch (result) {
                         case SessionForm.Results.Show:
+                            StructureForm.InitEngine(session.Locale, session.Build);
                             session.Show(mDockPanel, DockState.Document);
                             break;
                         case SessionForm.Results.CloseMe:
@@ -430,6 +433,7 @@ namespace MapleShark2.UI {
                     case ".msb": {
                         SessionForm session = NewSession();
                         session.OpenReadOnly(file);
+                        StructureForm.InitEngine(session.Locale, session.Build);
                         session.Show(mDockPanel, DockState.Document);
                         break;
                     }

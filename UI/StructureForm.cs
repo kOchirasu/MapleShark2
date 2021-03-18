@@ -32,6 +32,11 @@ namespace MapleShark2.UI {
             ThemeApplier.ApplyTheme(Config.Instance.Theme, Controls);
         }
 
+        // Warm up the engine for this locale+version
+        public void InitEngine(byte locale, uint version) {
+            scriptManager.GetEngine(locale, version);
+        }
+
         public void ParseMaplePacket(MaplePacket packet) {
             tree.Nodes.Clear();
             subNodes.Clear();

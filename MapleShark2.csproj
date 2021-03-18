@@ -13,6 +13,7 @@
         <FileAlignment>512</FileAlignment>
         <ApplicationIcon>Resources\Shark.ico</ApplicationIcon>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <DisableFody Condition=" '$(Configuration)' != 'Release' ">true</DisableFody>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <PlatformTarget>AnyCPU</PlatformTarget>
@@ -133,9 +134,12 @@
     </ItemGroup>
     <ItemGroup>
       <PackageReference Include="Be.Windows.Forms.HexBox" Version="1.6.1" />
+      <PackageReference Include="Costura.Fody" Version="5.0.2">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
       <PackageReference Include="DockPanelSuite" Version="3.0.6" />
       <PackageReference Include="DockPanelSuite.ThemeVS2015" Version="3.0.6" />
-      <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.18.2" />
       <PackageReference Include="IronPython" Version="2.7.11" />
       <PackageReference Include="jacobslusser.ScintillaNET" Version="3.6.3" />
       <PackageReference Include="NLog.Windows.Forms" Version="4.3.0" />

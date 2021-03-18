@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using IronPython.Hosting;
 using MapleShark2.UI;
 using Microsoft.Scripting.Hosting;
@@ -40,6 +41,12 @@ namespace MapleShark2.Tools {
             ICollection<string> paths = engine.GetSearchPaths();
             paths.Add(Helpers.GetScriptFolder(locale, version));
             engine.SetSearchPaths(paths);
+            new Task(() => {
+                // Warm up these modules because they are commonly used
+                engine.Execute("import script_api");
+                engine.Execute("import common");
+            }).Start();
+
             engines[(locale, version)] = engine;
             CreateVersionedScriptsWatcher(locale, version);
             return engine;

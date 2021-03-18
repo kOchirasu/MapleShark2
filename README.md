@@ -14,3 +14,5 @@ the `ScriptEngine` to be reloaded so that new changes can be used.
 
 - `Scripts/`: Version agnostic functions to be shared by all scripts.
 - `LOCALE/VERSION`: Version specific functions to be used only by containing directory.
+
+`script_api.py` and `common.py` are imported at `ScriptEngine` construction for quicker responsiveness when using them.
