@@ -1,0 +1,62 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0-windows</TargetFramework>
+        <UseWindowsForms>true</UseWindowsForms>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="nlog.config">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <Content Include="Resources\Button-Blank-Green-icon.png" />
+        <Content Include="Resources\Button-Blank-Red-icon.png" />
+        <Content Include="Resources\save-icon.png" />
+        <None Include="Resources\script_api.py">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <Content Include="Resources\Shark.ico" />
+        <Content Include="Resources\SharkLogo.png" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="Be.Windows.Forms.HexBox" Version="1.6.1" />
+        <PackageReference Include="Costura.Fody" Version="5.3.0">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="DockPanelSuite" Version="3.1.0-beta7" />
+        <PackageReference Include="DockPanelSuite.ThemeVS2015" Version="3.1.0-beta7" />
+        <PackageReference Include="IronPython" Version="2.7.11" />
+        <PackageReference Include="NLog" Version="4.7.10" />
+        <PackageReference Include="NLog.Windows.Forms" Version="4.5.0-rc.1" />
+        <PackageReference Include="PacketDotNet" Version="1.2.0" />
+        <PackageReference Include="SharpPcap" Version="6.0.0" />
+        <PackageReference Include="System.Buffers" Version="4.5.1" />
+        <PackageReference Include="System.Memory" Version="4.5.4" />
+        <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
+        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="5.0.0" />
+        <PackageReference Include="unofficial.ScintillaNET" Version="3.8.7" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Maple2.PacketLib\Maple2.PacketLib.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="Tools\Resources.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Tools\Resources.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Resources.resx</DependentUpon>
+      </Compile>
+    </ItemGroup>
+</Project>

@@ -64,6 +64,7 @@ namespace MapleShark2.Tools {
 
         // Watch scripts root folder (script_api.py & others)
         private void CreateScriptsRootWatcher() {
+            Helpers.MakeSureFileDirectoryExists(Helpers.GetScriptsRoot() + Path.DirectorySeparatorChar);
             var watcher = new FileSystemWatcher {
                 Path = Helpers.GetScriptsRoot(),
                 Filter = "*.py",

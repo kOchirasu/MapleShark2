@@ -14,6 +14,7 @@ namespace MapleShark2 {
         private static void Main(string[] pArgs) {
             AppDomain.CurrentDomain.UnhandledException += HandleUnhandledException;
 
+            Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
