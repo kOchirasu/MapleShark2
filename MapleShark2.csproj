@@ -134,7 +134,7 @@
     </ItemGroup>
     <ItemGroup>
       <PackageReference Include="Be.Windows.Forms.HexBox" Version="1.6.1" />
-      <PackageReference Include="Costura.Fody" Version="5.0.2">
+      <PackageReference Include="Costura.Fody" Version="5.3.0">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
@@ -142,9 +142,9 @@
       <PackageReference Include="DockPanelSuite.ThemeVS2015" Version="3.0.6" />
       <PackageReference Include="IronPython" Version="2.7.11" />
       <PackageReference Include="jacobslusser.ScintillaNET" Version="3.6.3" />
-      <PackageReference Include="NLog.Windows.Forms" Version="4.3.0" />
+      <PackageReference Include="NLog.Windows.Forms" Version="4.4.0" />
       <PackageReference Include="PacketDotNet" Version="1.2.0" />
-      <PackageReference Include="SharpPcap" Version="5.4.0" />
+      <PackageReference Include="SharpPcap" Version="6.0.0" />
       <PackageReference Include="System.Buffers" Version="4.5.1" />
       <PackageReference Include="System.Memory" Version="4.5.4" />
       <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />

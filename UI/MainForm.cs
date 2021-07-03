@@ -130,7 +130,7 @@ namespace MapleShark2.UI {
             }
 
             try {
-                device.Open(DeviceMode.Promiscuous, 10);
+                device.Open(DeviceModes.Promiscuous, 10);
             } catch {
                 MessageBox.Show("Failed to set the device in Promiscuous mode! But that doesn't really matter lol.");
                 device.Open();
@@ -141,11 +141,11 @@ namespace MapleShark2.UI {
             device.StartCapture();
         }
 
-        private void device_OnPacketArrival(object sender, CaptureEventArgs e) {
+        private void device_OnPacketArrival(object sender, PacketCapture e) {
             if (!sniffEnabled) return;
 
             lock (packetQueue) {
-                packetQueue.Add(e.Packet);
+                packetQueue.Add(e.GetPacket());
             }
         }
 
@@ -230,7 +230,12 @@ namespace MapleShark2.UI {
             fileDevice.Open();
 
             SessionForm session = null;
-            while (fileDevice.GetNextPacket(out RawCapture packet) != 0 && packet != null) {
+            while (fileDevice.GetNextPacket(out PacketCapture capture) != 0) {
+                RawCapture packet = capture.GetPacket();
+                if (packet == null) {
+                    continue;
+                }
+
                 var tcpPacket = Packet.ParsePacket(packet.LinkLayerType, packet.Data).Extract<TcpPacket>();
                 if (tcpPacket == null) continue;
                 if (!InPortRange(tcpPacket.SourcePort) && !InPortRange(tcpPacket.DestinationPort)) continue;
@@ -328,7 +333,7 @@ namespace MapleShark2.UI {
                 mTimer.Enabled = true;
             } catch (Exception) {
                 if (!device.Opened) {
-                    device.Open(DeviceMode.Promiscuous, 1);
+                    device.Open(DeviceModes.Promiscuous, 1);
                 }
             }
         }
