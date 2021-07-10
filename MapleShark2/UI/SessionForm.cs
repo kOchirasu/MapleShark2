@@ -293,7 +293,7 @@ namespace MapleShark2.UI {
             }
 
             ListView.EndUpdate();
-            if (ListView.VirtualListSize > 0) ListView.EnsureVisible(0);
+            if (ListView.Count > 0) ListView.EnsureVisible(0);
 
             Text = $"{Path.GetFileName(pFilename)} (ReadOnly)";
             logger.Info($"Loaded file: {pFilename}");
@@ -624,7 +624,7 @@ namespace MapleShark2.UI {
             if (ListView.SelectedIndices.Count == 0) return;
             int index = ListView.SelectedIndices[0];
 
-            for (int i = index + 1; i < ListView.VirtualListSize; i++)
+            for (int i = index + 1; i < ListView.Count; i++)
                 mPackets.Remove(ListView.FilteredPackets[i]);
             RefreshPackets();
         }

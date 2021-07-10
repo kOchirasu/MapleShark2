@@ -31,7 +31,7 @@ namespace MapleShark2.UI
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.ListView = new PacketListView();
+            this.ListView = new VirtualPacketListView();
             this.mTimestampColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.mDirectionColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.mLengthColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));

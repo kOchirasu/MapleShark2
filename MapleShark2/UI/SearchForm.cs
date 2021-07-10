@@ -108,7 +108,7 @@ namespace MapleShark2.UI {
             int initialIndex = session.ListView.SelectedIndices.Count == 0
                 ? 0
                 : session.ListView.SelectedIndices[0] + 1;
-            for (int index = initialIndex; index < session.ListView.VirtualListSize; ++index) {
+            for (int index = initialIndex; index < session.ListView.Count; ++index) {
                 MaplePacket packetItem = session.FilteredPackets[index];
                 if (packetItem.Outbound == search.Outbound && packetItem.Opcode == search.Header) {
                     session.ListView.Select(index);
@@ -145,7 +145,7 @@ namespace MapleShark2.UI {
             int initialIndex = session.ListView.SelectedIndices.Count == 0 ? 0 : session.ListView.SelectedIndices[0];
             byte[] pattern = ((DynamicByteProvider) hexInput.ByteProvider).Bytes.ToArray();
             long startIndex = MainForm.DataForm.SelectionLength > 0 ? MainForm.DataForm.SelectionStart : -1;
-            for (int index = initialIndex; index < session.ListView.VirtualListSize; ++index) {
+            for (int index = initialIndex; index < session.ListView.Count; ++index) {
                 MaplePacket packetItem = session.FilteredPackets[index];
                 long matchIndex = packetItem.Search(pattern, startIndex + 1);
 
