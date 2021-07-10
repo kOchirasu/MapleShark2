@@ -1,6 +1,4 @@
-﻿using MapleShark2.Properties;
-
-namespace MapleShark2.UI
+﻿namespace MapleShark2.UI
 {
     partial class MainForm
     {
@@ -78,7 +76,6 @@ namespace MapleShark2.UI
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.mStopStartButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.helpToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.mDockPanel = new WeifenLuo.WinFormsUI.Docking.DockPanel();
             this.mMenu.SuspendLayout();
             this.toolStrip.SuspendLayout();
@@ -109,6 +106,7 @@ namespace MapleShark2.UI
             this.mFileOpenMenu.ShortcutKeys =
                 ((System.Windows.Forms.Keys) ((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
             this.mFileOpenMenu.Size = new System.Drawing.Size(218, 22);
+            this.mFileOpenMenu.Image = MapleShark2.Properties.Resources.open_icon;
             this.mFileOpenMenu.Text = "&Open";
             this.mFileOpenMenu.Click += new System.EventHandler(this.mFileOpenMenu_Click);
             //
@@ -240,7 +238,7 @@ namespace MapleShark2.UI
             //
             this.toolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
                 this.openToolStripButton, this.saveToolStripButton, this.toolStripSeparator1, this.mStopStartButton,
-                this.toolStripSeparator2, this.helpToolStripButton
+                this.toolStripSeparator2
             });
             this.toolStrip.Location = new System.Drawing.Point(0, 24);
             this.toolStrip.Name = "toolStrip";
@@ -251,8 +249,7 @@ namespace MapleShark2.UI
             // openToolStripButton
             //
             this.openToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.openToolStripButton.Image =
-                ((System.Drawing.Image) (resources.GetObject("openToolStripButton.Image")));
+            this.openToolStripButton.Image = MapleShark2.Properties.Resources.open_icon;
             this.openToolStripButton.ImageTransparentColor = System.Drawing.Color.Black;
             this.openToolStripButton.Name = "openToolStripButton";
             this.openToolStripButton.Size = new System.Drawing.Size(23, 22);
@@ -262,8 +259,7 @@ namespace MapleShark2.UI
             // saveToolStripButton
             //
             this.saveToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.saveToolStripButton.Image =
-                ((System.Drawing.Image) (resources.GetObject("saveToolStripButton.Image")));
+            this.saveToolStripButton.Image = MapleShark2.Properties.Resources.save_icon;
             this.saveToolStripButton.ImageTransparentColor = System.Drawing.Color.Black;
             this.saveToolStripButton.Name = "saveToolStripButton";
             this.saveToolStripButton.Size = new System.Drawing.Size(23, 22);
@@ -280,7 +276,7 @@ namespace MapleShark2.UI
             this.mStopStartButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.mStopStartButton.Name = "mStopStartButton";
             this.mStopStartButton.Size = new System.Drawing.Size(78, 22);
-            this.mStopStartButton.Image = Resources.Button_Blank_Red_icon;
+            this.mStopStartButton.Image = MapleShark2.Properties.Resources.Button_Blank_Red_icon;
             this.mStopStartButton.Text = "Stop sniffing";
             this.mStopStartButton.Click += new System.EventHandler(this.mStopStartButton_Click);
             //
@@ -288,17 +284,6 @@ namespace MapleShark2.UI
             //
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
-            //
-            // helpToolStripButton
-            //
-            this.helpToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.helpToolStripButton.Image =
-                ((System.Drawing.Image) (resources.GetObject("helpToolStripButton.Image")));
-            this.helpToolStripButton.ImageTransparentColor = System.Drawing.Color.Black;
-            this.helpToolStripButton.Name = "helpToolStripButton";
-            this.helpToolStripButton.Size = new System.Drawing.Size(23, 22);
-            this.helpToolStripButton.Text = "Help";
-            this.helpToolStripButton.Click += new System.EventHandler(this.helpToolStripButton_Click);
             //
             // mDockPanel
             //
@@ -417,7 +402,6 @@ namespace MapleShark2.UI
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripButton mStopStartButton;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.ToolStripButton helpToolStripButton;
         private System.Windows.Forms.ToolStripMenuItem importJavapropertiesFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem setupToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;

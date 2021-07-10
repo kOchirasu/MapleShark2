@@ -1,6 +1,4 @@
-﻿using MapleShark2.UI.Control;
-
-namespace MapleShark2.UI
+﻿namespace MapleShark2.UI
 {
     partial class SessionForm
     {
@@ -31,7 +29,7 @@ namespace MapleShark2.UI
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.ListView = new VirtualPacketListView();
+            this.ListView = new MapleShark2.UI.Control.VirtualPacketListView();
             this.mTimestampColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.mDirectionColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.mLengthColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -278,6 +276,7 @@ namespace MapleShark2.UI
             this.mFileSaveMenu.Name = "mFileSaveMenu";
             this.mFileSaveMenu.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
             this.mFileSaveMenu.Size = new System.Drawing.Size(147, 22);
+            this.mFileSaveMenu.Image = MapleShark2.Properties.Resources.save_icon;
             this.mFileSaveMenu.Text = "&Save";
             this.mFileSaveMenu.Click += new System.EventHandler(this.mFileSaveMenu_Click);
             //
