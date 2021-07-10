@@ -43,7 +43,7 @@ namespace MapleShark2.UI {
             InitializeComponent();
             CreateStandardControls();
 
-            Text = "MapleShark2 (Build: " + Program.AssemblyVersion + ")";
+            Text = $"MapleShark2 (Build: {Program.AssemblyVersion})";
 
             this.startupArguments = startupArguments;
         }

@@ -46,7 +46,7 @@
             this.mSaveButton.Enabled = false;
             this.mSaveButton.Location = new System.Drawing.Point(0, 0);
             this.mSaveButton.Name = "mSaveButton";
-            this.mSaveButton.Size = new System.Drawing.Size(392, 25);
+            this.mSaveButton.Size = new System.Drawing.Size(392, 30);
             this.mSaveButton.TabIndex = 5;
             this.mSaveButton.Text = "&Save script";
             this.mSaveButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -138,7 +138,7 @@
             // splitContainer1.Panel2
             //
             this.splitContainer1.Panel2.Controls.Add(this.mImportButton);
-            this.splitContainer1.Size = new System.Drawing.Size(598, 25);
+            this.splitContainer1.Size = new System.Drawing.Size(598, 30);
             this.splitContainer1.SplitterDistance = 392;
             this.splitContainer1.TabIndex = 6;
             //
@@ -147,7 +147,7 @@
             this.mImportButton.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mImportButton.Location = new System.Drawing.Point(0, 0);
             this.mImportButton.Name = "mImportButton";
-            this.mImportButton.Size = new System.Drawing.Size(202, 25);
+            this.mImportButton.Size = new System.Drawing.Size(202, 30);
             this.mImportButton.TabIndex = 0;
             this.mImportButton.Text = "Import script...";
             this.mImportButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;

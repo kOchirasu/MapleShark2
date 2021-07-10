@@ -463,34 +463,38 @@ namespace MapleShark2.UI {
         }
 
         private void mPacketContextMenu_Opened(object pSender, EventArgs pArgs) {
-            mPacketContextNameBox.Focus();
-            mPacketContextNameBox.SelectAll();
+            if (string.IsNullOrWhiteSpace(mPacketContextNameBox.Text)) {
+                mPacketContextNameBox.Focus();
+                mPacketContextNameBox.SelectAll();
+            }
 
             ListView.Items[ListView.SelectedIndices[0]]?.EnsureVisible();
             openingContextMenu = false;
         }
 
         private void mPacketContextNameBox_KeyDown(object pSender, KeyEventArgs pArgs) {
-            if (pArgs.Modifiers == Keys.None && pArgs.KeyCode == Keys.Enter && ListView.SelectedIndices.Count > 0) {
-                int index = ListView.SelectedIndices[0];
-                MaplePacket packet = ListView.Selected;
-                Definition definition = Config.Instance.GetDefinition(packet);
-                if (definition == null) {
-                    definition = new Definition {
-                        Outbound = packet.Outbound,
-                        Opcode = packet.Opcode,
-                    };
-                }
-
-                definition.Name = mPacketContextNameBox.Text;
-                SaveDefinition(Locale, Build, definition);
-
-                pArgs.SuppressKeyPress = true;
-                mPacketContextMenu.Close();
-                RefreshPackets();
-
-                ListView.Items[index]?.EnsureVisible();
+            if (pArgs.Modifiers != Keys.None || pArgs.KeyCode != Keys.Enter || ListView.SelectedIndices.Count <= 0) {
+                return;
             }
+            
+            int index = ListView.SelectedIndices[0];
+            MaplePacket packet = ListView.Selected;
+            Definition definition = Config.Instance.GetDefinition(packet);
+            if (definition == null) {
+                definition = new Definition {
+                    Outbound = packet.Outbound,
+                    Opcode = packet.Opcode,
+                };
+            }
+
+            definition.Name = mPacketContextNameBox.Text;
+            SaveDefinition(Locale, Build, definition);
+
+            pArgs.SuppressKeyPress = true;
+            mPacketContextMenu.Close();
+            RefreshPackets();
+
+            ListView.Items[index]?.EnsureVisible();
         }
 
         private void mPacketContextIgnoreMenu_CheckedChanged(object pSender, EventArgs pArgs) {
