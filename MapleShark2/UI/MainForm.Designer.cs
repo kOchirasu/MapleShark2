@@ -304,6 +304,7 @@ namespace MapleShark2.UI
             //
             this.mDockPanel.ActiveAutoHideContent = null;
             this.mDockPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.mDockPanel.DocumentStyle = WeifenLuo.WinFormsUI.Docking.DocumentStyle.DockingMdi;
             this.mDockPanel.DockBackColor = System.Drawing.SystemColors.ControlDark;
             this.mDockPanel.DockBottomPortion = 0.3D;
             this.mDockPanel.DockLeftPortion = 0.3D;
