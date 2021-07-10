@@ -523,7 +523,7 @@ namespace MapleShark2.UI {
 
             RefreshPackets();
 
-            if (newIndex != 0 && ListView.FilteredPackets[newIndex] != null) {
+            if (newIndex >= 0 && ListView.FilteredPackets[newIndex] != null) {
                 ListViewItem listItem = ListView.Items[newIndex];
                 listItem.Selected = true;
                 listItem.EnsureVisible();
