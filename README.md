@@ -5,7 +5,7 @@
 
 Scripting uses IronPython 2.7.11 https://github.com/IronLanguages/ironpython2
 
-See [script_api.py](Resources/script_api.py) for more details.
+See [script_api.py](MapleShark2/Resources/script_api.py) for more details.
 
 `sys.path` is set to use the `Scripts/` directory as well as the corresponding `LOCALE/VERSION/`
 directory to search for modules. Modules included in a subdirectory of these path directories
