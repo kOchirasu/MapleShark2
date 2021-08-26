@@ -85,10 +85,7 @@ namespace MapleShark2.Tools {
 
         private void CreateVersionedScriptsWatcher(byte locale, uint version) {
             string scriptFolderPath = Helpers.GetScriptFolder(locale, version);
-            if (!Directory.Exists(scriptFolderPath))
-            {
-                Directory.CreateDirectory(scriptFolderPath);
-            }
+            Directory.CreateDirectory(scriptFolderPath);
             var watcher = new FileSystemWatcher {
                 Path = scriptFolderPath,
                 Filter = "*.py",
