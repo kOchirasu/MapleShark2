@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -8,6 +9,8 @@ using Microsoft.Scripting.Hosting;
 
 namespace MapleShark2.Tools {
     public class ScriptManager {
+        private static readonly Regex LocaleVersionRegex = new Regex(@"^(\d+)[\\/](\d+)[\\/].+$");
+        
         private readonly StructureForm form;
         private readonly Dictionary<(byte Locale, uint Version), ScriptEngine> engines;
 
@@ -16,7 +19,7 @@ namespace MapleShark2.Tools {
             this.engines = new Dictionary<(byte Locale, uint Version), ScriptEngine>();
 
             // reloads modules for all engines when changed
-            CreateScriptsRootWatcher();
+            CreateScriptsWatcher();
         }
 
         public void ExecuteScript(byte locale, uint version, bool outbound, ushort opcode) {
@@ -48,7 +51,6 @@ namespace MapleShark2.Tools {
             }).Start();
 
             engines[(locale, version)] = engine;
-            CreateVersionedScriptsWatcher(locale, version);
             return engine;
         }
 
@@ -63,7 +65,7 @@ namespace MapleShark2.Tools {
         }
 
         // Watch scripts root folder (script_api.py & others)
-        private void CreateScriptsRootWatcher() {
+        private void CreateScriptsWatcher() {
             Helpers.MakeSureFileDirectoryExists(Helpers.GetScriptsRoot() + Path.DirectorySeparatorChar);
             var watcher = new FileSystemWatcher {
                 Path = Helpers.GetScriptsRoot(),
@@ -73,39 +75,33 @@ namespace MapleShark2.Tools {
             };
 
             watcher.Changed += (sender, args) => {
+                Console.WriteLine(args.ChangeType);
                 // Exclude version specific modules.
-                if (Regex.IsMatch(args.Name, @"^\d+[\\/]\d+[\\/].+$")) {
+                Match match = LocaleVersionRegex.Match(args.Name);
+                if (match.Success) {
+                    byte locale = byte.Parse(match.Groups[1].Value);
+                    uint version = uint.Parse(match.Groups[2].Value);
+                    // Exclude opcode scripts in Inbound|Outbound.
+                    if (Regex.IsMatch(args.Name, @$"^{locale}[\\/]{version}[\\/](Inbound|Outbound)[\\/].+$")) {
+                        return;
+                    }
+                    
+                    OnVersionedScriptChanged(locale, version);
                     return;
                 }
 
-                // Clear all engines so they can be reloaded with updated modules.
-                engines.Clear();
+                OnRootScriptChanged();
             };
         }
 
-        private void CreateVersionedScriptsWatcher(byte locale, uint version) {
-            string scriptFolderPath = Helpers.GetScriptFolder(locale, version);
-            Directory.CreateDirectory(scriptFolderPath);
-            var watcher = new FileSystemWatcher {
-                Path = scriptFolderPath,
-                Filter = "*.py",
-                IncludeSubdirectories = true,
-                EnableRaisingEvents = true,
-            };
+        private void OnRootScriptChanged() {
+            // Clear all engines so they can be reloaded with updated modules.
+            engines.Clear();
+        }
 
-            watcher.Changed += (sender, args) => {
-                // Exclude opcode scripts in Inbound|Outbound.
-                if (Regex.IsMatch(args.Name, @"^(Inbound|Outbound)[\\/].+$")) {
-                    return;
-                }
-
-                // Remove affected engine so it can be reloaded with updated modules.
-                engines.Remove((locale, version));
-
-                // Stop this watcher because a new one will be created with with new engine.
-                watcher.EnableRaisingEvents = false;
-                watcher.Dispose();
-            };
+        private void OnVersionedScriptChanged(byte locale, uint version) {
+            // Remove affected engine so it can be reloaded with updated modules.
+            engines.Remove((locale, version));
         }
     }
 }
