@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -13,13 +12,42 @@ namespace MapleShark2.Tools {
         
         private readonly StructureForm form;
         private readonly Dictionary<(byte Locale, uint Version), ScriptEngine> engines;
+        
+        // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
+        // This needs to be a field to avoid being GCed.
+        private readonly FileSystemWatcher watcher;
 
         public ScriptManager(StructureForm form) {
             this.form = form;
             this.engines = new Dictionary<(byte Locale, uint Version), ScriptEngine>();
 
             // reloads modules for all engines when changed
-            CreateScriptsWatcher();
+            // Watch scripts root folder (script_api.py & others)
+            Helpers.MakeSureFileDirectoryExists(Helpers.GetScriptsRoot() + Path.DirectorySeparatorChar);
+            watcher = new FileSystemWatcher {
+                Path = Helpers.GetScriptsRoot(),
+                Filter = "*.py",
+                IncludeSubdirectories = true,
+                EnableRaisingEvents = true,
+            };
+
+            watcher.Changed += (sender, args) => {
+                // Exclude version specific modules.
+                Match match = LocaleVersionRegex.Match(args.Name);
+                if (match.Success) {
+                    byte locale = byte.Parse(match.Groups[1].Value);
+                    uint version = uint.Parse(match.Groups[2].Value);
+                    // Exclude opcode scripts in Inbound|Outbound.
+                    if (Regex.IsMatch(args.Name, @$"^{locale}[\\/]{version}[\\/](Inbound|Outbound)[\\/].+$")) {
+                        return;
+                    }
+                    
+                    OnVersionedScriptChanged(locale, version);
+                    return;
+                }
+
+                OnRootScriptChanged();
+            };
         }
 
         public void ExecuteScript(byte locale, uint version, bool outbound, ushort opcode) {
@@ -62,36 +90,6 @@ namespace MapleShark2.Tools {
             engine.Runtime.Globals.SetVariable("structure_form", form);
 
             return engine;
-        }
-
-        // Watch scripts root folder (script_api.py & others)
-        private void CreateScriptsWatcher() {
-            Helpers.MakeSureFileDirectoryExists(Helpers.GetScriptsRoot() + Path.DirectorySeparatorChar);
-            var watcher = new FileSystemWatcher {
-                Path = Helpers.GetScriptsRoot(),
-                Filter = "*.py",
-                IncludeSubdirectories = true,
-                EnableRaisingEvents = true,
-            };
-
-            watcher.Changed += (sender, args) => {
-                Console.WriteLine(args.ChangeType);
-                // Exclude version specific modules.
-                Match match = LocaleVersionRegex.Match(args.Name);
-                if (match.Success) {
-                    byte locale = byte.Parse(match.Groups[1].Value);
-                    uint version = uint.Parse(match.Groups[2].Value);
-                    // Exclude opcode scripts in Inbound|Outbound.
-                    if (Regex.IsMatch(args.Name, @$"^{locale}[\\/]{version}[\\/](Inbound|Outbound)[\\/].+$")) {
-                        return;
-                    }
-                    
-                    OnVersionedScriptChanged(locale, version);
-                    return;
-                }
-
-                OnRootScriptChanged();
-            };
         }
 
         private void OnRootScriptChanged() {
