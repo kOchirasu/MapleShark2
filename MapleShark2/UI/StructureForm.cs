@@ -99,7 +99,7 @@ namespace MapleShark2.UI {
         public void EndNode(bool expand) {
             if (subNodes.Count > 0) {
                 StructureNode node = subNodes.Pop();
-                int length = packet.Position - node.Data.Offset;
+                int length = packet.Position + packet.Offset - node.Data.Offset;
                 node.UpdateData(packet.GetSegment(node.Data.Offset, length));
                 if (expand) node.Expand();
             }
