@@ -10,7 +10,7 @@ namespace MapleShark2.Tools {
     public sealed class Config {
         public enum ThemeType {
             Light,
-            Dark
+            Dark,
         }
 
         private static readonly IMapleSharkTheme lightTheme = new LightTheme();
@@ -19,6 +19,7 @@ namespace MapleShark2.Tools {
         public string Interface = "";
         public ushort LowPort = 30000; //MS2 Gateway
         public ushort HighPort = 33001; //MS2 Channel Ranges
+        public int PacketRate = 300;
         public ThemeType WindowTheme = ThemeType.Light;
 
         [XmlIgnore] public IMapleSharkTheme Theme = lightTheme;
@@ -35,12 +36,11 @@ namespace MapleShark2.Tools {
                         sInstance.Save();
                     } else {
                         try {
-                            using (var xr = XmlReader.Create(configPath)) {
-                                var xs = new XmlSerializer(typeof(Config));
-                                sInstance = xs.Deserialize(xr) as Config;
-                                sInstance.LoadTheme();
-                                sInstance.LoadedFromFile = true;
-                            }
+                            using var xr = XmlReader.Create(configPath);
+                            var xs = new XmlSerializer(typeof(Config));
+                            sInstance = xs.Deserialize(xr) as Config;
+                            sInstance.LoadTheme();
+                            sInstance.LoadedFromFile = true;
                         } catch (Exception ex) {
                             const string message = "The configuration file is broken and could not be read. "
                                                    + "You'll have to reconfigure MapleShark."

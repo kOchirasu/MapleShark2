@@ -3,7 +3,7 @@
 
 ## Scripting
 
-Scripting uses IronPython 3.4.0-beta1 https://github.com/IronLanguages/ironpython3
+Scripting uses IronPython 3.4.1 https://github.com/IronLanguages/ironpython3
 
 See [script_api.py](MapleShark2/Resources/script_api.py) for more details.
 

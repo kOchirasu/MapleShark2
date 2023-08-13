@@ -39,6 +39,8 @@ namespace MapleShark2.UI.Child
             this.mInterfaceCombo = new System.Windows.Forms.ComboBox();
             this.mInterfaceLabel = new System.Windows.Forms.Label();
             this.mMainPicture = new System.Windows.Forms.PictureBox();
+            this.mRateLabel = new System.Windows.Forms.Label();
+            this.mRateNumeric = new System.Windows.Forms.NumericUpDown();
             this.chkDarkMode = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.mHighPortNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.mLowPortNumeric)).BeginInit();
@@ -48,9 +50,9 @@ namespace MapleShark2.UI.Child
             // mCancelButton
             //
             this.mCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.mCancelButton.Location = new System.Drawing.Point(341, 84);
+            this.mCancelButton.Location = new System.Drawing.Point(331, 95);
             this.mCancelButton.Name = "mCancelButton";
-            this.mCancelButton.Size = new System.Drawing.Size(75, 23);
+            this.mCancelButton.Size = new System.Drawing.Size(85, 23);
             this.mCancelButton.TabIndex = 14;
             this.mCancelButton.Text = "&Cancel";
             this.mCancelButton.FlatStyle = FlatStyle.Flat;
@@ -59,9 +61,9 @@ namespace MapleShark2.UI.Child
             // mOKButton
             //
             this.mOKButton.Enabled = false;
-            this.mOKButton.Location = new System.Drawing.Point(201, 84);
+            this.mOKButton.Location = new System.Drawing.Point(201, 95);
             this.mOKButton.Name = "mOKButton";
-            this.mOKButton.Size = new System.Drawing.Size(75, 23);
+            this.mOKButton.Size = new System.Drawing.Size(85, 23);
             this.mOKButton.TabIndex = 13;
             this.mOKButton.Text = "&Ok";
             this.mOKButton.FlatStyle = FlatStyle.Flat;
@@ -136,7 +138,7 @@ namespace MapleShark2.UI.Child
             // mInterfaceLabel
             //
             this.mInterfaceLabel.AutoSize = true;
-            this.mInterfaceLabel.Location = new System.Drawing.Point(143, 15);
+            this.mInterfaceLabel.Location = new System.Drawing.Point(145, 15);
             this.mInterfaceLabel.Name = "mInterfaceLabel";
             this.mInterfaceLabel.Size = new System.Drawing.Size(52, 13);
             this.mInterfaceLabel.TabIndex = 8;
@@ -152,14 +154,45 @@ namespace MapleShark2.UI.Child
             this.mMainPicture.TabIndex = 15;
             this.mMainPicture.TabStop = false;
             //
+            // mRateLabel
+            //
+            this.mRateLabel.AutoSize = true;
+            this.mRateLabel.Location = new System.Drawing.Point(132, 68);
+            this.mRateLabel.Name = "mRateLabel";
+            this.mRateLabel.Size = new System.Drawing.Size(32, 13);
+            this.mRateLabel.TabIndex = 16;
+            this.mRateLabel.Text = "&Packet Rate:";
+            //
+            // mRateNumeric
+            //
+            this.mRateNumeric.Location = new System.Drawing.Point(201, 67);
+            this.mRateNumeric.Maximum = new decimal(new int[] {
+                1000,
+                0,
+                0,
+                0});
+            this.mRateNumeric.Minimum = new decimal(new int[] {
+                10,
+                0,
+                0,
+                0});
+            this.mRateNumeric.Name = "mRateNumeric";
+            this.mRateNumeric.Size = new System.Drawing.Size(50, 20);
+            this.mRateNumeric.TabIndex = 17;
+            this.mRateNumeric.Value = new decimal(new int[] {
+                300,
+                0,
+                0,
+                0});
+            //
             // chkDarkMode
             //
             this.chkDarkMode.AutoSize = true;
-            this.chkDarkMode.Location = new System.Drawing.Point(201, 60);
+            this.chkDarkMode.Location = new System.Drawing.Point(316, 67);
             this.chkDarkMode.Name = "chkDarkMode";
             this.chkDarkMode.Size = new System.Drawing.Size(50, 14);
             this.chkDarkMode.Text = "Dark Mode";
-            this.chkDarkMode.TabIndex = 16;
+            this.chkDarkMode.TabIndex = 18;
             this.chkDarkMode.UseVisualStyleBackColor = true;
             this.chkDarkMode.CheckedChanged += chkDarkMode_CheckChanged;
             //
@@ -169,7 +202,7 @@ namespace MapleShark2.UI.Child
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.mCancelButton;
-            this.ClientSize = new System.Drawing.Size(428, 119);
+            this.ClientSize = new System.Drawing.Size(428, 128);
             this.Controls.Add(this.mMainPicture);
             this.Controls.Add(this.mCancelButton);
             this.Controls.Add(this.mOKButton);
@@ -178,6 +211,8 @@ namespace MapleShark2.UI.Child
             this.Controls.Add(this.mPortsLabel);
             this.Controls.Add(this.mInterfaceCombo);
             this.Controls.Add(this.mInterfaceLabel);
+            this.Controls.Add(this.mRateLabel);
+            this.Controls.Add(this.mRateNumeric);
             this.Controls.Add(this.chkDarkMode);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -205,6 +240,8 @@ namespace MapleShark2.UI.Child
         private System.Windows.Forms.ComboBox mInterfaceCombo;
         private System.Windows.Forms.Label mInterfaceLabel;
         private System.Windows.Forms.PictureBox mMainPicture;
+        private System.Windows.Forms.Label mRateLabel;
+        private System.Windows.Forms.NumericUpDown mRateNumeric;
         private System.Windows.Forms.CheckBox chkDarkMode;
     }
 }

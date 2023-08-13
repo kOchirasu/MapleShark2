@@ -49,6 +49,7 @@ namespace MapleShark2.UI.Child {
 
             mLowPortNumeric.Value = Config.Instance.LowPort;
             mHighPortNumeric.Value = Config.Instance.HighPort;
+            mRateNumeric.Value = Config.Instance.PacketRate;
         }
 
         private void mInterfaceCombo_SelectedIndexChanged(object pSender, EventArgs pArgs) {
@@ -68,6 +69,7 @@ namespace MapleShark2.UI.Child {
             Config.Instance.Interface = entry.Device.Name;
             Config.Instance.LowPort = (ushort) mLowPortNumeric.Value;
             Config.Instance.HighPort = (ushort) mHighPortNumeric.Value;
+            Config.Instance.PacketRate = (int) mRateNumeric.Value;
             Config.Instance.Save();
 
             DialogResult = DialogResult.OK;

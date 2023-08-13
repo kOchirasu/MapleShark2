@@ -178,6 +178,7 @@ namespace MapleShark2.UI {
             PropertyForm.ApplyTheme();
 
             SetupAdapter();
+            mTimer.Interval = Config.Instance.PacketRate;
             mTimer.Enabled = true;
 
             foreach (string arg in startupArguments) {
@@ -504,6 +505,7 @@ namespace MapleShark2.UI {
             }
 
             SetupAdapter();
+            mTimer.Interval = Config.Instance.PacketRate;
 
             if (lastTimerState) {
                 mTimer.Enabled = true;
